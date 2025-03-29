@@ -2,6 +2,7 @@
 doctrine:
     dbal:
         url: '%env(resolve:DATABASE_URL)%'
+        driver: pdo_mysql
         mapping_types:
             enum: string
         # IMPORTANT: You MUST configure your server version,
@@ -20,6 +21,7 @@ doctrine:
                 prefix: 'App\Entity'
                 alias: App
 
+
 when@test:
     doctrine:
         dbal:
@@ -37,6 +39,7 @@ when@prod:
             result_cache_driver:
                 type: pool
                 pool: doctrine.result_cache_pool
+            
 
 framework:
     cache:

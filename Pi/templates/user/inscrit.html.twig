@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Inscription - NiceAdmin</title>
+
+  <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
+  <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+</head>
+
+<body>
+  <main>
+    <div class="container">
+      <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+        <div class="container">
+          <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+              
+              <div class="d-flex justify-content-center py-4">
+                <a href="" class="logo d-flex align-items-center w-auto">
+                  <img src="{{ asset('assets/img/logo.png') }}" alt="">
+                  <span class="d-none d-lg-block">NiceAdmin</span>
+                </a>
+              </div>
+
+              <div class="card mb-3">
+                <div class="card-body">
+                  <div class="pt-4 pb-2">
+                    <h5 class="card-title text-center pb-0 fs-4">Créer un compte</h5>
+                    <p class="text-center small">Remplissez les champs pour vous inscrire</p>
+                  </div>
+
+              <form class="row g-3 needs-validation" novalidate>
+  
+  <!-- Nom & Prénom -->
+  <div class="col-md-6">
+    <label for="nom" class="form-label">Nom</label>
+    {{ form_widget(formB.nom, {'attr': {'class': 'form-control'}}) }}
+  </div>
+
+  <div class="col-md-6">
+    <label for="prenom" class="form-label">Prénom</label>
+    {{ form_widget(formB.prenom, {'attr': {'class': 'form-control'}}) }}
+  </div>
+
+  <!-- Email -->
+  <div class="col-md-6">
+    <label for="email" class="form-label">Email</label>
+    {{ form_widget(formB.email, {'attr': {'class': 'form-control'}}) }}
+  </div>
+
+  <!-- Mot de passe -->
+  <div class="col-md-6">
+    <label for="password" class="form-label">Mot de passe</label>
+    {{ form_widget(formB.password, {'attr': {'class': 'form-control'}}) }}
+  </div>
+
+  <!-- CIN -->
+  <div class="col-md-6">
+    <label for="cin" class="form-label">CIN</label>
+    {{ form_widget(formB.cin, {'attr': {'class': 'form-control'}}) }}
+  </div>
+
+  <!-- Date de naissance -->
+  <div class="col-md-6">
+    <label for="date_naissance" class="form-label">Date de Naissance</label>
+    {{ form_widget(formB.datenaissance, {'attr': {'class': 'form-control'}}) }}
+  </div>
+
+  <!-- Rôle -->
+  <div class="col-md-6">
+    <label for="role" class="form-label">Rôle</label>
+    {{ form_widget(formB.role, {'attr': {'class': 'form-control'}}) }}
+  </div>
+
+  <!-- Statut -->
+  <div class="col-md-6">
+    <label for="status" class="form-label">Statut</label>
+    {{ form_widget(formB.status, {'attr': {'class': 'form-control'}}) }}
+  </div>
+
+  <!-- Bouton en bas -->
+  <div class="col-12 mt-3">
+    <button class="btn btn-primary w-100" type="submit">Créer un compte</button>
+  </div>
+
+  <!-- Lien vers le login -->
+  <div class="col-12 text-center mt-2">
+    <p class="small mb-0">Déjà un compte ? <a href="{{ path('login') }}">Connectez-vous</a></p>
+  </div>
+
+</form>
+
+                </div>
+              </div>
+
+          
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ asset('assets/js/main.js') }}"></script>
+</body>
+</html>
