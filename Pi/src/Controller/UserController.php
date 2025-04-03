@@ -11,114 +11,98 @@ use App\Form\ForminscritType;
 use App\Form\LoginformType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\String\Slugger\SluggerInterface;
-use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\Form\Extension\Core\Type\EmailType;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Form\FormError;
+
+
 class UserController extends AbstractController
 {
 
-   
-
     #[Route('/profile', name: 'profile')]
-public function profile(Request $request, SessionInterface $session, EntityManagerInterface $entityManager)
-{
-    if (!$session->get('id')) {
-        return $this->redirectToRoute('login');  // Redirect to login if not logged in
-    }
-    // Récupérer l'ID de l'utilisateur depuis la session
-    $userId = $session->get('id');
-
-    // Rechercher l'utilisateur dans la base de données
-    $user = $entityManager->getRepository(User::class)->find($userId);
-    
-    if (!$user) {
-        throw $this->createNotFoundException('User not found');
-    }
-
-    $form = $this->createFormBuilder($user)
-    ->add('nom', TextType::class, [
-        'label' => false,  
-    ])
-    ->add('prenom', TextType::class, [
-        'label' => false,  
-    ])
-    ->add('email', TextType::class, [
-        'label' => false,  
-    ])
-    ->add('numPhone', TextType::class, [
-        'label' => false,  
-    ])
-    ->add('dateNaissance', DateType::class, [
-        'widget' => 'single_text',
-        'required' => false
-    ])
-    ->add('image_url', FileType::class, [
-        'label' => false,  
-        'required' => false, // Makes the image optional
-        'mapped' => false, // This prevents it from being automatically bound to the entity
-        'attr' => ['accept' => 'image/*'], // Optional: restrict file types to images
-    ])
-    
-    
-    ->getForm();
-
-
-    // Gérer la soumission du formulaire
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Get the uploaded image file
-        $imageFile = $form->get('image_url')->getData();  
-    
-     if ($imageFile) {
-            // Remove old image if exists
-            if ($user->getImageUrl()) {
-                $oldImagePath = $this->getParameter('kernel.project_dir') . '/public/' . $user->getImageUrl();
-                if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
-                }
-            }
-        
-            // Generate new filename
-            $newFilename = uniqid() . '.' . $imageFile->guessExtension();
-            
-            // Move new file
-            $imageFile->move($this->getParameter('kernel.project_dir') . '/public/images', $newFilename);
-            
-            // Update the user's image URL
-            $user->setImageUrl('images/' . $newFilename); 
-        
-        
-            // Save the user entity with the updated image_url
-            $entityManager->flush();  // Persist the changes
-        
-            return $this->redirectToRoute('profile');
+    public function profile(Request $request, SessionInterface $session, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
         }
-        
     
-        // Save the user entity with the updated image_url
-        $entityManager->flush();  // Persist the changes
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
     
-        return $this->redirectToRoute('profile');
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+    
+        $form = $this->createFormBuilder($user)
+            ->add('nom', TextType::class, ['label' => false])
+            ->add('prenom', TextType::class, ['label' => false])
+            ->add('email', EmailType::class, ['label' => false]) // Correction : utiliser EmailType pour validation auto
+            ->add('numPhone', TextType::class, ['label' => false])
+            ->add('dateNaissance', DateType::class, ['widget' => 'single_text', 'required' => false])
+            ->add('image_url', FileType::class, [
+                'label' => 'Image (JPEG/PNG)',
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->getForm();
+    
+        $form->handleRequest($request);
+    
+        if ($form->isSubmitted()) {
+            $errors = $validator->validate($user);
+
+            $imageFile = $form->get('image_url')->getData();
+            $imageErrors = [];
+    
+            if ($imageFile) {
+                $imageErrors = $validator->validate($imageFile, [
+                    new Assert\Image(['mimeTypes' => ['image/jpeg', 'image/png']]),
+                    new Assert\File(['maxSize' => '5M', 'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPEG/PNG).']),
+                ]);
+    
+                foreach ($imageErrors as $error) {
+                    $form->get('image_url')->addError(new FormError($error->getMessage()));
+                }
+             
+            }
+    
+            // Empêcher la soumission en cas d'erreurs
+            if (count($errors) === 0 && count($imageErrors) === 0 && $form->isValid()) {
+                if ($imageFile) {
+                    $newFilename = uniqid() . '.' . $imageFile->guessExtension();
+                    $imageFile->move($this->getParameter('kernel.project_dir') . '/public/images', $newFilename);
+                    $user->setImageUrl('images/' . $newFilename);
+                
+    
+                $entityManager->persist($user);
+                $entityManager->flush();
+                return $this->redirectToRoute('profile');
+            }
+            else{
+
+            }
+            }
+        }
+    
+        return $this->render('user/profile.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+         
+        ]);
     }
     
     
 
-    return $this->render('user/profile.html.twig', [
-        'user' => $user,
-        'form' => $form->createView(),
-    ]);
-}
 
 
 
 
     
         
-        #[Route('/inscrit', name: 'inscrit')]
+    #[Route('/inscrit', name: 'inscrit')]
     public function ajouter(Request $request, EntityManagerInterface $entityManager)
     {
         $user = new User();
@@ -126,10 +110,19 @@ public function profile(Request $request, SessionInterface $session, EntityManag
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+           
             $entityManager->persist($user);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_login');
+            return $this->redirectToRoute('login');
+        }
+        else {
+      
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+            
         }
 
         return $this->render('user/inscrit.html.twig', [

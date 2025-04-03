@@ -70,23 +70,19 @@
         
         <div class="input-group has-validation">
             <span class="input-group-text">@</span>
-            {{ form_widget(form.email, {'attr': {'class': 'form-control', 'id': form.email.vars.id}}) }}
+            {{ form_widget(form.email, {'attr': {'class': 'form-control' }}) }}
             <div class="invalid-feedback">Please enter your email.</div>
         </div>
     </div>
 
     <div class="col-12">
-        <label for="{{ form.password.vars.id }}" class="form-label">Password</label>
-        {{ form_widget(form.password, {'attr': {'class': 'form-control', 'id': form.password.vars.id}}) }}
+        <label class="form-label">Password</label>
+        {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+
         <div class="invalid-feedback">Please enter your password!</div>
     </div>
 
-    <div class="col-12">
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" name="remember" value="true" id="rememberMe">
-            <label class="form-check-label" for="rememberMe">Remember me</label>
-        </div>
-    </div>
+ 
 
     <div class="col-12">
         <button class="btn btn-primary w-100" type="submit">Login</button>
@@ -97,6 +93,12 @@
             <a href="{{ path('inscrit') }}">Create an account</a>
         </p>
     </div>
+
+    <div class="col-12">
+    <p class="small mb-0">
+        <a href="{{ path('app_forgot_password_request') }}">Mot de passe oublié ?</a>
+    </p>
+</div>
 
 {{ form_end(form) }}
 

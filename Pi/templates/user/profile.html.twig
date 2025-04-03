@@ -13,7 +13,13 @@
             </ol>
         </nav>
     </div><!-- End Page Title -->
-
+<style>
+    .error-message {
+        color: red;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+</style>
     <section class="section profile">
         <div class="row">
             <div class="col-xl-4">
@@ -25,7 +31,6 @@
 {% else %}
     <img src="{{ asset('assets/imgP/logo.png') }}" alt="Default Profile" class="rounded-circle">
 {% endif %}
-
 
 
 
@@ -51,17 +56,18 @@
                         <div class="tab-content pt-2">
                             <!-- PROFILE OVERVIEW -->
                             <div class="tab-pane fade show active profile-overview" id="profile-overview">
+                  
                                 <h5 class="card-title">Profile Details</h5>
                                 <div class="row">
                                     <div class="col-lg-3 col-md-4 label">Full Name</div>
                                     <div class="col-lg-9 col-md-8">{{ user.nom }} {{ user.prenom }}</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-lg-3 col-md-4 label">Job</div>
+                                    <div class="col-lg-3 col-md-4 label">Role</div>
                                     <div class="col-lg-9 col-md-8">{{ user.roles }}</div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-lg-3 col-md-4 label">Date de Naissance</div>
+                                    <div class="col-lg-3 col-md-4 label">Date of Birth</div>
                                     <div class="col-lg-9 col-md-8">{{ user.dateNaissance|date('d/m/Y') }}</div>
                                 </div>
                                 <div class="row">
@@ -76,6 +82,7 @@
 
                          <!-- PROFILE EDIT -->
 <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+
     <form method="POST" enctype="multipart/form-data">
         {{ form_start(form) }}
         
@@ -87,7 +94,7 @@
             <label for="nom" class="col-md-4 col-lg-3 col-form-label">First Name</label>
             <div class="col-lg-9 col-md-8">
                 {{ form_widget(form.nom, {'attr': {'class': 'form-control'}} )}}
-                
+             <div class="error-message">{{ form_errors(form.nom) }} </div>
             </div>
         </div>
 
@@ -97,6 +104,7 @@
             <div class="col-md-8 col-lg-9">
                
                 {{ form_widget(form.prenom, {'attr': {'class': 'form-control'}} )}}
+                  <div class="error-message"> {{ form_errors(form.prenom) }}</div>
             </div>
         </div>
 
@@ -106,6 +114,7 @@
             <div class="col-md-8 col-lg-9">
                
                 {{ form_widget(form.email, {'attr': {'class': 'form-control'}} )}}
+                <div class="error-message"> {{ form_errors(form.email) }}  </div>
             </div>
         </div>
 
@@ -115,6 +124,7 @@
             <div class="col-md-8 col-lg-9">
              
                 {{ form_widget(form.numPhone, {'attr': {'class': 'form-control'}} )}}
+                 <div class="error-message"> {{ form_errors(form.numPhone) }} </div>
             </div>
         </div>
 
@@ -124,15 +134,16 @@
             <div class="col-md-8 col-lg-9">
            
                 {{ form_widget(form.dateNaissance , {'attr': {'class': 'form-control'}} )}}
-             
+               <div class="error-message"> {{ form_errors(form.dateNaissance) }}</div>
             </div>
         </div>
 
-        <!-- Image Upload -->
+       <!-- Image Upload -->
         <div class="row mb-3">
             <label for="image_url" class="col-md-4 col-lg-3 col-form-label">Upload Profile Image</label>
             <div class="col-md-8 col-lg-9">
                 {{ form_row(form.image_url) }}
+             
             </div>
         </div>
 

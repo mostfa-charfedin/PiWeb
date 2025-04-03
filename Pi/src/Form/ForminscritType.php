@@ -38,12 +38,8 @@ class ForminscritType extends AbstractType
             'widget' => 'single_text', 
          
         ])
-        ->add('role', TextType::class, [
-                'label' => 'role'
-        ])
-        ->add('status', TextType::class, [
-                'label' => 'status'
-            ])
+      
+        ->add('numPhone', TextType::class)
          
         ;
     }

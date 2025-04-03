@@ -3,7 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Boolean;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * User
@@ -11,7 +11,7 @@ use phpDocumentor\Reflection\Types\Boolean;
  * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="email", columns={"email"}), @ORM\UniqueConstraint(name="cin", columns={"cin"})})
  * @ORM\Entity
  */
-class User
+class User 
 {
     /**
      * @var int
@@ -23,44 +23,38 @@ class User
     private $id;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="nom", type="string", length=255, nullable=true, options={"default"="NULL"})
+
      */
     private $nom;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="prenom", type="string", length=255, nullable=true, options={"default"="NULL"})
+
      */
     private $prenom;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="email", type="string", length=255, nullable=true, options={"default"="NULL"})
+
      */
     private $email ;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="password", type="string", length=255, nullable=true, options={"default"="NULL"})
+
      */
     private $password ;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="cin", type="integer", nullable=true, options={"default"="NULL"})
+    
      */
     private $cin ;
 
     /**
-     * @var \DateTime|null
-     *
      * @ORM\Column(name="dateNaissance", type="date", nullable=true, options={"default"="NULL"})
+
      */
     private $datenaissance ;
 
@@ -77,11 +71,12 @@ class User
      *
      * @ORM\Column(name="image_url", type="string", length=255, nullable=true, options={"default"="NULL"})
      */
-    private ?string $image_url; 
+    private ?string $image_url= null; 
     
 
-      /**
+     /**
      * @ORM\Column(type="integer")
+
      */
     private $numPhone;
 
@@ -90,7 +85,7 @@ class User
      *
      * @ORM\Column(name="status", type="string", length=20, nullable=true, options={"default"="'ACTIVE'"})
      */
-    private $status = '\'ACTIVE\'';
+    private $status = 'ACTIVE';
 
     /**
      * @var \Doctrine\Common\Collections\Collection

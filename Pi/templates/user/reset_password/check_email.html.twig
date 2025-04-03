@@ -1,0 +1,11 @@
+
+
+{% block title %}Vérifiez votre e-mail{% endblock %}
+
+{% block body %}
+    <h1>Vérifiez votre e-mail</h1>
+
+    <p>Un e-mail vous a été envoyé. Il contient un lien que vous pouvez utiliser pour réinitialiser votre mot de passe. Ce lien expirera dans {{ resetToken.expirationMessageKey|trans(resetToken.expirationMessageData, 'ResetPasswordBundle') }}.</p>
+
+    <p>Si vous ne voyez pas d'e-mail, veuillez vérifier votre dossier spam ou réessayer.</p>
+{% endblock %}
