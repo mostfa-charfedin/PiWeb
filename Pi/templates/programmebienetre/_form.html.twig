@@ -1,0 +1,27 @@
+{{ form_start(form) }}
+    <div class="form-group">
+        {{ form_label(form.titre) }}
+        {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.titre) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.type) }}
+        {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.type) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.description) }}
+        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.description) }}
+    </div>
+
+    <div class="form-group">
+        {{ form_label(form.iduser) }}
+        {{ form_widget(form.iduser, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.iduser) }}
+    </div>
+
+    <button class="btn btn-primary">{{ button_label|default('Sauvegarder') }}</button>
+{{ form_end(form) }}

@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+
+<title>Edit Programmebienetre</title>
+
+{% block body %}
+    <h1>Edit Programmebienetre</h1>
+
+    {{ include('programmebienetre/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_programmebienetre_index') }}">back to list</a>
+
+    {{ include('programmebienetre/_delete_form.html.twig') }}
+{% endblock %}
