@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use phpDocumentor\Reflection\Types\Boolean;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * User
@@ -99,12 +101,16 @@ class User
      */
     private $idquiz = array();
 
+    #[ORM\ManyToMany(targetEntity: Quiz::class, mappedBy: "users")]
+    private Collection $quizzes;
+
     /**
      * Constructor
      */
     public function __construct()
     {
         $this->idquiz = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->quizzes = new ArrayCollection();
     }
     public function getId(): ?int
     {
@@ -239,6 +245,28 @@ public function setDatenaissance(?\DateTimeInterface $datenaissance): self
     {
         $this->password = $password;
 
+        return $this;
+    }
+
+    public function getQuizzes(): Collection
+    {
+        return $this->quizzes;
+    }
+
+    public function addQuiz(Quiz $quiz): self
+    {
+        if (!$this->quizzes->contains($quiz)) {
+            $this->quizzes[] = $quiz;
+            $quiz->addUser($this);
+        }
+        return $this;
+    }
+
+    public function removeQuiz(Quiz $quiz): self
+    {
+        if ($this->quizzes->removeElement($quiz)) {
+            $quiz->removeUser($this);
+        }
         return $this;
     }
 }

@@ -2,63 +2,95 @@
 
 namespace App\Entity;
 
+use App\Repository\QuestionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-/**
- * Question
- *
- * @ORM\Table(name="question", indexes={@ORM\Index(name="idQuiz", columns={"idQuiz"})})
- * @ORM\Entity
- */
+#[ORM\Entity(repositoryClass: QuestionRepository::class)]
+#[ORM\Table(name: "question")]
+#[ORM\Index(columns: ["idQuiz"], name: "idQuiz")]
+#[ApiResource]
 class Question
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="idQuestion", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $idquestion;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    #[Groups(['question:read'])]
+    private ?int $id = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="Question", type="string", length=255, nullable=true, options={"default"="NULL"})
-     */
-    private $question = 'NULL';
+    #[ORM\Column(length: 255)]
+    #[Groups(['question:read'])]
+    private ?string $question = null;
 
-    /**
-     * @var \Quiz
-     *
-     * @ORM\ManyToOne(targetEntity="Quiz")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz")
-     * })
-     */
-    private $idquiz;
+    #[ORM\ManyToOne(inversedBy: 'questions')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['question:read'])]
+    private ?Quiz $quiz = null;
 
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="Reponse", inversedBy="question")
-     * @ORM\JoinTable(name="question_repense",
-     *   joinColumns={
-     *     @ORM\JoinColumn(name="question_id", referencedColumnName="idQuestion")
-     *   },
-     *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="repense_id", referencedColumnName="idReponse")
-     *   }
-     * )
-     */
-    private $repense = array();
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Reponse::class)]
+    #[Groups(['question:read'])]
+    private Collection $reponses;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->repense = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->reponses = new ArrayCollection();
     }
 
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getQuestion(): ?string
+    {
+        return $this->question;
+    }
+
+    public function setQuestion(string $question): static
+    {
+        $this->question = $question;
+        return $this;
+    }
+
+    public function getQuiz(): ?Quiz
+    {
+        return $this->quiz;
+    }
+
+    public function setQuiz(?Quiz $quiz): static
+    {
+        $this->quiz = $quiz;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reponse>
+     */
+    public function getReponses(): Collection
+    {
+        return $this->reponses;
+    }
+
+    public function addReponse(Reponse $reponse): static
+    {
+        if (!$this->reponses->contains($reponse)) {
+            $this->reponses->add($reponse);
+            $reponse->setQuestion($this);
+        }
+        return $this;
+    }
+
+    public function removeReponse(Reponse $reponse): static
+    {
+        if ($this->reponses->removeElement($reponse)) {
+            // set the owning side to null (unless already changed)
+            if ($reponse->getQuestion() === $this) {
+                $reponse->setQuestion(null);
+            }
+        }
+        return $this;
+    }
 }

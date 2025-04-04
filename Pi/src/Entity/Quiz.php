@@ -2,60 +2,118 @@
 
 namespace App\Entity;
 
+use App\Repository\QuizRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-/**
- * Quiz
- *
- * @ORM\Table(name="quiz")
- * @ORM\Entity
- */
+#[ORM\Entity(repositoryClass: QuizRepository::class)]
+#[ApiResource]
 class Quiz
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="idQuiz", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $idquiz;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    #[Groups(['quiz:read'])]
+    private ?int $id = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="nom", type="string", length=255, nullable=true, options={"default"="NULL"})
-     */
-    private $nom = 'NULL';
+    #[ORM\Column(length: 255)]
+    #[Groups(['quiz:read'])]
+    private ?string $name = null;
 
-    /**
-     * @var \DateTime|null
-     *
-     * @ORM\Column(name="dateCreation", type="date", nullable=true, options={"default"="NULL"})
-     */
-    private $datecreation = 'NULL';
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['quiz:read'])]
+    private ?string $description = null;
 
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="User", inversedBy="idquiz")
-     * @ORM\JoinTable(name="score",
-     *   joinColumns={
-     *     @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz")
-     *   },
-     *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="idUser", referencedColumnName="id")
-     *   }
-     * )
-     */
-    private $iduser = array();
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class)]
+    #[Groups(['quiz:read'])]
+    private Collection $questions;
 
-    /**
-     * Constructor
-     */
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: "quizzes")]
+    #[ORM\JoinTable(name: "quiz_user")]
+    #[ORM\JoinColumn(name: "quiz_id", referencedColumnName: "id")]
+    #[ORM\InverseJoinColumn(name: "user_id", referencedColumnName: "id")]
+    private Collection $users;
+
     public function __construct()
     {
-        $this->iduser = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->questions = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Question>
+     */
+    public function getQuestions(): Collection
+    {
+        return $this->questions;
+    }
+
+    public function addQuestion(Question $question): static
+    {
+        if (!$this->questions->contains($question)) {
+            $this->questions->add($question);
+            $question->setQuiz($this);
+        }
+        return $this;
+    }
+
+    public function removeQuestion(Question $question): static
+    {
+        if ($this->questions->removeElement($question)) {
+            // set the owning side to null (unless already changed)
+            if ($question->getQuiz() === $this) {
+                $question->setQuiz(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): self
+    {
+        if (!$this->users->contains($user)) {
+            $this->users[] = $user;
+        }
+        return $this;
+    }
+
+    public function removeUser(User $user): self
+    {
+        $this->users->removeElement($user);
+        return $this;
+    }
 }

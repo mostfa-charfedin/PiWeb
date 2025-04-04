@@ -1,0 +1,53 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Quiz{% endblock %}
+
+{% block body %}
+  <main id="main" class="main">
+    <div class="pagetitle">
+      <h1>Edit Quiz</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Quizzes</a></li>
+          <li class="breadcrumb-item active">Edit Quiz</li>
+        </ol>
+      </nav>
+    </div>
+
+    <section class="section">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Edit Quiz</h5>
+
+              {{ form_start(form) }}
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Name</label>
+                <div class="col-sm-10">
+                  {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <label class="col-sm-2 col-form-label">Description</label>
+                <div class="col-sm-10">
+                  {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                </div>
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-sm-10">
+                  <button type="submit" class="btn btn-primary">Update Quiz</button>
+                  <a href="{{ path('quiz_list') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+              </div>
+              {{ form_end(form) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+{% endblock %} 

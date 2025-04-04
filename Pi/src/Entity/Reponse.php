@@ -3,61 +3,99 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Symfony\Component\Serializer\Annotation\Groups;
 
-/**
- * Reponse
- *
- * @ORM\Table(name="reponse", indexes={@ORM\Index(name="idQuestion", columns={"idQuestion"})})
- * @ORM\Entity
- */
+#[ORM\Entity]
+#[ORM\Table(name: "reponse")]
+#[ORM\Index(columns: ["idQuestion"], name: "idQuestion")]
+#[ApiResource]
 class Reponse
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="idReponse", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $idreponse;
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: "IDENTITY")]
+    #[ORM\Column(name: "idReponse", type: "integer", nullable: false)]
+    #[Groups(['reponse:read'])]
+    private ?int $idreponse = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="Response", type="string", length=255, nullable=true, options={"default"="NULL"})
-     */
-    private $response = 'NULL';
+    #[ORM\Column(name: "Response", type: "string", length: 255, nullable: true, options: ["default" => "NULL"])]
+    #[Groups(['reponse:read'])]
+    private ?string $response = 'NULL';
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="status", type="string", length=255, nullable=true, options={"default"="NULL"})
-     */
-    private $status = 'NULL';
+    #[ORM\Column(name: "status", type: "string", length: 255, nullable: true, options: ["default" => "NULL"])]
+    #[Groups(['reponse:read'])]
+    private ?string $status = 'NULL';
 
-    /**
-     * @var \Question
-     *
-     * @ORM\ManyToOne(targetEntity="Question")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idQuestion", referencedColumnName="idQuestion")
-     * })
-     */
-    private $idquestion;
+    #[ORM\ManyToOne(targetEntity: Question::class, inversedBy: "reponses")]
+    #[ORM\JoinColumn(name: "idQuestion", referencedColumnName: "idQuestion", nullable: false)]
+    #[Groups(['reponse:read'])]
+    private ?Question $question = null;
 
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="Question", mappedBy="repense")
-     */
-    private $question = array();
+    #[ORM\ManyToMany(targetEntity: Question::class, mappedBy: "reponses")]
+    private Collection $questions;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->question = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->questions = new ArrayCollection();
     }
 
+    // Getters and Setters
+    public function getIdreponse(): ?int
+    {
+        return $this->idreponse;
+    }
+
+    public function getResponse(): ?string
+    {
+        return $this->response;
+    }
+
+    public function setResponse(?string $response): self
+    {
+        $this->response = $response;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getQuestion(): ?Question
+    {
+        return $this->question;
+    }
+
+    public function setQuestion(?Question $question): self
+    {
+        $this->question = $question;
+        return $this;
+    }
+
+    public function getQuestions(): Collection
+    {
+        return $this->questions;
+    }
+
+    public function addQuestion(Question $question): self
+    {
+        if (!$this->questions->contains($question)) {
+            $this->questions[] = $question;
+        }
+        return $this;
+    }
+
+    public function removeQuestion(Question $question): self
+    {
+        $this->questions->removeElement($question);
+        return $this;
+    }
 }
