@@ -57,7 +57,7 @@ class ResetPasswordRequestRepository extends ServiceEntityRepository implements 
 
     public function getUserIdentifier(object $user): string
     {
-        return $user->getUserIdentifier();
+        return $user->getId();
     }
 
     public function persistResetPasswordRequest(object $resetPasswordRequest): void

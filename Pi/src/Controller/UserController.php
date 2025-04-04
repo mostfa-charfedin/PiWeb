@@ -17,6 +17,11 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Form\FormError;
+use App\Repository\UserRepository;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Security\Csrf\CsrfToken;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 
 class UserController extends AbstractController
@@ -197,18 +202,115 @@ public function login(Request $request, SessionInterface $session, EntityManager
         ]);
     }
 
-    
- 
+    #[Route('/GestionUsers', name: 'GestionUsers', methods: ['GET'])]
+    public function index(
+        UserRepository $userRepository,
+        PaginatorInterface $paginator,
+        Request $request
+    ): Response {
+        $query = $userRepository->createQueryBuilder('u')->getQuery();
+        
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            10 // Items par page
+        );
 
-
-    #[Route('', name: '')]
-    public function index(SessionInterface $session): Response
-    {
-        if (!$session->get('id')) {
-            return $this->redirectToRoute('login');  // Redirect to login if not logged in
-        }
-        return $this->render('user/index.html.twig', [
-            'controller_name' => 'UserController',
+        return $this->render('user/admin/UsersManag.html.twig', [
+            'pagination' => $pagination
         ]);
     }
+
+    
+
+    #[Route('admin/user/{id}/details', name: 'admin_user_details', methods: ['GET'])]
+    public function details(User $user): Response
+    {
+        return $this->render('user/admin/_details.html.twig', [
+            'user' => $user,
+        ]);
+    }
+    
+   /**
+     * @Route("/admin/user/{id}/edit-modal", name="admin_user_edit_modal", methods={"GET"})
+     */
+    public function editModal(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $entityManager->getRepository(User::class)->find($id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $form = $this->createFormBuilder($user)
+            ->add('nom', TextType::class, ['label' => false])
+            ->add('prenom', TextType::class, ['label' => false])
+            ->add('email', EmailType::class, ['label' => false])
+            ->add('numPhone', TextType::class, ['label' => false])
+            ->add('dateNaissance', DateType::class, ['widget' => 'single_text', 'required' => false])
+            ->getForm();
+
+        $formView = $form->createView();
+
+        return new JsonResponse([
+            'form' => $this->renderView('user/admin/_edit_form.html.twig', ['form' => $formView]),
+        ]);
+    }
+
+    /**
+     * @Route("/admin/user/{id}/update", name="admin_user_update", methods={"POST"})
+     */
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
+    {
+        $user = $entityManager->getRepository(User::class)->find($id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $form = $this->createFormBuilder($user)
+            ->add('nom', TextType::class, ['label' => false])
+            ->add('prenom', TextType::class, ['label' => false])
+            ->add('email', EmailType::class, ['label' => false])
+            ->add('numPhone', TextType::class, ['label' => false])
+            ->add('dateNaissance', DateType::class, ['widget' => 'single_text', 'required' => false])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $errors = $validator->validate($user);
+
+            if (count($errors) === 0) {
+                $entityManager->persist($user);
+                $entityManager->flush();
+
+                return new JsonResponse(['success' => 'User updated successfully!']);
+            } else {
+                return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        return new JsonResponse(['errors' => (string) $form->getErrors(true)], Response::HTTP_BAD_REQUEST);
+    }
+
+  /**
+     * @Route("/admin/user/{id}/delete", name="admin_user_delete", methods={"POST"})
+     */
+    public function delete(Request $request, User $user, EntityManagerInterface $entityManager, CsrfTokenManagerInterface $csrfTokenManager): Response
+    {
+        $token = new CsrfToken('delete' . $user->getId(), $request->request->get('_token')); // Crée un objet CsrfToken
+
+        if (!$csrfTokenManager->isTokenValid($token)) { // Utilise l'objet CsrfToken
+            return $this->redirectToRoute('GestionUsers');
+        }
+
+        $entityManager->remove($user);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Utilisateur supprimé avec succès.');
+
+        return $this->redirectToRoute('GestionUsers');
+    }
+  
 }
