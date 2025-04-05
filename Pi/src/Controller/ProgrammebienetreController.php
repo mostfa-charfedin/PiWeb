@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProgrammebienetreController extends AbstractController
 {
@@ -26,30 +25,17 @@ class ProgrammebienetreController extends AbstractController
     }
 
     #[Route('/programmebienetre/new', name: 'app_programmebienetre_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $programmebienetre = new Programmebienetre();
         $form = $this->createForm(ProgrammebienetreType::class, $programmebienetre);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            $errors = $validator->validate($programmebienetre);
-            
-            if (count($errors) === 0) {
-                try {
-                    $entityManager->persist($programmebienetre);
-                    $entityManager->flush();
-                    
-                    $this->addFlash('success', 'Le programme a été créé avec succès.');
-                    return $this->redirectToRoute('app_programmebienetre_index', [], Response::HTTP_SEE_OTHER);
-                } catch (\Exception $e) {
-                    $this->addFlash('error', 'Une erreur est survenue lors de la création du programme.');
-                }
-            } else {
-                foreach ($errors as $error) {
-                    $this->addFlash('error', $error->getMessage());
-                }
-            }
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($programmebienetre);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_programmebienetre_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('programmebienetre/new.html.twig', [
@@ -67,28 +53,15 @@ class ProgrammebienetreController extends AbstractController
     }
 
     #[Route('/programmebienetre/{idprogramme}/edit', name: 'app_programmebienetre_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Programmebienetre $programmebienetre, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    public function edit(Request $request, Programmebienetre $programmebienetre, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(ProgrammebienetreType::class, $programmebienetre);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            $errors = $validator->validate($programmebienetre);
-            
-            if (count($errors) === 0) {
-                try {
-                    $entityManager->flush();
-                    
-                    $this->addFlash('success', 'Le programme a été modifié avec succès.');
-                    return $this->redirectToRoute('app_programmebienetre_index', [], Response::HTTP_SEE_OTHER);
-                } catch (\Exception $e) {
-                    $this->addFlash('error', 'Une erreur est survenue lors de la modification du programme.');
-                }
-            } else {
-                foreach ($errors as $error) {
-                    $this->addFlash('error', $error->getMessage());
-                }
-            }
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+
+            return $this->redirectToRoute('app_programmebienetre_index', [], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('programmebienetre/edit.html.twig', [
@@ -101,13 +74,8 @@ class ProgrammebienetreController extends AbstractController
     public function delete(Request $request, Programmebienetre $programmebienetre, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$programmebienetre->getIdprogramme(), $request->request->get('_token'))) {
-            try {
-                $entityManager->remove($programmebienetre);
-                $entityManager->flush();
-                $this->addFlash('success', 'Le programme a été supprimé avec succès.');
-            } catch (\Exception $e) {
-                $this->addFlash('error', 'Une erreur est survenue lors de la suppression du programme.');
-            }
+            $entityManager->remove($programmebienetre);
+            $entityManager->flush();
         }
 
         return $this->redirectToRoute('app_programmebienetre_index', [], Response::HTTP_SEE_OTHER);

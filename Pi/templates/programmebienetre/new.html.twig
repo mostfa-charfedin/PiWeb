@@ -1,104 +1,160 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html.twig' %}
 
-<head>
-  <meta charset="utf-8">
-  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+{% block title %}New Program{% endblock %}
 
-  <title>New Wellness Program</title>
-  <meta content="" name="description">
-  <meta content="" name="keywords">
-
-  <!-- Favicons -->
-  <link href="{{ asset('assets/imgP/logo.jpg') }}" rel="icon">
-  <link href="{{ asset('assets/imgP/logo.jpg') }}" rel="apple-touch-icon">
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.gstatic.com" rel="preconnect">
-  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-
-  <!-- Vendor CSS Files -->
-  <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/vendor/quill/quill.snow.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/vendor/simple-datatables/style.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
-</head>
-
-<body>
-  <main>
+{% block body %}
+<div class="container-fluid py-4" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh;">
     <div class="container">
-      <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-6 d-flex flex-column align-items-center justify-content-center">
-
-              <div class="d-flex justify-content-center py-4">
-                <a href="{{ path('app_programmebienetre_index') }}" class="logo d-flex align-items-center w-auto">
-                  <img src="{{ asset('assets/imgP/logo.jpg') }}" alt="Onboardify Logo" style="height: 40px; width: auto; margin-right: 10px;">
-                  <span class="d-none d-lg-block" style="font-size: 1.5rem; font-weight: 600; color: #012970;">Onboardify</span>
-                </a>
-              </div>
-
-              <div class="card mb-3">
-                <div class="card-body">
-                  <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Create New Wellness Program</h5>
-                    <p class="text-center small">Fill in the program details</p>
-                  </div>
-
-                  {{ form_start(form, {'attr': {'class': 'row g-3 needs-validation', 'novalidate': 'novalidate'}}) }}
-                  
-                  <div class="col-12">
-                    <label for="{{ form.titre.vars.id }}" class="form-label">Title</label>
-                    {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'id': form.titre.vars.id, 'placeholder': 'Enter program title'}}) }}
-                    {{ form_errors(form.titre) }}
-                  </div>
-
-                  <div class="col-12">
-                    <label for="{{ form.type.vars.id }}" class="form-label">Type</label>
-                    {{ form_widget(form.type, {'attr': {'class': 'form-control', 'id': form.type.vars.id, 'placeholder': 'Enter program type'}}) }}
-                    {{ form_errors(form.type) }}
-                  </div>
-
-                  <div class="col-12">
-                    <label for="{{ form.description.vars.id }}" class="form-label">Description</label>
-                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'id': form.description.vars.id, 'placeholder': 'Enter program description'}}) }}
-                    {{ form_errors(form.description) }}
-                  </div>
-
-                  <div class="col-12">
-                    <label for="{{ form.iduser.vars.id }}" class="form-label">User</label>
-                    {{ form_widget(form.iduser, {'attr': {'class': 'form-control', 'id': form.iduser.vars.id}}) }}
-                    {{ form_errors(form.iduser) }}
-                  </div>
-
-                  <div class="col-12">
-                    <button class="btn btn-primary w-100" type="submit">Create Program</button>
-                  </div>
-
-                  <div class="col-12">
-                    <p class="small mb-0">
-                      <a href="{{ path('app_programmebienetre_index') }}">Back to List</a>
-                    </p>
-                  </div>
-
-                  {{ form_end(form) }}
-
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="text-center mb-4">
+            <img src="{{ asset('assets/imgP/logo.png') }}" alt="Logo" style="width: 200px; height: auto; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));">
         </div>
-      </section>
-    </div>
-  </main>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-lg" style="border-radius: 20px; border: none; overflow: hidden;">
+                    <div class="card-header text-center p-4" style="background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);">
+                        <h3 class="text-white mb-0" style="font-weight: 600; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Create New Program</h3>
+                    </div>
+                    <div class="card-body p-4" style="background: rgba(255, 255, 255, 0.9);">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                            
+                            <div class="mb-4">
+                                <label for="{{ form.titre.vars.id }}" class="form-label" style="color: #2d3748; font-weight: 600; font-size: 1.1rem;">
+                                    <i class="bi bi-bookmark-star-fill me-2" style="color: #0061ff;"></i>Title
+                                </label>
+                                {{ form_widget(form.titre, {
+                                    'attr': {
+                                        'class': 'form-control form-control-lg',
+                                        'placeholder': 'Enter program title',
+                                        'style': 'border-radius: 15px; border: 2px solid #e2e8f0; padding: 15px; transition: all 0.3s ease;'
+                                    }
+                                }) }}
+                                <div style="color: #FF0000; font-weight: 500; margin-top: 0.5rem;">
+                                    {{ form_errors(form.titre) }}
+                                </div>
+                            </div>
 
-  <!-- Vendor JS Files -->
-  <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-  <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
-  <script src="{{ asset('assets/js/main.js') }}"></script>
-</body>
-</html>
+                            <div class="mb-4">
+                                <label for="{{ form.type.vars.id }}" class="form-label" style="color: #2d3748; font-weight: 600; font-size: 1.1rem;">
+                                    <i class="bi bi-tag-fill me-2" style="color: #0061ff;"></i>Type
+                                </label>
+                                {{ form_widget(form.type, {
+                                    'attr': {
+                                        'class': 'form-control form-control-lg',
+                                        'placeholder': 'Select program type',
+                                        'style': 'border-radius: 15px; border: 2px solid #e2e8f0; padding: 15px; transition: all 0.3s ease;'
+                                    }
+                                }) }}
+                                <div style="color: #FF0000; font-weight: 500; margin-top: 0.5rem;">
+                                    {{ form_errors(form.type) }}
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="{{ form.description.vars.id }}" class="form-label" style="color: #2d3748; font-weight: 600; font-size: 1.1rem;">
+                                    <i class="bi bi-text-paragraph me-2" style="color: #0061ff;"></i>Description
+                                </label>
+                                {{ form_widget(form.description, {
+                                    'attr': {
+                                        'class': 'form-control form-control-lg',
+                                        'placeholder': 'Describe the program',
+                                        'style': 'border-radius: 15px; border: 2px solid #e2e8f0; min-height: 120px; padding: 15px; transition: all 0.3s ease;'
+                                    }
+                                }) }}
+                                <div style="color: #FF0000; font-weight: 500; margin-top: 0.5rem;">
+                                    {{ form_errors(form.description) }}
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="{{ form.iduser.vars.id }}" class="form-label" style="color: #2d3748; font-weight: 600; font-size: 1.1rem;">
+                                    <i class="bi bi-person-check-fill me-2" style="color: #0061ff;"></i>Assigned User
+                                </label>
+                                {{ form_widget(form.iduser, {
+                                    'attr': {
+                                        'class': 'form-select form-select-lg',
+                                        'style': 'border-radius: 15px; border: 2px solid #e2e8f0; padding: 15px; transition: all 0.3s ease;'
+                                    }
+                                }) }}
+                                <div style="color: #FF0000; font-weight: 500; margin-top: 0.5rem;">
+                                    {{ form_errors(form.iduser) }}
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-3 mt-5">
+                                <button class="btn btn-primary btn-lg" type="submit" 
+                                        style="border-radius: 15px; padding: 15px; background: linear-gradient(135deg, #0061ff 0%, #60efff 100%); border: none; box-shadow: 0 4px 15px rgba(0,97,255,0.3); font-weight: 600; letter-spacing: 0.5px; transition: all 0.3s ease;">
+                                    <i class="bi bi-plus-circle-fill me-2"></i>Create Program
+                                </button>
+                                
+                                <a href="{{ path('app_programmebienetre_index') }}" 
+                                   class="btn btn-light btn-lg" 
+                                   style="border-radius: 15px; padding: 15px; background: white; border: 2px solid #e2e8f0; font-weight: 600; letter-spacing: 0.5px; transition: all 0.3s ease;">
+                                    <i class="bi bi-arrow-left me-2"></i>Back to List
+                                </a>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted" style="color: #4a5568 !important; font-weight: 500;">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Create mode - Fill in the details to create a new program
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: #0061ff !important;
+        box-shadow: 0 0 0 0.25rem rgba(0,97,255,0.15) !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,97,255,0.2);
+    }
+
+    /* Error messages styling */
+    .form-error {
+        margin-top: 0.5rem;
+    }
+
+    .form-error ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .form-error ul li {
+        color: #FF0000;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Invalid field styling */
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #FF0000;
+    }
+
+    .form-control.is-invalid:focus,
+    .form-select.is-invalid:focus {
+        border-color: #FF0000;
+        box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.25);
+    }
+
+    /* Make sure error messages are displayed */
+    .invalid-feedback {
+        display: block !important;
+        color: #FF0000 !important;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+</style>
+{% endblock %}

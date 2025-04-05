@@ -11,9 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\Choice;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class ProgrammebienetreType extends AbstractType
 {
@@ -21,41 +19,45 @@ class ProgrammebienetreType extends AbstractType
     {
         $builder
             ->add('titre', TextType::class, [
-                'label' => 'Titre',
+                'label' => 'Title',
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Entrez le titre du programme'
+                    'placeholder' => 'Enter program title'
                 ],
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez saisir un titre pour le programme'
+                    new Assert\NotBlank([
+                        'message' => 'Title field cannot be empty!'
                     ]),
-                    new Length([
+                    new Assert\Length([
                         'min' => 3,
                         'max' => 255,
-                        'minMessage' => 'Le titre est trop court (minimum {{ limit }} caractères)',
-                        'maxMessage' => 'Le titre est trop long (maximum {{ limit }} caractères)'
+                        'minMessage' => 'Title must be at least {{ limit }} characters long',
+                        'maxMessage' => 'Title cannot be longer than {{ limit }} characters'
+                    ]),
+                    new Assert\Regex([
+                        'pattern' => '/^[a-zA-ZÀ-ÿ\s]+$/',
+                        'message' => 'Title can only contain letters and spaces'
                     ])
                 ]
             ])
             ->add('type', ChoiceType::class, [
                 'label' => 'Type',
                 'choices' => [
-                    'Physique' => 'Physique',
+                    'Physical' => 'Physical',
                     'Mental' => 'Mental',
                     'Social' => 'Social',
-                    'Professionnel' => 'Professionnel'
+                    'Professional' => 'Professional'
                 ],
                 'attr' => [
                     'class' => 'form-control'
                 ],
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez sélectionner un type de programme'
+                    new Assert\NotBlank([
+                        'message' => 'Please select a program type!'
                     ]),
-                    new Choice([
-                        'choices' => ['Physique', 'Mental', 'Social', 'Professionnel'],
-                        'message' => 'Type invalide. Veuillez choisir parmi : Physique, Mental, Social ou Professionnel'
+                    new Assert\Choice([
+                        'choices' => ['Physical', 'Mental', 'Social', 'Professional'],
+                        'message' => 'Invalid program type selected'
                     ])
                 ]
             ])
@@ -64,22 +66,26 @@ class ProgrammebienetreType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 4,
-                    'placeholder' => 'Décrivez le programme en détail'
+                    'placeholder' => 'Describe the program in detail'
                 ],
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez saisir une description pour le programme'
+                    new Assert\NotBlank([
+                        'message' => 'Description field cannot be empty!'
                     ]),
-                    new Length([
+                    new Assert\Length([
                         'min' => 10,
                         'max' => 255,
-                        'minMessage' => 'La description est trop courte (minimum {{ limit }} caractères)',
-                        'maxMessage' => 'La description est trop longue (maximum {{ limit }} caractères)'
+                        'minMessage' => 'Description must be at least {{ limit }} characters long',
+                        'maxMessage' => 'Description cannot be longer than {{ limit }} characters'
+                    ]),
+                    new Assert\Regex([
+                        'pattern' => '/^[a-zA-ZÀ-ÿ\s\.,]+$/',
+                        'message' => 'Description can only contain letters, spaces, dots and commas'
                     ])
                 ]
             ])
             ->add('iduser', EntityType::class, [
-                'label' => 'Utilisateur',
+                'label' => 'User',
                 'class' => User::class,
                 'choice_label' => function(User $user) {
                     return $user->getNom() . ' ' . $user->getPrenom();
@@ -88,8 +94,8 @@ class ProgrammebienetreType extends AbstractType
                     'class' => 'form-control'
                 ],
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez sélectionner un utilisateur pour le programme'
+                    new Assert\NotBlank([
+                        'message' => 'Please select a user!'
                     ])
                 ]
             ])
@@ -100,6 +106,9 @@ class ProgrammebienetreType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Programmebienetre::class,
+            'attr' => [
+                'novalidate' => 'novalidate'
+            ]
         ]);
     }
 }

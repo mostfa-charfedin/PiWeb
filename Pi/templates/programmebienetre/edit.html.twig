@@ -3,101 +3,92 @@
 {% block title %}Edit Program{% endblock %}
 
 {% block body %}
-<div class="bg-gradient" style="
-    background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
-    min-height: 100vh;
-    padding: 2rem 0;
-">
+<div class="container-fluid py-4" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh;">
     <div class="container">
+        <div class="text-center mb-4">
+            <img src="{{ asset('assets/imgP/logo.png') }}" alt="Logo" style="width: 200px; height: auto; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));">
+        </div>
         <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
-                <!-- Logo Section -->
-                <div class="text-center mb-3">
-                    <a href="{{ path('app_programmebienetre_index') }}" class="d-inline-block">
-                        <img src="{{ asset('assets/imgP/logo.jpg') }}" alt="Onboardify Logo" 
-                             style="height: 60px; width: auto; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
-                    </a>
-                    <h2 class="mt-2 mb-0" style="color: #2c3345; font-size: 1.5rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        Onboardify
-                    </h2>
-                    <p class="text-muted small mb-0" style="color: #4a5568 !important;">Wellness Program Management</p>
-                </div>
-
-                <!-- Main Card -->
-                <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 12px 24px rgba(0,0,0,0.1); backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9);">
-                    <div class="card-header text-white" style="border-radius: 15px 15px 0 0; background: linear-gradient(120deg, #4776E6 0%, #8E54E9 100%); border: none;">
-                        <h4 class="card-title mb-0 py-2 text-center" style="font-size: 1.2rem; letter-spacing: 0.5px;">
-                            <i class="bi bi-pencil-square me-2"></i>Edit Program
-                        </h4>
+            <div class="col-md-8">
+                <div class="card shadow-lg" style="border-radius: 20px; border: none; overflow: hidden;">
+                    <div class="card-header text-center p-4" style="background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);">
+                        <h3 class="text-white mb-0" style="font-weight: 600; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Edit Program</h3>
                     </div>
-                    
-                    <div class="card-body p-4">
+                    <div class="card-body p-4" style="background: rgba(255, 255, 255, 0.9);">
                         {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
                             
                             <div class="mb-4">
-                                <label for="{{ form.titre.vars.id }}" class="form-label" style="color: #4a5568; font-weight: 500;">
-                                    <i class="bi bi-bookmark-star me-1" style="color: #8E54E9;"></i>Title
+                                <label for="{{ form.titre.vars.id }}" class="form-label" style="color: #2d3748; font-weight: 600; font-size: 1.1rem;">
+                                    <i class="bi bi-bookmark-star-fill me-2" style="color: #0061ff;"></i>Title
                                 </label>
                                 {{ form_widget(form.titre, {
                                     'attr': {
-                                        'class': 'form-control',
+                                        'class': 'form-control form-control-lg',
                                         'placeholder': 'Enter program title',
-                                        'style': 'border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px;'
+                                        'style': 'border-radius: 15px; border: 2px solid #e2e8f0; padding: 15px; transition: all 0.3s ease;'
                                     }
                                 }) }}
-                                {{ form_errors(form.titre) }}
+                                <div style="color: #FF0000; font-weight: 500; margin-top: 0.5rem;">
+                                    {{ form_errors(form.titre) }}
+                                </div>
                             </div>
 
                             <div class="mb-4">
-                                <label for="{{ form.type.vars.id }}" class="form-label" style="color: #4a5568; font-weight: 500;">
-                                    <i class="bi bi-tag me-1" style="color: #8E54E9;"></i>Type
+                                <label for="{{ form.type.vars.id }}" class="form-label" style="color: #2d3748; font-weight: 600; font-size: 1.1rem;">
+                                    <i class="bi bi-tag-fill me-2" style="color: #0061ff;"></i>Type
                                 </label>
                                 {{ form_widget(form.type, {
                                     'attr': {
-                                        'class': 'form-control',
-                                        'placeholder': 'Enter program type',
-                                        'style': 'border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px;'
+                                        'class': 'form-control form-control-lg',
+                                        'placeholder': 'Select program type',
+                                        'style': 'border-radius: 15px; border: 2px solid #e2e8f0; padding: 15px; transition: all 0.3s ease;'
                                     }
                                 }) }}
-                                {{ form_errors(form.type) }}
+                                <div style="color: #FF0000; font-weight: 500; margin-top: 0.5rem;">
+                                    {{ form_errors(form.type) }}
+                                </div>
                             </div>
 
                             <div class="mb-4">
-                                <label for="{{ form.description.vars.id }}" class="form-label" style="color: #4a5568; font-weight: 500;">
-                                    <i class="bi bi-text-paragraph me-1" style="color: #8E54E9;"></i>Description
+                                <label for="{{ form.description.vars.id }}" class="form-label" style="color: #2d3748; font-weight: 600; font-size: 1.1rem;">
+                                    <i class="bi bi-text-paragraph me-2" style="color: #0061ff;"></i>Description
                                 </label>
                                 {{ form_widget(form.description, {
                                     'attr': {
-                                        'class': 'form-control',
-                                        'placeholder': 'Enter program description',
-                                        'style': 'border-radius: 12px; border: 1px solid #e2e8f0; min-height: 100px; padding: 12px; resize: vertical;'
+                                        'class': 'form-control form-control-lg',
+                                        'placeholder': 'Describe the program',
+                                        'style': 'border-radius: 15px; border: 2px solid #e2e8f0; min-height: 120px; padding: 15px; transition: all 0.3s ease;'
                                     }
                                 }) }}
-                                {{ form_errors(form.description) }}
+                                <div style="color: #FF0000; font-weight: 500; margin-top: 0.5rem;">
+                                    {{ form_errors(form.description) }}
+                                </div>
                             </div>
 
                             <div class="mb-4">
-                                <label for="{{ form.iduser.vars.id }}" class="form-label" style="color: #4a5568; font-weight: 500;">
-                                    <i class="bi bi-person-check me-1" style="color: #8E54E9;"></i>Assigned User
+                                <label for="{{ form.iduser.vars.id }}" class="form-label" style="color: #2d3748; font-weight: 600; font-size: 1.1rem;">
+                                    <i class="bi bi-person-check-fill me-2" style="color: #0061ff;"></i>Assigned User
                                 </label>
                                 {{ form_widget(form.iduser, {
                                     'attr': {
-                                        'class': 'form-select',
-                                        'style': 'border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px;'
+                                        'class': 'form-select form-select-lg',
+                                        'style': 'border-radius: 15px; border: 2px solid #e2e8f0; padding: 15px; transition: all 0.3s ease;'
                                     }
                                 }) }}
-                                {{ form_errors(form.iduser) }}
+                                <div style="color: #FF0000; font-weight: 500; margin-top: 0.5rem;">
+                                    {{ form_errors(form.iduser) }}
+                                </div>
                             </div>
 
-                            <div class="d-grid gap-3">
-                                <button class="btn btn-primary" type="submit" 
-                                        style="border-radius: 12px; padding: 12px; background: linear-gradient(120deg, #4776E6 0%, #8E54E9 100%); border: none; box-shadow: 0 4px 15px rgba(71,118,230,0.2); font-weight: 500; letter-spacing: 0.5px;">
-                                    <i class="bi bi-save me-2"></i>Save Changes
+                            <div class="d-grid gap-3 mt-5">
+                                <button class="btn btn-primary btn-lg" type="submit" 
+                                        style="border-radius: 15px; padding: 15px; background: linear-gradient(135deg, #0061ff 0%, #60efff 100%); border: none; box-shadow: 0 4px 15px rgba(0,97,255,0.3); font-weight: 600; letter-spacing: 0.5px; transition: all 0.3s ease;">
+                                    <i class="bi bi-save2-fill me-2"></i>Save Changes
                                 </button>
                                 
                                 <a href="{{ path('app_programmebienetre_index') }}" 
-                                   class="btn btn-light" 
-                                   style="border-radius: 12px; padding: 12px; background: white; border: 1px solid #e2e8f0; font-weight: 500; letter-spacing: 0.5px;">
+                                   class="btn btn-light btn-lg" 
+                                   style="border-radius: 15px; padding: 15px; background: white; border: 2px solid #e2e8f0; font-weight: 600; letter-spacing: 0.5px; transition: all 0.3s ease;">
                                     <i class="bi bi-arrow-left me-2"></i>Back to List
                                 </a>
                             </div>
@@ -105,10 +96,9 @@
                     </div>
                 </div>
 
-                <!-- Footer Note -->
-                <div class="text-center mt-3">
-                    <p class="text-muted small mb-0" style="color: #4a5568 !important;">
-                        <i class="bi bi-info-circle me-1"></i>
+                <div class="text-center mt-4">
+                    <p class="text-muted" style="color: #4a5568 !important; font-weight: 500;">
+                        <i class="bi bi-info-circle-fill me-2"></i>
                         Edit mode - All changes will be saved
                     </p>
                 </div>
@@ -116,4 +106,55 @@
         </div>
     </div>
 </div>
+
+<style>
+    .form-control:focus, .form-select:focus {
+        border-color: #0061ff !important;
+        box-shadow: 0 0 0 0.25rem rgba(0,97,255,0.15) !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,97,255,0.2);
+    }
+
+    /* Error messages styling */
+    .form-error {
+        margin-top: 0.5rem;
+    }
+
+    .form-error ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .form-error ul li {
+        color: #FF0000;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Invalid field styling */
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #FF0000;
+    }
+
+    .form-control.is-invalid:focus,
+    .form-select.is-invalid:focus {
+        border-color: #FF0000;
+        box-shadow: 0 0 0 0.25rem rgba(255, 0, 0, 0.25);
+    }
+
+    /* Make sure error messages are displayed */
+    .invalid-feedback {
+        display: block !important;
+        color: #FF0000 !important;
+        font-weight: 500;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+    }
+</style>
 {% endblock %}

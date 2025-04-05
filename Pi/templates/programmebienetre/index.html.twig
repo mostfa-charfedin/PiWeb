@@ -1,81 +1,105 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Wellness Programs{% endblock %}
+{% block title %}Programs List{% endblock %}
 
 {% block body %}
-  <main>
+<div class="container-fluid py-4" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); min-height: 100vh;">
     <div class="container">
-      <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
-        <div class="container">
-          <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-6 d-flex flex-column align-items-center justify-content-center">
-
-                           <div class="text-center mb-3">
-                    <a href="{{ path('app_programmebienetre_index') }}" class="d-inline-block">
-                        <img src="{{ asset('assets/imgP/logo.jpg') }}" alt="Onboardify Logo" 
-                             style="height: 60px; width: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                </a>
-                 <h2 class="mt-2 mb-0" style="color: #2c3345; font-size: 1.5rem; font-weight: 700;">
-                        Onboardify
-                    </h2>
-              </div>
-
-              <div class="card mb-3">
-                <div class="card-body">
-                  <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Wellness Programs</h5>
-                    <p class="text-center small">List of all wellness programs</p>
-                  </div>
-
-                  {% if programmebienetre is empty %}
-                    <p class="text-center">No programs found</p>
-                  {% else %}
-                    <div class="table-responsive">
-                      <table class="table table-hover">
-                        <thead>
-                          <tr>
-                            <th>Title</th>
-                            <th>Type</th>
-                            <th>Description</th>
-                            <th>User</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                        {% for program in programmebienetre %}
-                          <tr>
-                            <td>{{ program.titre }}</td>
-                            <td>{{ program.type }}</td>
-                            <td>{{ program.description }}</td>
-                            <td>{{ program.iduser ? program.iduser.nom : '' }}</td>
-                            <td>
-                              <div class="btn-group" role="group">
-                                <a href="{{ path('app_programmebienetre_show', {'idprogramme': program.idprogramme}) }}" class="btn btn-info btn-sm">
-                                  <i class="bi bi-eye-fill"></i> View
-                                </a>
-                                <a href="{{ path('app_programmebienetre_edit', {'idprogramme': program.idprogramme}) }}" class="btn btn-warning btn-sm">
-                                  <i class="bi bi-pencil-fill"></i> Edit
-                                </a>
-                              </div>
-                            </td>
-                          </tr>
-                        {% endfor %}
-                        </tbody>
-                      </table>
-                    </div>
-                  {% endif %}
-
-                  <div class="text-center mt-4">
-                    <a href="{{ path('app_programmebienetre_new') }}" class="btn btn-primary w-100">
-                      <i class="bi bi-plus-circle-fill"></i> Create New Program
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div class="text-center mb-4">
+            <img src="{{ asset('assets/imgP/logo.png') }}" alt="Logo" style="width: 200px; height: auto; filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));">
         </div>
-      </section>
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card shadow-lg" style="border-radius: 20px; border: none; overflow: hidden;">
+                    <div class="card-header text-center p-4" style="background: linear-gradient(135deg, #0061ff 0%, #60efff 100%);">
+                        <h3 class="text-white mb-0" style="font-weight: 600; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);">Programs List</h3>
+                    </div>
+                    <div class="card-body p-4" style="background: rgba(255, 255, 255, 0.9);">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="text-primary" style="font-weight: 600;">Title</th>
+                                        <th class="text-primary" style="font-weight: 600;">Type</th>
+                                        <th class="text-primary" style="font-weight: 600;">Description</th>
+                                        <th class="text-primary" style="font-weight: 600;">Assigned User</th>
+                                        <th class="text-center text-primary" style="font-weight: 600;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for programmebienetre in programmebienetre %}
+                                    <tr>
+                                        <td>{{ programmebienetre.titre }}</td>
+                                        <td>{{ programmebienetre.type }}</td>
+                                        <td>{{ programmebienetre.description }}</td>
+                                        <td>{{ programmebienetre.iduser ? programmebienetre.iduser.email : '' }}</td>
+                                        <td class="text-center">
+                                            <a href="{{ path('app_programmebienetre_show', {'idprogramme': programmebienetre.idprogramme}) }}" 
+                                               class="btn btn-info btn-sm me-2" 
+                                               style="border-radius: 10px; border: none; background: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%); box-shadow: 0 2px 8px rgba(14,165,233,0.2);">
+                                                <i class="bi bi-eye-fill"></i> View
+                                            </a>
+                                            <a href="{{ path('app_programmebienetre_edit', {'idprogramme': programmebienetre.idprogramme}) }}" 
+                                               class="btn btn-warning btn-sm" 
+                                               style="border-radius: 10px; border: none; background: linear-gradient(135deg, #eab308 0%, #fbbf24 100%); box-shadow: 0 2px 8px rgba(234,179,8,0.2);">
+                                                <i class="bi bi-pencil-fill"></i> Edit
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">No programs found</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <a href="{{ path('app_programmebienetre_new') }}" 
+                               class="btn btn-primary btn-lg" 
+                               style="border-radius: 15px; padding: 15px; background: linear-gradient(135deg, #0061ff 0%, #60efff 100%); border: none; box-shadow: 0 4px 15px rgba(0,97,255,0.3); font-weight: 600; letter-spacing: 0.5px; transition: all 0.3s ease;">
+                                <i class="bi bi-plus-circle-fill me-2"></i>Create New Program
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </main>
+</div>
+
+<style>
+    .table th {
+        border-top: none;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .table td {
+        border: none;
+        padding: 1rem;
+    }
+    
+    .table tbody tr {
+        border-bottom: 1px solid #e2e8f0;
+        transition: all 0.2s ease;
+    }
+    
+    .table tbody tr:hover {
+        background-color: rgba(0,97,255,0.05);
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,97,255,0.2);
+    }
+    
+    .btn-warning:hover {
+        box-shadow: 0 6px 20px rgba(234,179,8,0.2);
+    }
+    
+    .btn-info:hover {
+        box-shadow: 0 6px 20px rgba(14,165,233,0.2);
+    }
+</style>
 {% endblock %}
