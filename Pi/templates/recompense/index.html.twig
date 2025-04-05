@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recompense index{% endblock %}
+
+{% block body %}
+    <h1>Recompense index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Idrecompense</th>
+                <th>Dateattribution</th>
+                <th>Type</th>
+                <th>Statusrecompence</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for recompense in recompenses %}
+            <tr>
+                <td>{{ recompense.idrecompense }}</td>
+                <td>{{ recompense.dateattribution ? recompense.dateattribution|date('Y-m-d') : '' }}</td>
+                <td>{{ recompense.type }}</td>
+                <td>{{ recompense.statusrecompence }}</td>
+                <td>
+                    <a href="{{ path('app_recompense_show', {'idrecompense': recompense.idrecompense}) }}">show</a>
+                    <a href="{{ path('app_recompense_edit', {'idrecompense': recompense.idrecompense}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_recompense_new') }}">Create new</a>
+{% endblock %}
