@@ -55,23 +55,15 @@
       <ul class="d-flex align-items-center">
 
         <li class="nav-item dropdown pe-3">
-
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
-         
-   
-{% if user.imageUrl %}
-    <img src="{{ asset(user.imageUrl ) }}" alt="Profile Image" width="40" height="40" class="rounded-circle">
-{% else %}
-    <img src="{{ asset('assets/imgP/logo.png') }}" alt="Default Profile" width="40" height="40" class="rounded-circle">
-{% endif %}
-
-            <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.nom }} {{ user.prenom }}</span>
-          </a><!-- End Profile Iamge Icon -->
+            <img src="{{ asset('assets/imgP/logo.png') }}" alt="Profile" class="rounded-circle">
+            <span class="d-none d-md-block dropdown-toggle ps-2">Admin</span>
+          </a>
 
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
-              <h6>{{ user.nom }} &nbsp; {{ user.prenom }}</h6>
-              <span>{{ user.roles }}</span>
+              <h6>Admin</h6>
+              <span>Administrator</span>
             </li>
             <li>
               <hr class="dropdown-divider">
@@ -113,9 +105,8 @@
                 <span>Sign Out</span>
               </a>
             </li>
-
-          </ul><!-- End Profile Dropdown Items -->
-        </li><!-- End Profile Nav -->
+          </ul>
+        </li>
 
       </ul>
     </nav><!-- End Icons Navigation -->
@@ -133,6 +124,24 @@
           <span>Dashboard</span>
         </a>
       </li><!-- End Dashboard Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#programmebienetre-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-heart"></i><span>Wellness Programs</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="programmebienetre-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{{ path('app_programmebienetre_index') }}">
+              <i class="bi bi-circle"></i><span>List Programs</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ path('app_programmebienetre_new') }}">
+              <i class="bi bi-circle"></i><span>Create Program</span>
+            </a>
+          </li>
+        </ul>
+      </li>
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#components-nav" data-bs-toggle="collapse" href="#">

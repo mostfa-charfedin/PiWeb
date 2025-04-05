@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>{% block title %}Onboardify{% endblock %}</title>
+  <title>{% block title %}Welcome!{% endblock %}</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -25,6 +25,15 @@
   <link href="{{ asset('assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/vendor/simple-datatables/style.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+
+  <!-- Run `composer require symfony/webpack-encore-bundle` to start using Symfony UX -->
+  {% block stylesheets %}
+    {{ encore_entry_link_tags('app') }}
+  {% endblock %}
+
+  {% block javascripts %}
+    {{ encore_entry_script_tags('app') }}
+  {% endblock %}
 </head>
 
 <body>
