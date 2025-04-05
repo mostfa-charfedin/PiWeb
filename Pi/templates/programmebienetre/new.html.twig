@@ -5,13 +5,13 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Nouveau Programme Bien-être</title>
+  <title>New Wellness Program</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
   <!-- Favicons -->
-  <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
-  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+  <link href="{{ asset('assets/imgP/logo.jpg') }}" rel="icon">
+  <link href="{{ asset('assets/imgP/logo.jpg') }}" rel="apple-touch-icon">
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">
@@ -36,52 +36,52 @@
             <div class="col-lg-8 col-md-6 d-flex flex-column align-items-center justify-content-center">
 
               <div class="d-flex justify-content-center py-4">
-                <a href="" class="logo d-flex align-items-center w-auto">
-                  <img src="{{ asset('assets/imgP/logo.png') }}" alt="">
-                  <span class="d-none d-lg-block">Onboardify</span>
+                <a href="{{ path('app_programmebienetre_index') }}" class="logo d-flex align-items-center w-auto">
+                  <img src="{{ asset('assets/imgP/logo.jpg') }}" alt="Onboardify Logo" style="height: 40px; width: auto; margin-right: 10px;">
+                  <span class="d-none d-lg-block" style="font-size: 1.5rem; font-weight: 600; color: #012970;">Onboardify</span>
                 </a>
               </div>
 
               <div class="card mb-3">
                 <div class="card-body">
                   <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Créer un nouveau Programme Bien-être</h5>
-                    <p class="text-center small">Remplissez les détails du programme</p>
+                    <h5 class="card-title text-center pb-0 fs-4">Create New Wellness Program</h5>
+                    <p class="text-center small">Fill in the program details</p>
                   </div>
 
                   {{ form_start(form, {'attr': {'class': 'row g-3 needs-validation', 'novalidate': 'novalidate'}}) }}
                   
                   <div class="col-12">
-                    <label for="{{ form.titre.vars.id }}" class="form-label">Titre</label>
-                    {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'id': form.titre.vars.id}}) }}
+                    <label for="{{ form.titre.vars.id }}" class="form-label">Title</label>
+                    {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'id': form.titre.vars.id, 'placeholder': 'Enter program title'}}) }}
                     {{ form_errors(form.titre) }}
                   </div>
 
                   <div class="col-12">
                     <label for="{{ form.type.vars.id }}" class="form-label">Type</label>
-                    {{ form_widget(form.type, {'attr': {'class': 'form-control', 'id': form.type.vars.id}}) }}
+                    {{ form_widget(form.type, {'attr': {'class': 'form-control', 'id': form.type.vars.id, 'placeholder': 'Enter program type'}}) }}
                     {{ form_errors(form.type) }}
                   </div>
 
                   <div class="col-12">
                     <label for="{{ form.description.vars.id }}" class="form-label">Description</label>
-                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'id': form.description.vars.id}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'id': form.description.vars.id, 'placeholder': 'Enter program description'}}) }}
                     {{ form_errors(form.description) }}
                   </div>
 
                   <div class="col-12">
-                    <label for="{{ form.iduser.vars.id }}" class="form-label">Utilisateur</label>
+                    <label for="{{ form.iduser.vars.id }}" class="form-label">User</label>
                     {{ form_widget(form.iduser, {'attr': {'class': 'form-control', 'id': form.iduser.vars.id}}) }}
                     {{ form_errors(form.iduser) }}
                   </div>
 
                   <div class="col-12">
-                    <button class="btn btn-primary w-100" type="submit">Créer</button>
+                    <button class="btn btn-primary w-100" type="submit">Create Program</button>
                   </div>
 
                   <div class="col-12">
                     <p class="small mb-0">
-                      <a href="{{ path('app_programmebienetre_index') }}">Retour à la liste</a>
+                      <a href="{{ path('app_programmebienetre_index') }}">Back to List</a>
                     </p>
                   </div>
 

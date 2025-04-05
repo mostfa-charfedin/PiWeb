@@ -1,13 +1,119 @@
-<!DOCTYPE html>
+{% extends 'base.html.twig' %}
 
-<title>Edit Programmebienetre</title>
+{% block title %}Edit Program{% endblock %}
 
 {% block body %}
-    <h1>Edit Programmebienetre</h1>
+<div class="bg-gradient" style="
+    background: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <!-- Logo Section -->
+                <div class="text-center mb-3">
+                    <a href="{{ path('app_programmebienetre_index') }}" class="d-inline-block">
+                        <img src="{{ asset('assets/imgP/logo.jpg') }}" alt="Onboardify Logo" 
+                             style="height: 60px; width: auto; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);">
+                    </a>
+                    <h2 class="mt-2 mb-0" style="color: #2c3345; font-size: 1.5rem; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        Onboardify
+                    </h2>
+                    <p class="text-muted small mb-0" style="color: #4a5568 !important;">Wellness Program Management</p>
+                </div>
 
-    {{ include('programmebienetre/_form.html.twig', {'button_label': 'Update'}) }}
+                <!-- Main Card -->
+                <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 12px 24px rgba(0,0,0,0.1); backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header text-white" style="border-radius: 15px 15px 0 0; background: linear-gradient(120deg, #4776E6 0%, #8E54E9 100%); border: none;">
+                        <h4 class="card-title mb-0 py-2 text-center" style="font-size: 1.2rem; letter-spacing: 0.5px;">
+                            <i class="bi bi-pencil-square me-2"></i>Edit Program
+                        </h4>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                            
+                            <div class="mb-4">
+                                <label for="{{ form.titre.vars.id }}" class="form-label" style="color: #4a5568; font-weight: 500;">
+                                    <i class="bi bi-bookmark-star me-1" style="color: #8E54E9;"></i>Title
+                                </label>
+                                {{ form_widget(form.titre, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'placeholder': 'Enter program title',
+                                        'style': 'border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px;'
+                                    }
+                                }) }}
+                                {{ form_errors(form.titre) }}
+                            </div>
 
-    <a href="{{ path('app_programmebienetre_index') }}">back to list</a>
+                            <div class="mb-4">
+                                <label for="{{ form.type.vars.id }}" class="form-label" style="color: #4a5568; font-weight: 500;">
+                                    <i class="bi bi-tag me-1" style="color: #8E54E9;"></i>Type
+                                </label>
+                                {{ form_widget(form.type, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'placeholder': 'Enter program type',
+                                        'style': 'border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px;'
+                                    }
+                                }) }}
+                                {{ form_errors(form.type) }}
+                            </div>
 
-    {{ include('programmebienetre/_delete_form.html.twig') }}
+                            <div class="mb-4">
+                                <label for="{{ form.description.vars.id }}" class="form-label" style="color: #4a5568; font-weight: 500;">
+                                    <i class="bi bi-text-paragraph me-1" style="color: #8E54E9;"></i>Description
+                                </label>
+                                {{ form_widget(form.description, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'placeholder': 'Enter program description',
+                                        'style': 'border-radius: 12px; border: 1px solid #e2e8f0; min-height: 100px; padding: 12px; resize: vertical;'
+                                    }
+                                }) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="{{ form.iduser.vars.id }}" class="form-label" style="color: #4a5568; font-weight: 500;">
+                                    <i class="bi bi-person-check me-1" style="color: #8E54E9;"></i>Assigned User
+                                </label>
+                                {{ form_widget(form.iduser, {
+                                    'attr': {
+                                        'class': 'form-select',
+                                        'style': 'border-radius: 12px; border: 1px solid #e2e8f0; padding: 12px;'
+                                    }
+                                }) }}
+                                {{ form_errors(form.iduser) }}
+                            </div>
+
+                            <div class="d-grid gap-3">
+                                <button class="btn btn-primary" type="submit" 
+                                        style="border-radius: 12px; padding: 12px; background: linear-gradient(120deg, #4776E6 0%, #8E54E9 100%); border: none; box-shadow: 0 4px 15px rgba(71,118,230,0.2); font-weight: 500; letter-spacing: 0.5px;">
+                                    <i class="bi bi-save me-2"></i>Save Changes
+                                </button>
+                                
+                                <a href="{{ path('app_programmebienetre_index') }}" 
+                                   class="btn btn-light" 
+                                   style="border-radius: 12px; padding: 12px; background: white; border: 1px solid #e2e8f0; font-weight: 500; letter-spacing: 0.5px;">
+                                    <i class="bi bi-arrow-left me-2"></i>Back to List
+                                </a>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Footer Note -->
+                <div class="text-center mt-3">
+                    <p class="text-muted small mb-0" style="color: #4a5568 !important;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Edit mode - All changes will be saved
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

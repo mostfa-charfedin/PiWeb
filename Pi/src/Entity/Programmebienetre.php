@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * Programmebienetre
@@ -25,31 +26,51 @@ class Programmebienetre
     /**
      * @var string|null
      *
-     * @ORM\Column(name="titre", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="titre", type="string", length=255, nullable=false)
+     * @Assert\NotBlank(message="Veuillez saisir un titre pour le programme")
+     * @Assert\Length(
+     *     min=3,
+     *     max=255,
+     *     minMessage="Le titre est trop court (minimum {{ limit }} caractères)",
+     *     maxMessage="Le titre est trop long (maximum {{ limit }} caractères)"
+     * )
      */
-    private $titre = 'NULL';
+    private $titre;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="type", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="type", type="string", length=255, nullable=false)
+     * @Assert\NotBlank(message="Veuillez sélectionner un type de programme")
+     * @Assert\Choice(
+     *     choices={"Physique", "Mental", "Social", "Professionnel"},
+     *     message="Type invalide. Veuillez choisir parmi : Physique, Mental, Social ou Professionnel"
+     * )
      */
-    private $type = 'NULL';
+    private $type;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="description", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="description", type="string", length=255, nullable=false)
+     * @Assert\NotBlank(message="Veuillez saisir une description pour le programme")
+     * @Assert\Length(
+     *     min=10,
+     *     max=255,
+     *     minMessage="La description est trop courte (minimum {{ limit }} caractères)",
+     *     maxMessage="La description est trop longue (maximum {{ limit }} caractères)"
+     * )
      */
-    private $description = 'NULL';
+    private $description;
 
     /**
-     * @var \User
+     * @var \App\Entity\User|null
      *
-     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\ManyToOne(targetEntity=User::class)
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idUser", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="idUser", referencedColumnName="id", nullable=false)
      * })
+     * @Assert\NotNull(message="Veuillez sélectionner un utilisateur pour le programme")
      */
     private $iduser;
 
@@ -91,12 +112,12 @@ class Programmebienetre
         return $this;
     }
 
-    public function getIduser(): ?User
+    public function getIduser(): ?\App\Entity\User
     {
         return $this->iduser;
     }
 
-    public function setIduser(?User $iduser): self
+    public function setIduser(?\App\Entity\User $iduser): self
     {
         $this->iduser = $iduser;
         return $this;

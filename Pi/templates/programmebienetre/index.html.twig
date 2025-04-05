@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Programmes Bien-être{% endblock %}
+{% block title %}Wellness Programs{% endblock %}
 
 {% block body %}
   <main>
@@ -10,56 +10,65 @@
           <div class="row justify-content-center">
             <div class="col-lg-8 col-md-6 d-flex flex-column align-items-center justify-content-center">
 
-              <div class="d-flex justify-content-center py-4">
-                <a href="" class="logo d-flex align-items-center w-auto">
-                  <img src="{{ asset('assets/imgP/logo.png') }}" alt="">
-                  <span class="d-none d-lg-block">Onboardify</span>
+                           <div class="text-center mb-3">
+                    <a href="{{ path('app_programmebienetre_index') }}" class="d-inline-block">
+                        <img src="{{ asset('assets/imgP/logo.jpg') }}" alt="Onboardify Logo" 
+                             style="height: 60px; width: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
                 </a>
+                 <h2 class="mt-2 mb-0" style="color: #2c3345; font-size: 1.5rem; font-weight: 700;">
+                        Onboardify
+                    </h2>
               </div>
 
               <div class="card mb-3">
                 <div class="card-body">
                   <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Programmes Bien-être</h5>
-                    <p class="text-center small">Liste des programmes de bien-être</p>
+                    <h5 class="card-title text-center pb-0 fs-4">Wellness Programs</h5>
+                    <p class="text-center small">List of all wellness programs</p>
                   </div>
 
-                  <div class="table-responsive">
-                    <table class="table">
-                      <thead>
-                        <tr>
-                          <th>Titre</th>
-                          <th>Type</th>
-                          <th>Description</th>
-                          <th>Utilisateur</th>
-                          <th>Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% for programmebienetre in programmebienetres %}
+                  {% if programmebienetre is empty %}
+                    <p class="text-center">No programs found</p>
+                  {% else %}
+                    <div class="table-responsive">
+                      <table class="table table-hover">
+                        <thead>
                           <tr>
-                            <td>{{ programmebienetre.titre }}</td>
-                            <td>{{ programmebienetre.type }}</td>
-                            <td>{{ programmebienetre.description }}</td>
-                            <td>{{ programmebienetre.iduser ? programmebienetre.iduser.nom : '' }}</td>
+                            <th>Title</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                            <th>User</th>
+                            <th>Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        {% for program in programmebienetre %}
+                          <tr>
+                            <td>{{ program.titre }}</td>
+                            <td>{{ program.type }}</td>
+                            <td>{{ program.description }}</td>
+                            <td>{{ program.iduser ? program.iduser.nom : '' }}</td>
                             <td>
                               <div class="btn-group" role="group">
-                                <a href="{{ path('app_programmebienetre_show', {'idprogramme': programmebienetre.idprogramme}) }}" class="btn btn-info btn-sm">Voir</a>
-                                <a href="{{ path('app_programmebienetre_edit', {'idprogramme': programmebienetre.idprogramme}) }}" class="btn btn-warning btn-sm">Modifier</a>
+                                <a href="{{ path('app_programmebienetre_show', {'idprogramme': program.idprogramme}) }}" class="btn btn-info btn-sm">
+                                  <i class="bi bi-eye-fill"></i> View
+                                </a>
+                                <a href="{{ path('app_programmebienetre_edit', {'idprogramme': program.idprogramme}) }}" class="btn btn-warning btn-sm">
+                                  <i class="bi bi-pencil-fill"></i> Edit
+                                </a>
                               </div>
                             </td>
                           </tr>
-                        {% else %}
-                          <tr>
-                            <td colspan="5" class="text-center">Aucun programme trouvé</td>
-                          </tr>
                         {% endfor %}
-                      </tbody>
-                    </table>
-                  </div>
+                        </tbody>
+                      </table>
+                    </div>
+                  {% endif %}
 
-                  <div class="col-12 mt-3">
-                    <a href="{{ path('app_programmebienetre_new') }}" class="btn btn-primary w-100">Créer un nouveau programme</a>
+                  <div class="text-center mt-4">
+                    <a href="{{ path('app_programmebienetre_new') }}" class="btn btn-primary w-100">
+                      <i class="bi bi-plus-circle-fill"></i> Create New Program
+                    </a>
                   </div>
                 </div>
               </div>
