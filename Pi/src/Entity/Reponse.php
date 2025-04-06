@@ -10,41 +10,35 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity]
 #[ORM\Table(name: "reponse")]
-#[ORM\Index(columns: ["idQuestion"], name: "idQuestion")]
 #[ApiResource]
 class Reponse
 {
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: "IDENTITY")]
-    #[ORM\Column(name: "idReponse", type: "integer", nullable: false)]
+    #[ORM\Column(name: "id", type: "integer")]
     #[Groups(['reponse:read'])]
-    private ?int $idreponse = null;
+    private ?int $id = null;
 
-    #[ORM\Column(name: "Response", type: "string", length: 255, nullable: true, options: ["default" => "NULL"])]
+    #[ORM\Column(name: "response", type: "string", length: 255, nullable: true)]
     #[Groups(['reponse:read'])]
-    private ?string $response = 'NULL';
+    private ?string $response = null;
 
-    #[ORM\Column(name: "status", type: "string", length: 255, nullable: true, options: ["default" => "NULL"])]
+    #[ORM\Column(name: "status", type: "string", length: 255, nullable: true)]
     #[Groups(['reponse:read'])]
-    private ?string $status = 'NULL';
+    private ?string $status = null;
 
     #[ORM\ManyToOne(targetEntity: Question::class, inversedBy: "reponses")]
-    #[ORM\JoinColumn(name: "idQuestion", referencedColumnName: "idQuestion", nullable: false)]
+    #[ORM\JoinColumn(nullable: false)]
     #[Groups(['reponse:read'])]
     private ?Question $question = null;
 
-    #[ORM\ManyToMany(targetEntity: Question::class, mappedBy: "reponses")]
-    private Collection $questions;
-
     public function __construct()
     {
-        $this->questions = new ArrayCollection();
     }
 
-    // Getters and Setters
-    public function getIdreponse(): ?int
+    public function getId(): ?int
     {
-        return $this->idreponse;
+        return $this->id;
     }
 
     public function getResponse(): ?string
@@ -77,25 +71,6 @@ class Reponse
     public function setQuestion(?Question $question): self
     {
         $this->question = $question;
-        return $this;
-    }
-
-    public function getQuestions(): Collection
-    {
-        return $this->questions;
-    }
-
-    public function addQuestion(Question $question): self
-    {
-        if (!$this->questions->contains($question)) {
-            $this->questions[] = $question;
-        }
-        return $this;
-    }
-
-    public function removeQuestion(Question $question): self
-    {
-        $this->questions->removeElement($question);
         return $this;
     }
 }

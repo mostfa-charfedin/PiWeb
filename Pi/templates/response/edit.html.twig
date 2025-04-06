@@ -1,18 +1,19 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Quiz{% endblock %}
+{% block title %}Edit Response{% endblock %}
 
 {% block body %}
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-12 col-xl-10">
             <div class="pagetitle text-center mb-4">
-                <h1 class="display-5 fw-bold">Edit Quiz</h1>
+                <h1 class="display-5 fw-bold">Edit Response</h1>
                 <nav>
                     <ol class="breadcrumb justify-content-center">
                         <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Home</a></li>
                         <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Quizzes</a></li>
-                        <li class="breadcrumb-item active">Edit Quiz</li>
+                        <li class="breadcrumb-item"><a href="{{ path('quiz_view', {'id': quiz.idQuiz}) }}">{{ quiz.name }}</a></li>
+                        <li class="breadcrumb-item active">Edit Response</li>
                     </ol>
                 </nav>
             </div>
@@ -22,29 +23,36 @@
                     <div class="col-12 col-md-10 col-lg-8">
                         <div class="card shadow">
                             <div class="card-body">
-                                <h5 class="card-title text-center mb-4">Edit Quiz</h5>
+                                <h5 class="card-title text-center mb-4">Edit Response for Question</h5>
+                                <div class="alert alert-info mb-4">
+                                    <strong>Question:</strong> {{ question.text }}
+                                </div>
 
                                 {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+
                                 <div class="mb-3">
-                                    {{ form_label(form.name, 'Quiz Name', {'label_attr': {'class': 'form-label'}}) }}
-                                    {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.name) }}
+                                    {{ form_label(form.text, 'Response Text', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.text, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.text) }}
                                 </div>
 
                                 <div class="mb-4">
-                                    {{ form_label(form.dateCreation, 'Creation Date', {'label_attr': {'class': 'form-label'}}) }}
-                                    {{ form_widget(form.dateCreation, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.dateCreation) }}
+                                    <div class="form-check">
+                                        {{ form_widget(form.isCorrect) }}
+                                        {{ form_label(form.isCorrect, 'Is this the correct answer?', {'label_attr': {'class': 'form-check-label'}}) }}
+                                    </div>
+                                    {{ form_errors(form.isCorrect) }}
                                 </div>
 
                                 <div class="text-center">
                                     <button type="submit" class="btn btn-primary me-2">
-                                        <i class="bi bi-save me-2"></i>Update Quiz
+                                        <i class="bi bi-save me-2"></i>Update Response
                                     </button>
-                                    <a href="{{ path('quiz_list') }}" class="btn btn-secondary">
+                                    <a href="{{ path('quiz_view', {'id': quiz.idQuiz}) }}" class="btn btn-secondary">
                                         <i class="bi bi-x-circle me-2"></i>Cancel
                                     </a>
                                 </div>
+
                                 {{ form_end(form) }}
                             </div>
                         </div>

@@ -11,8 +11,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class QuizController extends AbstractController
 {
@@ -40,11 +38,7 @@ class QuizController extends AbstractController
     public function create(Request $request): Response
     {
         $quiz = new Quiz();
-        $form = $this->createFormBuilder($quiz)
-            ->add('name', TextType::class)
-            ->add('description', TextType::class)
-            ->add('save', SubmitType::class, ['label' => 'Create Quiz'])
-            ->getForm();
+        $form = $this->createForm(QuizType::class, $quiz);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -62,11 +56,7 @@ class QuizController extends AbstractController
     #[Route('/quiz/{id}/edit', name: 'quiz_edit')]
     public function edit(Request $request, Quiz $quiz): Response
     {
-        $form = $this->createFormBuilder($quiz)
-            ->add('name', TextType::class)
-            ->add('description', TextType::class)
-            ->add('save', SubmitType::class, ['label' => 'Update Quiz'])
-            ->getForm();
+        $form = $this->createForm(QuizType::class, $quiz);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -88,9 +78,16 @@ class QuizController extends AbstractController
         return $this->redirectToRoute('quiz_list');
     }
 
-    // API ENDPOINTS (for AJAX calls if needed)
-    
-    // 🔹 GET ALL QUIZZES (API)
+    #[Route('/quiz/{id}/view', name: 'quiz_view')]
+    public function view(Quiz $quiz): Response
+    {
+        return $this->render('quiz/view.html.twig', [
+            'quiz' => $quiz,
+        ]);
+    }
+
+    // ----------------- API ENDPOINTS -----------------
+
     #[Route('/api', name: 'quiz_api_index', methods: ['GET'])]
     public function apiIndex(): JsonResponse
     {
@@ -98,7 +95,6 @@ class QuizController extends AbstractController
         return $this->json($quizzes);
     }
 
-    // 🔹 CREATE A QUIZ (API)
     #[Route('/api/new', name: 'quiz_api_create', methods: ['POST'])]
     public function apiCreate(Request $request): JsonResponse
     {
@@ -108,7 +104,6 @@ class QuizController extends AbstractController
             return $this->json(['error' => 'Invalid data'], JsonResponse::HTTP_BAD_REQUEST);
         }
 
-        // Vérifier si un quiz avec le même nom existe
         if ($this->quizRepository->findOneBy(['nom' => $data['nom']])) {
             return $this->json(['error' => 'Quiz with this name already exists'], JsonResponse::HTTP_CONFLICT);
         }
@@ -123,7 +118,6 @@ class QuizController extends AbstractController
         return $this->json(['message' => 'Quiz created successfully', 'id' => $quiz->getIdquiz()], JsonResponse::HTTP_CREATED);
     }
 
-    // 🔹 UPDATE A QUIZ (API)
     #[Route('/api/{id}', name: 'quiz_api_update', methods: ['PUT'])]
     public function apiUpdate(Request $request, int $id): JsonResponse
     {
@@ -145,7 +139,6 @@ class QuizController extends AbstractController
         return $this->json(['message' => 'Quiz updated successfully']);
     }
 
-    // 🔹 DELETE A QUIZ BY ID (API)
     #[Route('/api/{id}', name: 'quiz_api_delete', methods: ['DELETE'])]
     public function apiDelete(int $id): JsonResponse
     {
@@ -160,7 +153,6 @@ class QuizController extends AbstractController
         return $this->json(['message' => 'Quiz deleted successfully']);
     }
 
-    // 🔹 GET A SINGLE QUIZ BY ID (API)
     #[Route('/api/{id}', name: 'quiz_api_get_by_id', methods: ['GET'])]
     public function apiGetById(int $id): JsonResponse
     {
@@ -172,7 +164,6 @@ class QuizController extends AbstractController
         return $this->json($quiz);
     }
 
-    // 🔹 GET ALL QUIZ NAMES (API)
     #[Route('/api/names', name: 'quiz_api_get_all_names', methods: ['GET'])]
     public function apiGetAllNames(): JsonResponse
     {

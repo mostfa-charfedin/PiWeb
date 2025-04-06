@@ -4,9 +4,9 @@ namespace App\Form;
 
 use App\Entity\Quiz;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class QuizType extends AbstractType
@@ -14,18 +14,15 @@ class QuizType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('nom', TextType::class, [
+            ->add('name', TextType::class, [
                 'label' => 'Quiz Name',
-                'attr' => [
-                    'placeholder' => 'Enter quiz name',
-                ],
+                'attr' => ['class' => 'form-control']
             ])
-            ->add('datecreation', DateType::class, [
+            ->add('dateCreation', DateType::class, [
                 'label' => 'Creation Date',
                 'widget' => 'single_text',
-                'data' => new \DateTime(),
-            ])
-        ;
+                'attr' => ['class' => 'form-control']
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -34,4 +31,4 @@ class QuizType extends AbstractType
             'data_class' => Quiz::class,
         ]);
     }
-} 
+}

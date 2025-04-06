@@ -8,39 +8,37 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use ApiPlatform\Core\Annotation\ApiResource;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: QuizRepository::class)]
+#[ORM\Table(name: "quiz")]
 #[ApiResource]
 class Quiz
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: "idQuiz", type: "integer")]
     #[Groups(['quiz:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(name: "nom", type: "string", length: 255)]
+    #[Assert\NotBlank(message: "Le nom du quiz est obligatoire.")]
+    #[Assert\Regex(
+        pattern: "/^[\p{L}\s]+$/u",
+        message: "Le nom ne peut contenir que des lettres et des espaces."
+    )]
     #[Groups(['quiz:read'])]
     private ?string $name = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['quiz:read'])]
-    private ?string $description = null;
+    #[ORM\Column(name: 'dateCreation', type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $dateCreation = null;
 
-    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class)]
-    #[Groups(['quiz:read'])]
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, orphanRemoval: true)]
     private Collection $questions;
-
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: "quizzes")]
-    #[ORM\JoinTable(name: "quiz_user")]
-    #[ORM\JoinColumn(name: "quiz_id", referencedColumnName: "id")]
-    #[ORM\InverseJoinColumn(name: "user_id", referencedColumnName: "id")]
-    private Collection $users;
 
     public function __construct()
     {
         $this->questions = new ArrayCollection();
-        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -59,14 +57,14 @@ class Quiz
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDateCreation(): ?\DateTimeInterface
     {
-        return $this->description;
+        return $this->dateCreation;
     }
 
-    public function setDescription(?string $description): static
+    public function setDateCreation(\DateTimeInterface $dateCreation): static
     {
-        $this->description = $description;
+        $this->dateCreation = $dateCreation;
         return $this;
     }
 
@@ -84,6 +82,7 @@ class Quiz
             $this->questions->add($question);
             $question->setQuiz($this);
         }
+
         return $this;
     }
 
@@ -95,25 +94,7 @@ class Quiz
                 $question->setQuiz(null);
             }
         }
-        return $this;
-    }
 
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
-        }
-        return $this;
-    }
-
-    public function removeUser(User $user): self
-    {
-        $this->users->removeElement($user);
         return $this;
     }
 }

@@ -11,32 +11,31 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: QuestionRepository::class)]
 #[ORM\Table(name: "question")]
-#[ORM\Index(columns: ["idQuiz"], name: "idQuiz")]
 #[ApiResource]
 class Question
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(name: "idQuestion", type: "integer")]
     #[Groups(['question:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(name: "Question", type: "string", length: 255)]
     #[Groups(['question:read'])]
-    private ?string $question = null;
+    private ?string $text = null;
 
-    #[ORM\ManyToOne(inversedBy: 'questions')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: 'questions')]
+    #[ORM\JoinColumn(name: 'idQuiz', referencedColumnName: 'idQuiz', nullable: false)]
     #[Groups(['question:read'])]
     private ?Quiz $quiz = null;
 
-    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Reponse::class)]
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Response::class, orphanRemoval: true)]
     #[Groups(['question:read'])]
-    private Collection $reponses;
+    private Collection $responses;
 
     public function __construct()
     {
-        $this->reponses = new ArrayCollection();
+        $this->responses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -44,14 +43,14 @@ class Question
         return $this->id;
     }
 
-    public function getQuestion(): ?string
+    public function getText(): ?string
     {
-        return $this->question;
+        return $this->text;
     }
 
-    public function setQuestion(string $question): static
+    public function setText(string $text): static
     {
-        $this->question = $question;
+        $this->text = $text;
         return $this;
     }
 
@@ -67,28 +66,28 @@ class Question
     }
 
     /**
-     * @return Collection<int, Reponse>
+     * @return Collection<int, Response>
      */
-    public function getReponses(): Collection
+    public function getResponses(): Collection
     {
-        return $this->reponses;
+        return $this->responses;
     }
 
-    public function addReponse(Reponse $reponse): static
+    public function addResponse(Response $response): static
     {
-        if (!$this->reponses->contains($reponse)) {
-            $this->reponses->add($reponse);
-            $reponse->setQuestion($this);
+        if (!$this->responses->contains($response)) {
+            $this->responses->add($response);
+            $response->setQuestion($this);
         }
         return $this;
     }
 
-    public function removeReponse(Reponse $reponse): static
+    public function removeResponse(Response $response): static
     {
-        if ($this->reponses->removeElement($reponse)) {
+        if ($this->responses->removeElement($response)) {
             // set the owning side to null (unless already changed)
-            if ($reponse->getQuestion() === $this) {
-                $reponse->setQuestion(null);
+            if ($response->getQuestion() === $this) {
+                $response->setQuestion(null);
             }
         }
         return $this;

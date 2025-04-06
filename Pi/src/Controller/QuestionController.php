@@ -3,95 +3,78 @@
 namespace App\Controller;
 
 use App\Entity\Question;
+use App\Entity\Quiz;
+use App\Form\QuestionType;
 use App\Repository\QuestionRepository;
-use App\Repository\QuizRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\FormBuilderInterface;
 
+#[Route('/question')]
 class QuestionController extends AbstractController
 {
-    private $questionRepository;
-    private $quizRepository;
-    private $entityManager;
-
-    public function __construct(
-        QuestionRepository $questionRepository, 
-        QuizRepository $quizRepository,
-        EntityManagerInterface $entityManager
-    ) {
-        $this->questionRepository = $questionRepository;
-        $this->quizRepository = $quizRepository;
-        $this->entityManager = $entityManager;
-    }
-
-    // CREATE
-    /**
-     * @Route("/question/create", name="question_create")
-     */
-    public function create(Request $request): Response
+    #[Route('/new/{quizId}', name: 'question_create', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, int $quizId): Response
     {
+        $quiz = $entityManager->getRepository(Quiz::class)->find($quizId);
+        
+        if (!$quiz) {
+            throw $this->createNotFoundException('Quiz not found');
+        }
+        
         $question = new Question();
-        $form = $this->createFormBuilder($question)
-            ->add('question', TextType::class)
-            ->add('quiz', TextType::class)
-            ->add('save', SubmitType::class, ['label' => 'Create Question'])
-            ->getForm();
-
+        $question->setQuiz($quiz);
+        
+        $form = $this->createForm(QuestionType::class, $question);
         $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-            $quiz = $this->quizRepository->findOneBy(['name' => $data->getQuiz()]);
-            $question->setQuiz($quiz);
-            $this->entityManager->persist($question);
-            $this->entityManager->flush();
 
-            return $this->redirectToRoute('question_list');
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->persist($question);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Question created successfully.');
+            return $this->redirectToRoute('quiz_view', ['id' => $quizId]);
         }
 
-        return $this->render('question/create.html.twig', [
-            'form' => $form->createView(),
+        return $this->render('question/new.html.twig', [
+            'question' => $question,
+            'form' => $form,
+            'quiz' => $quiz,
         ]);
     }
 
-    // UPDATE
-    /**
-     * @Route("/question/{id}/edit", name="question_edit")
-     */
-    public function edit(Request $request, Question $question): Response
+    #[Route('/{id}/edit', name: 'question_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, Question $question, EntityManagerInterface $entityManager): Response
     {
-        $form = $this->createFormBuilder($question)
-            ->add('question', TextType::class)
-            ->add('quiz', TextType::class)
-            ->add('save', SubmitType::class, ['label' => 'Update Question'])
-            ->getForm();
-
+        $form = $this->createForm(QuestionType::class, $question);
         $form->handleRequest($request);
+
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->flush();
-            return $this->redirectToRoute('question_list');
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Question updated successfully.');
+            return $this->redirectToRoute('quiz_view', ['id' => $question->getQuiz()->getIdQuiz()]);
         }
 
         return $this->render('question/edit.html.twig', [
-            'form' => $form->createView(),
             'question' => $question,
+            'form' => $form,
+            'quiz' => $question->getQuiz(),
         ]);
     }
 
-    // DELETE
-    /**
-     * @Route("/question/{id}/delete", name="question_delete")
-     */
-    public function delete(Question $question): Response
+    #[Route('/{id}/delete', name: 'question_delete', methods: ['GET'])]
+    public function delete(Question $question, EntityManagerInterface $entityManager): Response
     {
-        $this->entityManager->remove($question);
-        $this->entityManager->flush();
-        return $this->redirectToRoute('question_list');
+        $quizId = $question->getQuiz()->getIdQuiz();
+        
+        $entityManager->remove($question);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Question deleted successfully.');
+        return $this->redirectToRoute('quiz_view', ['id' => $quizId]);
     }
 
     // LIST ALL QUESTIONS
