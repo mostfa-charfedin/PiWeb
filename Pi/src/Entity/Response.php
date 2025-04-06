@@ -4,21 +4,23 @@ namespace App\Entity;
 
 use App\Repository\ResponseRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ResponseRepository::class)]
-#[ORM\Table(name: 'response')]
+#[ORM\Table(name: 'reponse')]
 class Response
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(name: "idResponse", type: "integer")]
+    #[ORM\Column(name: 'idReponse')]
     private ?int $id = null;
 
-    #[ORM\Column(name: "Response", type: "string", length: 255)]
+    #[ORM\Column(name: 'Response', type: 'text')]
+    #[Assert\NotBlank]
     private ?string $text = null;
 
-    #[ORM\Column(name: "isCorrect", type: "boolean")]
-    private ?bool $isCorrect = false;
+    #[ORM\Column(name: 'status', type: 'boolean')]
+    private bool $isCorrect = false;
 
     #[ORM\ManyToOne(inversedBy: 'responses')]
     #[ORM\JoinColumn(name: 'idQuestion', referencedColumnName: 'idQuestion', nullable: false)]
@@ -37,11 +39,10 @@ class Response
     public function setText(string $text): static
     {
         $this->text = $text;
-
         return $this;
     }
 
-    public function isCorrect(): ?bool
+    public function isCorrect(): bool
     {
         return $this->isCorrect;
     }
@@ -49,7 +50,6 @@ class Response
     public function setIsCorrect(bool $isCorrect): static
     {
         $this->isCorrect = $isCorrect;
-
         return $this;
     }
 
@@ -61,7 +61,6 @@ class Response
     public function setQuestion(?Question $question): static
     {
         $this->question = $question;
-
         return $this;
     }
 } 

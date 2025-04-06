@@ -2,56 +2,646 @@
 
 {% block title %}Edit Quiz{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-color: #6366F1;
+            --secondary-color: #858796;
+            --success-color: #22C55E;
+            --info-color: #3B82F6;
+            --warning-color: #F59E0B;
+            --danger-color: #EF4444;
+            --light-color: #F9FAFB;
+            --dark-color: #111827;
+            --border-color: #E5E7EB;
+        }
+        
+        body {
+            background-color: #F3F4F6;
+        }
+        
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            background: white;
+            transition: all 0.2s ease;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card-header {
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.25rem;
+            border-top-left-radius: 1rem !important;
+            border-top-right-radius: 1rem !important;
+        }
+        
+        .btn {
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #4F46E5;
+            border-color: #4F46E5;
+            transform: translateY(-1px);
+        }
+        
+        .btn-success {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning-color);
+            border-color: var(--warning-color);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger-color);
+            border-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-outline-danger {
+            color: var(--danger-color);
+            border-color: var(--danger-color);
+        }
+        
+        .btn-outline-danger:hover {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .form-control {
+            border-color: var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+        }
+        
+        .form-label {
+            color: var(--dark-color);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            font-weight: 600;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+            border-bottom: 2px solid var(--border-color);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .table td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #4B5563;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .badge {
+            font-weight: 500;
+            padding: 0.35em 0.65em;
+            border-radius: 9999px;
+        }
+        
+        .badge-success {
+            background-color: #DCFCE7;
+            color: #166534;
+        }
+        
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+        
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .breadcrumb-item.active {
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+        
+        .modal-content {
+            border: none;
+            border-radius: 1rem;
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            background-color: white;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            padding: 1.25rem;
+        }
+        
+        .modal-title {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1.25rem;
+        }
+        
+        .input-group-text {
+            background-color: var(--light-color);
+            border-color: var(--border-color);
+            color: var(--dark-color);
+        }
+        
+        .response-list {
+            margin-top: 1rem;
+        }
+        
+        .response-item {
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+        
+        .response-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+        
+        .response-item.correct {
+            border-color: var(--success-color);
+            background-color: #F0FDF4;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="container-fluid">
+<div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-12 col-xl-10">
-            <div class="pagetitle text-center mb-4">
-                <h1 class="display-5 fw-bold">Edit Quiz</h1>
-                <nav>
-                    <ol class="breadcrumb justify-content-center">
-                        <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Home</a></li>
-                        <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Quizzes</a></li>
-                        <li class="breadcrumb-item active">Edit Quiz</li>
-                    </ol>
-                </nav>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-2 font-weight-bold text-dark">Edit Quiz</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Home</a></li>
+                            <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Quizzes</a></li>
+                            <li class="breadcrumb-item active">Edit Quiz</li>
+                        </ol>
+                    </nav>
+                </div>
             </div>
 
-            <section class="section">
-                <div class="row justify-content-center">
-                    <div class="col-12 col-md-10 col-lg-8">
-                        <div class="card shadow">
-                            <div class="card-body">
-                                <h5 class="card-title text-center mb-4">Edit Quiz</h5>
-
-                                {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
-                                <div class="mb-3">
-                                    {{ form_label(form.name, 'Quiz Name', {'label_attr': {'class': 'form-label'}}) }}
-                                    {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.name) }}
-                                </div>
-
-                                <div class="mb-4">
-                                    {{ form_label(form.dateCreation, 'Creation Date', {'label_attr': {'class': 'form-label'}}) }}
-                                    {{ form_widget(form.dateCreation, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.dateCreation) }}
-                                </div>
-
-                                <div class="text-center">
-                                    <button type="submit" class="btn btn-primary me-2">
-                                        <i class="bi bi-save me-2"></i>Update Quiz
-                                    </button>
-                                    <a href="{{ path('quiz_list') }}" class="btn btn-secondary">
-                                        <i class="bi bi-x-circle me-2"></i>Cancel
-                                    </a>
-                                </div>
-                                {{ form_end(form) }}
+            <div class="row">
+                <div class="col-12 col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0 text-dark font-weight-bold">Quiz Details</h5>
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.name, 'Quiz Name', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.name) }}
                             </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.dateCreation, 'Creation Date', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.dateCreation, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.dateCreation) }}
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-save"></i>
+                                    <span>Update Quiz</span>
+                                </button>
+                                <a href="{{ path('quiz_list') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i>
+                                    <span>Cancel</span>
+                                </a>
+                            </div>
+
+                            {{ form_end(form) }}
                         </div>
                     </div>
                 </div>
-            </section>
+
+                <div class="col-12 col-lg-8">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0 text-dark font-weight-bold">Questions</h5>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
+                                <i class="bi bi-plus-lg"></i>
+                                <span>Add Question</span>
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            {% if quiz.questions is empty %}
+                                <div class="text-center py-5">
+                                    <div class="text-muted">
+                                        <i class="bi bi-journal-text fs-1 mb-3"></i>
+                                        <h6>No Questions Yet</h6>
+                                        <p class="small">Click the "Add Question" button to create your first question.</p>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 50%">QUESTION</th>
+                                                <th style="width: 30%">RESPONSES</th>
+                                                <th style="width: 20%" class="text-end">ACTIONS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for question in quiz.questions %}
+                                                <tr>
+                                                    <td>
+                                                        <h6 class="mb-0">{{ question.text }}</h6>
+                                                    </td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <span class="badge bg-primary rounded-pill me-2">
+                                                                {{ question.responses|length }}
+                                                            </span>
+                                                            {% set correctCount = question.responses|filter(r => r.isCorrect)|length %}
+                                                            {% if correctCount > 0 %}
+                                                                <span class="badge bg-success rounded-pill">
+                                                                    {{ correctCount }} correct
+                                                                </span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <div class="d-flex gap-2 justify-content-end">
+                                                            <button type="button" class="btn btn-primary btn-sm rounded-circle" 
+                                                                    onclick="viewQuestion({{ question.id }})"
+                                                                    title="View">
+                                                                <i class="bi bi-eye"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-warning btn-sm rounded-circle"
+                                                                    onclick="window.location.href='{{ path('question_edit', {'id': question.id}) }}'"
+                                                                    title="Edit">
+                                                                <i class="bi bi-pencil"></i>
+                                                            </button>
+                                                            <button type="button" class="btn btn-danger btn-sm rounded-circle"
+                                                                    onclick="if(confirm('Are you sure you want to delete this question?')) window.location.href='{{ path('question_delete', {'id': question.id}) }}'"
+                                                                    title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Add Question Modal -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addQuestionModalLabel">Add New Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addQuestionForm">
+                    <div class="mb-4">
+                        <label for="questionText" class="form-label">Question Text</label>
+                        <textarea class="form-control" id="questionText" rows="3" required></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label d-flex justify-content-between align-items-center">
+                            <span>Responses</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="addResponseBtn">
+                                <i class="bi bi-plus-lg"></i>
+                                <span>Add Response</span>
+                            </button>
+                        </label>
+                        <div id="responsesList">
+                            <div class="response-item mb-2">
+                                <div class="d-flex gap-2">
+                                    <div class="flex-grow-1">
+                                        <input type="text" class="form-control response-text" placeholder="Response text">
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="form-check">
+                                            <input type="checkbox" class="form-check-input response-status" title="Mark as correct">
+                                            <label class="form-check-label small">Correct</label>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-danger btn-sm remove-response">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveQuestionBtn">
+                    <i class="bi bi-save"></i>
+                    <span>Save Question</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Question Modal -->
+<div class="modal fade" id="viewQuestionModal" tabindex="-1" aria-labelledby="viewQuestionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewQuestionModalLabel">Question Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="mb-3 fw-bold" id="viewQuestionTitle"></h6>
+                <div class="response-list" id="viewResponsesList">
+                    <!-- Responses will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const addResponseBtn = document.getElementById('addResponseBtn');
+        const responsesList = document.getElementById('responsesList');
+        const saveQuestionBtn = document.getElementById('saveQuestionBtn');
+        const addQuestionModal = document.getElementById('addQuestionModal');
+        const modalInstance = new bootstrap.Modal(addQuestionModal);
+
+        // Add the viewQuestion function
+        window.viewQuestion = function(questionId) {
+            const modal = new bootstrap.Modal(document.getElementById('viewQuestionModal'));
+            
+            fetch(`/question/${questionId}/responses`, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const responsesList = document.getElementById('viewResponsesList');
+                responsesList.innerHTML = '';
+                
+                if (data.length === 0) {
+                    responsesList.innerHTML = `
+                        <div class="text-center py-4">
+                            <div class="text-muted">
+                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                No responses available
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    data.forEach(response => {
+                        const responseDiv = document.createElement('div');
+                        responseDiv.className = `response-item ${response.isCorrect ? 'correct' : ''}`;
+                        const textSpan = document.createElement('span');
+                        textSpan.textContent = response.text;
+                        responseDiv.innerHTML = `
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>${textSpan.textContent}</span>
+                                ${response.isCorrect ? '<span class="badge bg-success">Correct Answer</span>' : ''}
+                            </div>
+                        `;
+                        responsesList.appendChild(responseDiv);
+                    });
+                }
+                
+                modal.show();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('Error loading responses. Please try again.');
+            });
+        };
+
+        addResponseBtn.addEventListener('click', function() {
+            const responseDiv = document.createElement('div');
+            responseDiv.className = 'response-item mb-2';
+            responseDiv.innerHTML = `
+                <div class="d-flex gap-2">
+                    <div class="flex-grow-1">
+                        <input type="text" class="form-control response-text" placeholder="Response text" required>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input response-status" title="Mark as correct">
+                            <label class="form-check-label small">Correct</label>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger btn-sm remove-response">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            responsesList.appendChild(responseDiv);
+        });
+
+        responsesList.addEventListener('click', function(e) {
+            if (e.target.closest('.remove-response')) {
+                e.target.closest('.response-item').remove();
+            }
+        });
+
+        saveQuestionBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Clear previous alerts
+            const previousAlerts = document.querySelectorAll('.alert');
+            previousAlerts.forEach(alert => alert.remove());
+
+            // Get and validate question text
+            const questionText = document.getElementById('questionText').value.trim();
+            if (!questionText) {
+                showError('Please enter a question text');
+                return;
+            }
+
+            // Get and validate responses
+            const responses = [];
+            let hasValidResponse = false;
+            document.querySelectorAll('.response-item').forEach(item => {
+                const textInput = item.querySelector('.response-text');
+                const statusInput = item.querySelector('.response-status');
+                const responseText = textInput ? textInput.value.trim() : '';
+                if (responseText) {
+                    hasValidResponse = true;
+                    responses.push({
+                        text: responseText,
+                        isCorrect: statusInput ? statusInput.checked : false
+                    });
+                }
+            });
+
+            if (!hasValidResponse) {
+                showError('Please add at least one response');
+                return;
+            }
+
+            // Disable the save button and show loading state
+            const saveBtn = document.getElementById('saveQuestionBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+
+            // Create the request data
+            const requestData = {
+                text: questionText,
+                responses: responses
+            };
+
+            // Send the request
+            fetch('{{ path('question_create_ajax', {'quizId': quiz.id}) }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    showSuccess(data.message || 'Question created successfully!');
+                    
+                    // Clear the form
+                    document.getElementById('questionText').value = '';
+                    document.querySelectorAll('.response-item').forEach(item => {
+                        const textInput = item.querySelector('.response-text');
+                        if (textInput) {
+                            textInput.value = '';
+                        }
+                        const statusInput = item.querySelector('.response-status');
+                        if (statusInput) {
+                            statusInput.checked = false;
+                        }
+                    });
+                    
+                    // Close modal and reload after a short delay
+                    setTimeout(() => {
+                        modalInstance.hide();
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showError(data.error || 'Failed to create question');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showError('An error occurred while saving the question. Please try again.');
+            })
+            .finally(() => {
+                // Re-enable the save button
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = '<i class="bi bi-save"></i> Save Question';
+            });
+        });
+
+        function showError(message) {
+            const errorAlert = document.createElement('div');
+            errorAlert.className = 'alert alert-danger alert-dismissible fade show';
+            errorAlert.innerHTML = `
+                <i class="bi bi-exclamation-triangle me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.modal-body').insertBefore(errorAlert, document.querySelector('.modal-body').firstChild);
+        }
+
+        function showSuccess(message) {
+            const successAlert = document.createElement('div');
+            successAlert.className = 'alert alert-success alert-dismissible fade show';
+            successAlert.innerHTML = `
+                <i class="bi bi-check-circle me-2"></i>${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.modal-body').insertBefore(successAlert, document.querySelector('.modal-body').firstChild);
+        }
+    });
+</script>
 {% endblock %} 

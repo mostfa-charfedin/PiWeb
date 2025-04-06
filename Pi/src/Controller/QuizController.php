@@ -86,6 +86,32 @@ class QuizController extends AbstractController
         ]);
     }
 
+    #[Route('/quiz/{id}/questions', name: 'quiz_questions', methods: ['GET'])]
+    public function questions(Quiz $quiz): JsonResponse
+    {
+        $questions = $quiz->getQuestions();
+        $data = [];
+        
+        foreach ($questions as $question) {
+            $responses = [];
+            foreach ($question->getResponses() as $response) {
+                $responses[] = [
+                    'id' => $response->getId(),
+                    'text' => $response->getText(),
+                    'isCorrect' => $response->isCorrect(),
+                ];
+            }
+            
+            $data[] = [
+                'id' => $question->getId(),
+                'text' => $question->getText(),
+                'responses' => $responses,
+            ];
+        }
+        
+        return $this->json($data);
+    }
+
     // ----------------- API ENDPOINTS -----------------
 
     #[Route('/api', name: 'quiz_api_index', methods: ['GET'])]
