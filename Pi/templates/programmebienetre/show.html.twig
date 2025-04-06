@@ -10,7 +10,7 @@
 ">
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8">
+            <div class="col-lg-8">
                 <!-- Logo Section -->
                 <div class="d-flex justify-content-center py-4">
                     <div class="text-center">
@@ -20,50 +20,67 @@
                 </div>
 
                 <!-- Main Card -->
-                <div class="card" style="border-radius: 15px; border: none; box-shadow: 0 12px 24px rgba(0,0,0,0.1); backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9);">
-                    <div class="card-header text-white" style="border-radius: 15px 15px 0 0; background: linear-gradient(120deg, #4776E6 0%, #8E54E9 100%); border: none;">
-                        <h4 class="card-title mb-0 py-2 text-center" style="font-size: 1.2rem; letter-spacing: 0.5px;">
-                            <i class="bi bi-eye me-2"></i>Program Details
+                <div class="card" style="border-radius: 20px; border: none; box-shadow: 0 12px 24px rgba(0,0,0,0.1); backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9);">
+                    <div class="card-header text-white" style="border-radius: 20px 20px 0 0; background: linear-gradient(120deg, #4776E6 0%, #8E54E9 100%); border: none;">
+                        <h4 class="card-title mb-0 py-2 text-center" style="font-size: 1.4rem; letter-spacing: 0.5px;">
+                            <i class="bi bi-trophy me-2"></i>Program Details
                         </h4>
                     </div>
                     
                     <div class="card-body p-4">
-                        <div class="mb-4">
-                            <label class="form-label" style="color: #4a5568; font-weight: 500;">
-                                <i class="bi bi-bookmark-star me-1" style="color: #8E54E9;"></i>Title
-                            </label>
-                            <div class="form-control" style="border-radius: 12px; border: 1px solid #e2e8f0; background-color: #f8fafc; padding: 12px;">
-                                {{ programmebienetre.titre }}
+                        <!-- Program Info Section -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="info-card mb-3" style="background: #f8f9fa; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                                    <h5 class="mb-3" style="color: #4776E6; font-weight: 600;">
+                                        <i class="bi bi-info-circle me-2"></i>Basic Information
+                                    </h5>
+                                    <div class="mb-3">
+                                        <label class="form-label" style="color: #4a5568; font-weight: 500;">
+                                            <i class="bi bi-bookmark me-1" style="color: #8E54E9;"></i>Title
+                                        </label>
+                                        <div class="form-control" style="border-radius: 12px; border: 1px solid #e2e8f0; background-color: white; padding: 12px;">
+                                            {{ programmebienetre.titre }}
+                                        </div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label" style="color: #4a5568; font-weight: 500;">
+                                            <i class="bi bi-tag me-1" style="color: #8E54E9;"></i>Type
+                                        </label>
+                                        <div class="form-control" style="border-radius: 12px; border: 1px solid #e2e8f0; background-color: white; padding: 12px;">
+                                            {{ programmebienetre.type }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-card mb-3" style="background: #f8f9fa; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                                    <h5 class="mb-3" style="color: #4776E6; font-weight: 600;">
+                                        <i class="bi bi-person me-2"></i>Program Manager
+                                    </h5>
+                                    <div class="mb-3">
+                                        <label class="form-label" style="color: #4a5568; font-weight: 500;">
+                                            <i class="bi bi-person-circle me-1" style="color: #8E54E9;"></i>Manager
+                                        </label>
+                                        <div class="form-control" style="border-radius: 12px; border: 1px solid #e2e8f0; background-color: white; padding: 12px;">
+                                            {{ programmebienetre.iduser.nom }} {{ programmebienetre.iduser.prenom }}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label" style="color: #4a5568; font-weight: 500;">
-                                <i class="bi bi-tag me-1" style="color: #8E54E9;"></i>Type
-                            </label>
-                            <div class="form-control" style="border-radius: 12px; border: 1px solid #e2e8f0; background-color: #f8fafc; padding: 12px;">
-                                {{ programmebienetre.type }}
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label" style="color: #4a5568; font-weight: 500;">
-                                <i class="bi bi-text-paragraph me-1" style="color: #8E54E9;"></i>Description
-                            </label>
-                            <div class="form-control" style="border-radius: 12px; border: 1px solid #e2e8f0; background-color: #f8fafc; min-height: 100px; padding: 12px;">
+                        <!-- Description Section -->
+                        <div class="info-card mb-4" style="background: #f8f9fa; border-radius: 15px; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                            <h5 class="mb-3" style="color: #4776E6; font-weight: 600;">
+                                <i class="bi bi-text-paragraph me-2"></i>Description
+                            </h5>
+                            <div class="form-control" style="border-radius: 12px; border: 1px solid #e2e8f0; background-color: white; min-height: 150px; padding: 15px;">
                                 {{ programmebienetre.description }}
                             </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label class="form-label" style="color: #4a5568; font-weight: 500;">
-                                <i class="bi bi-person-check me-1" style="color: #8E54E9;"></i>Assigned User
-                            </label>
-                            <div class="form-control" style="border-radius: 12px; border: 1px solid #e2e8f0; background-color: #f8fafc; padding: 12px;">
-                                {{ programmebienetre.iduser ? programmebienetre.iduser.prenom ~ ' ' ~ programmebienetre.iduser.nom : 'No user assigned' }}
-                            </div>
-                        </div>
-
+                        <!-- Actions Section -->
                         <div class="d-grid gap-3">
                             <a href="{{ path('app_programmebienetre_edit', {'idprogramme': programmebienetre.idprogramme}) }}" 
                                class="btn btn-primary"
@@ -81,7 +98,7 @@
                             <a href="{{ path('app_programmebienetre_index') }}" 
                                class="btn btn-light"
                                style="border-radius: 12px; padding: 12px; background: white; border: 1px solid #e2e8f0; font-weight: 500; letter-spacing: 0.5px;">
-                                <i class="bi bi-arrow-left me-2"></i>Back to List
+                                <i class="bi bi-arrow-left me-2"></i>Back to Programs List
                             </a>
                         </div>
                     </div>
