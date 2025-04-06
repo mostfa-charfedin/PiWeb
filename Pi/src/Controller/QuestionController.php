@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Question;
 use App\Entity\Quiz;
-use App\Entity\Response;
+use App\Entity\Response as QuestionResponse;
 use App\Form\QuestionType;
 use App\Repository\QuestionRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -91,31 +91,63 @@ class QuestionController extends AbstractController
         }
     }
 
-    #[Route('/create/{quizId}', name: 'question_create_ajax', methods: ['POST'])]
+    #[Route('/responses/{id}', name: 'question_responses', methods: ['GET'])]
+    public function getResponses(Question $question): JsonResponse
+    {
+        try {
+            $responses = [];
+            foreach ($question->getResponses() as $response) {
+                $responses[] = [
+                    'id' => $response->getId(),
+                    'text' => $response->getText(),
+                    'isCorrect' => $response->isCorrect()
+                ];
+            }
+            
+            return new JsonResponse($responses);
+        } catch (\Exception $e) {
+            error_log("Error getting responses: " . $e->getMessage());
+            return new JsonResponse([
+                'error' => 'An error occurred while fetching responses'
+            ], 500);
+        }
+    }
+
+    #[Route('/ajax/create/{quizId}', name: 'question_create_ajax', methods: ['POST'])]
     public function createAjax(Request $request, EntityManagerInterface $entityManager, int $quizId): JsonResponse
     {
         try {
+            // Start transaction
+            $entityManager->beginTransaction();
+
             // Get the quiz
             $quiz = $entityManager->getRepository(Quiz::class)->find($quizId);
             if (!$quiz) {
                 return new JsonResponse([
                     'success' => false,
                     'error' => 'Quiz not found'
-                ]);
+                ], 404);
             }
 
             // Get and decode the request data
             $content = $request->getContent();
+            error_log("Received content: " . $content);
+            
             $data = json_decode($content, true);
+            error_log("Decoded data: " . print_r($data, true));
             
-            // Log the received data for debugging
-            error_log('Received data: ' . print_r($data, true));
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return new JsonResponse([
+                    'success' => false,
+                    'error' => 'Invalid JSON data: ' . json_last_error_msg()
+                ], 400);
+            }
             
-            if (!$data) {
+            if (!$data || !isset($data['text']) || !isset($data['responses'])) {
                 return new JsonResponse([
                     'success' => false,
                     'error' => 'Invalid request data'
-                ]);
+                ], 400);
             }
 
             // Validate question text
@@ -123,7 +155,7 @@ class QuestionController extends AbstractController
                 return new JsonResponse([
                     'success' => false,
                     'error' => 'Question text is required'
-                ]);
+                ], 400);
             }
 
             // Validate responses
@@ -131,60 +163,50 @@ class QuestionController extends AbstractController
                 return new JsonResponse([
                     'success' => false,
                     'error' => 'At least one response is required'
-                ]);
+                ], 400);
             }
 
-            // Start transaction
-            $entityManager->beginTransaction();
+            // Create question
+            $question = new Question();
+            $question->setText($data['text']);
+            $question->setQuiz($quiz);
+            $entityManager->persist($question);
+            $entityManager->flush(); // Flush to get the question ID
             
-            try {
-                // Create question
-                $question = new Question();
-                $question->setText($data['text']);
-                $question->setQuiz($quiz);
-                $entityManager->persist($question);
-                $entityManager->flush();
-
-                // Create responses
-                foreach ($data['responses'] as $responseData) {
-                    if (!empty($responseData['text'])) {
-                        $response = new Response();
-                        $response->setText($responseData['text']);
-                        $response->setIsCorrect($responseData['isCorrect'] ?? false);
-                        $response->setQuestion($question);
-                        $entityManager->persist($response);
-                    }
+            // Create responses
+            foreach ($data['responses'] as $responseData) {
+                if (!empty($responseData['text'])) {
+                    $response = new QuestionResponse();
+                    $response->setText($responseData['text']);
+                    $response->setIsCorrect($responseData['isCorrect'] ?? false);
+                    $response->setQuestion($question);
+                    $entityManager->persist($response);
                 }
-                
-                // Save all changes
-                $entityManager->flush();
-                $entityManager->commit();
-
-                return new JsonResponse([
-                    'success' => true,
-                    'message' => 'Question and responses created successfully',
-                    'questionId' => $question->getId()
-                ]);
-
-            } catch (\Exception $e) {
-                // Rollback transaction on error
-                $entityManager->rollback();
-                error_log('Error creating question: ' . $e->getMessage());
-                error_log('Stack trace: ' . $e->getTraceAsString());
-                
-                return new JsonResponse([
-                    'success' => false,
-                    'error' => 'Database error: ' . $e->getMessage()
-                ]);
             }
+
+            // Save everything
+            $entityManager->flush();
+            $entityManager->commit();
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Question created successfully',
+                'questionId' => $question->getId()
+            ], 201);
+
         } catch (\Exception $e) {
-            error_log('Error in createAjax: ' . $e->getMessage());
-            error_log('Stack trace: ' . $e->getTraceAsString());
+            // Rollback the transaction if there was an error
+            if ($entityManager->getConnection()->isTransactionActive()) {
+                $entityManager->rollback();
+            }
+            
+            error_log("Error creating question: " . $e->getMessage());
+            error_log("Stack trace: " . $e->getTraceAsString());
             
             return new JsonResponse([
                 'success' => false,
-                'error' => 'Server error: ' . $e->getMessage()
-            ]);
+                'error' => 'An error occurred: ' . $e->getMessage()
+            ], 500);
         }
     }
 

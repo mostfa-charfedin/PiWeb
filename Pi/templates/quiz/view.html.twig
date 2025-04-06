@@ -332,7 +332,8 @@
         const addResponseBtn = document.getElementById('addResponseBtn');
         const responsesList = document.getElementById('responsesList');
         const saveQuestionBtn = document.getElementById('saveQuestionBtn');
-        const modalInstance = new bootstrap.Modal(document.getElementById('addQuestionModal'));
+        const addQuestionModal = document.getElementById('addQuestionModal');
+        const modalInstance = new bootstrap.Modal(addQuestionModal);
 
         // Function to create a response input group
         function createResponseInput() {
@@ -393,13 +394,28 @@
             document.querySelector('.modal-body').insertBefore(alertDiv, document.getElementById('questionForm'));
         }
 
+        // Function to clear the form
+        function clearForm() {
+            document.getElementById('questionText').value = '';
+            const responseItems = document.querySelectorAll('.response-item');
+            responseItems.forEach((item, index) => {
+                if (index === 0) {
+                    const textInput = item.querySelector('.response-text');
+                    const statusInput = item.querySelector('.response-status');
+                    if (textInput) textInput.value = '';
+                    if (statusInput) statusInput.checked = false;
+                } else {
+                    item.remove();
+                }
+            });
+        }
+
         // Save Question button click handler
-        saveQuestionBtn.addEventListener('click', function(e) {
+        saveQuestionBtn.addEventListener('click', async function(e) {
             e.preventDefault();
             
             // Clear previous alerts
-            const previousAlerts = document.querySelectorAll('.alert');
-            previousAlerts.forEach(alert => alert.remove());
+            document.querySelectorAll('.alert').forEach(alert => alert.remove());
 
             // Get and validate question text
             const questionText = document.getElementById('questionText').value.trim();
@@ -429,71 +445,58 @@
                 return;
             }
 
+            // Check if at least one response is marked as correct
+            const hasCorrectResponse = responses.some(response => response.isCorrect);
+            if (!hasCorrectResponse) {
+                showError('Please mark at least one response as correct');
+                return;
+            }
+
             // Disable the save button and show loading state
-            const saveBtn = document.getElementById('saveQuestionBtn');
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Saving...';
+            saveQuestionBtn.disabled = true;
+            saveQuestionBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Saving...';
 
-            // Create the request data
-            const requestData = {
-                text: questionText,
-                responses: responses
-            };
+            try {
+                const response = await fetch('{{ path('question_create_ajax', {'quizId': quiz.id}) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        text: questionText,
+                        responses: responses
+                    })
+                });
 
-            // Send the request
-            fetch('{{ path('question_create_ajax', {'quizId': quiz.id}) }}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(requestData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        throw new Error(text);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
+                const data = await response.json();
+                console.log('Server response:', data);
+
                 if (data.success) {
-                    // Show success message
                     showSuccess(data.message || 'Question created successfully!');
-                    
-                    // Clear the form
-                    document.getElementById('questionText').value = '';
-                    document.querySelectorAll('.response-item').forEach(item => {
-                        const textInput = item.querySelector('.response-text');
-                        if (textInput) {
-                            textInput.value = '';
-                        }
-                        const statusInput = item.querySelector('.response-status');
-                        if (statusInput) {
-                            statusInput.checked = false;
-                        }
-                    });
-                    
-                    // Close modal and reload after a short delay
+                    clearForm();
                     setTimeout(() => {
                         modalInstance.hide();
                         window.location.reload();
-                    }, 1000);
+                    }, 1500);
                 } else {
                     showError(data.error || 'Failed to create question');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showError('An error occurred while saving the question. Please check the console for details.');
-            })
-            .finally(() => {
-                // Re-enable the save button
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = '<i class="bi bi-save"></i> Save Question';
-            });
+            } catch (error) {
+                console.error('Error details:', error);
+                showError('Server error: ' + (error.message || 'An error occurred while saving the question'));
+            } finally {
+                saveQuestionBtn.disabled = false;
+                saveQuestionBtn.innerHTML = '<i class="bi bi-save me-2"></i>Save Question';
+            }
+        });
+
+        // Reset form when modal is hidden
+        addQuestionModal.addEventListener('hidden.bs.modal', function () {
+            clearForm();
+            document.querySelectorAll('.alert').forEach(alert => alert.remove());
+            saveQuestionBtn.disabled = false;
+            saveQuestionBtn.innerHTML = '<i class="bi bi-save me-2"></i>Save Question';
         });
     });
 </script>

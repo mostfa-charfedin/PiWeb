@@ -234,27 +234,27 @@
                 <div>
                     <h1 class="h3 mb-2 font-weight-bold text-dark">Edit Quiz</h1>
                     <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb">
+        <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Home</a></li>
-                            <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Quizzes</a></li>
-                            <li class="breadcrumb-item active">Edit Quiz</li>
-                        </ol>
-                    </nav>
+          <li class="breadcrumb-item"><a href="{{ path('quiz_list') }}">Quizzes</a></li>
+          <li class="breadcrumb-item active">Edit Quiz</li>
+        </ol>
+      </nav>
                 </div>
-            </div>
+    </div>
 
-            <div class="row">
+      <div class="row">
                 <div class="col-12 col-lg-4">
-                    <div class="card">
+          <div class="card">
                         <div class="card-header">
                             <h5 class="mb-0 text-dark font-weight-bold">Quiz Details</h5>
                         </div>
-                        <div class="card-body">
+            <div class="card-body">
                             {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
                             
                             <div class="mb-3">
                                 {{ form_label(form.name, 'Quiz Name', {'label_attr': {'class': 'form-label'}}) }}
-                                {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                  {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
                                 {{ form_errors(form.name) }}
                             </div>
 
@@ -352,8 +352,8 @@
                                     </table>
                                 </div>
                             {% endif %}
-                        </div>
-                    </div>
+                </div>
+              </div>
                 </div>
             </div>
         </div>
@@ -373,8 +373,8 @@
                     <div class="mb-4">
                         <label for="questionText" class="form-label">Question Text</label>
                         <textarea class="form-control" id="questionText" rows="3" required></textarea>
-                    </div>
-                    
+              </div>
+
                     <div class="mb-3">
                         <label class="form-label d-flex justify-content-between align-items-center">
                             <span>Responses</span>
@@ -428,13 +428,13 @@
                 <div class="response-list" id="viewResponsesList">
                     <!-- Responses will be loaded here -->
                 </div>
-            </div>
+              </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
+          </div>
         </div>
-    </div>
-</div>
+      </div>
 
 {% endblock %}
 
@@ -575,17 +575,43 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify(requestData)
             })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+            .then(async response => {
+                console.log('Server response status:', response.status);
+                console.log('Response headers:', Object.fromEntries([...response.headers]));
+                
+                // Get the response text first
+                const responseText = await response.text();
+                console.log('Raw response:', responseText);
+                
+                // Check if the response starts with HTML
+                if (responseText.trim().startsWith('<!DOCTYPE html>') || responseText.trim().startsWith('<html')) {
+                    console.error('Server returned HTML instead of JSON');
+                    throw new Error('Server returned HTML instead of JSON. This might be a PHP error or routing issue.');
                 }
-                return response.json();
+                
+                // Try to parse as JSON
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('Failed to parse JSON:', e);
+                    console.error('Response text was:', responseText);
+                    throw new Error('Server returned invalid JSON response. Check console for details.');
+                }
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Server error occurred');
+                }
+                
+                return data;
             })
             .then(data => {
+                console.log('Server response data:', data);
                 if (data.success) {
                     // Show success message
                     showSuccess(data.message || 'Question created successfully!');
@@ -613,8 +639,8 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                showError('An error occurred while saving the question. Please try again.');
+                console.error('Error details:', error);
+                showError(error.message || 'An error occurred while saving the question. Please try again.');
             })
             .finally(() => {
                 // Re-enable the save button
