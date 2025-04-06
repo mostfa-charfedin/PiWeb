@@ -210,7 +210,10 @@ class User
     }
     
 
-    
+    public function getRole(): ?string
+{
+    return $this->role;
+}
 
     public function setRole(string $role): self
     {
