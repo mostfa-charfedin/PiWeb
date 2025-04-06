@@ -85,7 +85,7 @@ class RecompenseController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_programmebienetre_show', ['idprogramme' => $recompense->getIdprogramme()->getIdprogramme()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_recompense_program', ['idprogramme' => $recompense->getIdprogramme()->getIdprogramme()], Response::HTTP_SEE_OTHER);
         }
 
         return $this->render('recompense/edit.html.twig', [
