@@ -1,352 +1,58 @@
-{% extends 'base.html.twig' %}
+{% extends 'sideBar.html.twig' %}
 
-{% block title %}Create New Program{% endblock %}
+{% block title %}Create a Program{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 {% endblock %}
 
-{% block body %}
-<div class="main-container">
-    <!-- Logo Header -->
-    <header class="app-header">
-        <div class="logo-container">
-            <img src="{{ asset('assets/imgP/logo.png') }}" alt="Logo" class="app-logo">
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1>Create Program</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_programmebienetre_index') }}">Home</a></li>
+        <li class="breadcrumb-item">Forms</li>
+        <li class="breadcrumb-item active">Create Program</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Create New Program</h5>
+
+            <!-- Horizontal Form -->
+            {% set edit_mode = false %}
+            {% include 'programmebienetre/_form_horizontal.html.twig' %}
+            <!-- End Horizontal Form -->
+
+          </div>
         </div>
-    </header>
-
-    <div class="content-wrapper">
-        <div class="card main-card">
-            <!-- Card Header with Title -->
-            <div class="card-header">
-                <h1 class="page-title">Create New Program</h1>
-            </div>
-
-            <div class="card-body">
-                {{ form_start(form, {'attr': {'class': 'program-form'}}) }}
-                <div class="form-grid">
-                    <!-- Basic Information -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <i class="bi bi-info-circle-fill"></i>
-                            <h3>Basic Information</h3>
-                        </div>
-                        <div class="form-group">
-                            {{ form_label(form.titre, 'Title', {'label_attr': {'class': 'form-label'}}) }}
-                            <div class="input-group">
-                                <i class="bi bi-card-heading"></i>
-                                {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
-                            </div>
-                            {{ form_errors(form.titre) }}
-                        </div>
-                        <div class="form-group">
-                            {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label'}}) }}
-                            <div class="input-group">
-                                <i class="bi bi-tag"></i>
-                                {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
-                            </div>
-                            {{ form_errors(form.type) }}
-                        </div>
-                    </div>
-
-                    <!-- Program Details -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <i class="bi bi-file-text-fill"></i>
-                            <h3>Program Details</h3>
-                        </div>
-                        <div class="form-group">
-                            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
-                            <div class="input-group">
-                                <i class="bi bi-text-paragraph"></i>
-                                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '4'}}) }}
-                            </div>
-                            {{ form_errors(form.description) }}
-                        </div>
-                    </div>
-
-                    <!-- Manager Information -->
-                    <div class="form-section">
-                        <div class="section-header">
-                            <i class="bi bi-person-fill"></i>
-                            <h3>Manager Information</h3>
-                        </div>
-                        <div class="form-group">
-                            {{ form_label(form.iduser, 'Program Manager', {'label_attr': {'class': 'form-label'}}) }}
-                            <div class="input-group">
-                                <i class="bi bi-person-badge"></i>
-                                {{ form_widget(form.iduser, {'attr': {'class': 'form-control'}}) }}
-                            </div>
-                            {{ form_errors(form.iduser) }}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button type="submit" class="btn-action btn-save">
-                        <i class="bi bi-check-lg"></i>
-                        <span>Create Program</span>
-                    </button>
-                    <a href="{{ path('app_programmebienetre_index') }}" 
-                       class="btn-action btn-cancel">
-                        <i class="bi bi-x-lg"></i>
-                        <span>Cancel</span>
-                    </a>
-                </div>
-                {{ form_end(form) }}
-            </div>
-        </div>
+      </div>
     </div>
-</div>
-
-<style>
-    /* Main Container */
-    .main-container {
-        min-height: 100vh;
-        background: #f0f2f5;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-    }
-
-    /* Header & Logo Styles */
-    .app-header {
-        padding: 3rem 0;
-        margin-bottom: 2rem;
-        width: 100%;
-    }
-
-    .logo-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-        text-align: center;
-    }
-
-    .app-logo {
-        height: 200px;
-        width: auto;
-        object-fit: contain;
-    }
-
-    /* Content Wrapper */
-    .content-wrapper {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 2rem;
-        width: 100%;
-        flex: 1;
-    }
-
-    /* Card Styles */
-    .main-card {
-        background: white;
-        border-radius: 16px;
-        border: none;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        overflow: hidden;
-    }
-
-    .card-header {
-        background: #4154f1;
-        padding: 1.5rem 2rem;
-        border: none;
-    }
-
-    .page-title {
-        color: white;
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0;
-        text-align: center;
-    }
-
-    /* Form Grid Layout */
-    .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-        padding: 1.5rem;
-    }
-
-    .form-section {
-        background: #f8f9fa;
-        border-radius: 12px;
-        overflow: hidden;
-    }
-
-    .section-header {
-        padding: 1rem 1.5rem;
-        background: white;
-        border-bottom: 1px solid #edf2f7;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .section-header i {
-        color: #4154f1;
-        font-size: 1.25rem;
-    }
-
-    .section-header h3 {
-        margin: 0;
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #2c3345;
-    }
-
-    /* Form Elements */
-    .form-group {
-        padding: 1.5rem;
-    }
-
-    .form-label {
-        display: block;
-        font-size: 0.9rem;
-        font-weight: 500;
-        color: #6c757d;
-        margin-bottom: 0.5rem;
-    }
-
-    .input-group {
-        position: relative;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
-
-    .input-group i {
-        color: #4154f1;
-        font-size: 1.1rem;
-        margin-top: 0.75rem;
-    }
-
-    .form-control {
-        flex: 1;
-        padding: 0.75rem 1rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
-        font-size: 1rem;
-        color: #2c3345;
-        transition: all 0.2s;
-        background: white;
-    }
-
-    textarea.form-control {
-        min-height: 100px;
-        resize: vertical;
-    }
-
-    .form-control:focus {
-        outline: none;
-        border-color: #4154f1;
-        box-shadow: 0 0 0 3px rgba(65, 84, 241, 0.1);
-    }
-
-    .form-control::placeholder {
-        color: #a0aec0;
-    }
-
-    /* Error Messages */
-    .invalid-feedback {
-        color: #ef5350;
-        font-size: 0.85rem;
-        margin-top: 0.5rem;
-    }
-
-    /* Action Buttons */
-    .action-buttons {
-        padding: 1.5rem;
-        border-top: 1px solid #edf2f7;
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-    }
-
-    .btn-action {
-        min-width: 150px;
-        height: 2.75rem;
-        border-radius: 0.5rem;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border: none;
-        transition: all 0.2s;
-        color: white;
-        cursor: pointer;
-        text-decoration: none;
-        padding: 0 1.5rem;
-        gap: 0.5rem;
-        font-size: 0.95rem;
-        font-weight: 500;
-    }
-
-    .btn-save {
-        background: #4154f1;
-    }
-
-    .btn-cancel {
-        background: #6c757d;
-    }
-
-    .btn-action:hover {
-        transform: translateY(-2px);
-        opacity: 0.9;
-        color: white;
-        text-decoration: none;
-    }
-
-    /* Responsive Design */
-    @media (max-width: 768px) {
-        .content-wrapper {
-            padding: 0 1rem;
-        }
-
-        .form-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            padding: 1rem;
-        }
-
-        .action-buttons {
-            flex-direction: column;
-        }
-
-        .btn-action {
-            width: 100%;
-        }
-    }
-</style>
+  </section>
+</main>
+{% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add hover effect for action buttons
-            const actionButtons = document.querySelectorAll('.btn-action');
-            actionButtons.forEach(button => {
-                button.addEventListener('mouseover', function() {
-                    this.style.transform = 'translateY(-4px)';
-                });
-                button.addEventListener('mouseout', function() {
-                    this.style.transform = 'translateY(0)';
-                });
-            });
-
-            // Add focus effect for form controls
-            const formControls = document.querySelectorAll('.form-control');
-            formControls.forEach(control => {
-                control.addEventListener('focus', function() {
-                    this.parentElement.querySelector('i').style.color = '#4154f1';
-                });
-                control.addEventListener('blur', function() {
-                    this.parentElement.querySelector('i').style.color = '#4154f1';
-                });
-            });
+            // Add smooth fade-in animation for card
+            const card = document.querySelector('.card');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
         });
     </script>
-{% endblock %}
 {% endblock %}

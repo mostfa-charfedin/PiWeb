@@ -85,17 +85,23 @@ class ProgrammebienetreType extends AbstractType
                 ]
             ])
             ->add('iduser', EntityType::class, [
-                'label' => 'User',
+                'label' => 'Administrator',
                 'class' => User::class,
                 'choice_label' => function(User $user) {
                     return $user->getNom() . ' ' . $user->getPrenom();
                 },
+                'query_builder' => function ($er) {
+                    return $er->createQueryBuilder('u')
+                              ->where('u.role = :role')
+                              ->setParameter('role', 'ADMIN');
+                },
+                'placeholder' => 'Choose an Administrator',
                 'attr' => [
                     'class' => 'form-control'
                 ],
                 'constraints' => [
                     new Assert\NotBlank([
-                        'message' => 'Please select a user!'
+                        'message' => 'Please select an administrator!'
                     ])
                 ]
             ])

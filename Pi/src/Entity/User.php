@@ -79,12 +79,13 @@ class User
      */
     private ?string $image_url; 
     
-    /*
+
+    /**
      * @var int|null
      *
-     * @ORM\Column(name="numPhone", type="integer", nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="numPhone", type="integer", nullable=true)
      */
-    //private $numPhone;
+    private $numPhone;
 
     /**
      * @var string|null
@@ -117,7 +118,6 @@ class User
 
         return $this;
     }
-    /*
     public function getNumPhone(): ?int
     {
         return $this->numPhone;
@@ -129,7 +129,6 @@ class User
 
         return $this;
     }
-    */
     public function getCin(): ?int
     {
         return $this->cin;
@@ -213,7 +212,10 @@ class User
     }
     
 
-    
+    public function getRole(): ?string
+{
+    return $this->role;
+}
 
     public function setRole(string $role): self
     {
