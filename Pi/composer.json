@@ -46,7 +46,7 @@
         "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
-        "doctrine/doctrine-fixtures-bundle": "*",
+        "doctrine/doctrine-fixtures-bundle": "^4.1",
         "phpunit/phpunit": "^9.5",
         "symfony/browser-kit": "^6.4",
         "symfony/css-selector": "^6.4",
@@ -92,12 +92,15 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
         },
         "post-install-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+            "php bin/console doctrine:fixtures:load --no-interaction"
         ],
         "post-update-cmd": [
-            "@auto-scripts"
+            "@auto-scripts",
+            "php bin/console doctrine:fixtures:load --no-interaction"
         ]
     },
+
     "conflict": {
         "symfony/symfony": "*"
     },
