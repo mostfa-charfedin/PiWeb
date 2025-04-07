@@ -38,7 +38,7 @@
 
               <div class="d-flex justify-content-center py-4">
                 <a href="" class="logo d-flex align-items-center w-auto">
-                  <img src="{{ asset('assets/imgP/logo.png') }}" alt="">
+                  <img src="{{ asset('assets/imgP/logo2.png') }}" alt="">
                   <span class="d-none d-lg-block">Onboardify</span>
                 </a>
               </div>
@@ -46,8 +46,8 @@
               <div class="card mb-3">
                 <div class="card-body">
                   <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Mot de passe oublié</h5>
-                    <p class="text-center small">Entrez votre email pour réinitialiser votre mot de passe</p>
+                    <h5 class="card-title text-center pb-0 fs-4">Forgot your password</h5>
+                    <p class="text-center small">Enter your email to reset your password</p>
                   </div>
 
                   {% for flash_error in app.flashes('reset_password_error') %}
@@ -69,17 +69,17 @@
                     <div class="input-group has-validation">
                       <span class="input-group-text">@</span>
                       {{ form_widget(requestForm.email, {'attr': {'class': 'form-control'}}) }}
-                      <div class="invalid-feedback">Veuillez entrer votre email.</div>
+                      <div class="invalid-feedback">Please enter your email.</div>
                     </div>
                   </div>
 
                   <div class="col-12">
-                    <button class="btn btn-primary w-100" type="submit">Envoyer l'e-mail de réinitialisation</button>
+                    <button class="btn btn-primary w-100" type="submit">Send the reset email</button>
                   </div>
 
                   <div class="col-12 text-center">
                     <p class="small mb-0">
-                      <a href="{{ path('login') }}">Retour à la page de connexion</a>
+                      <a href="{{ path('login') }}">Return to login page</a>
                     </p>
                   </div>
 

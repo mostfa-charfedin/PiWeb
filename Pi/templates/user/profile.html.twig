@@ -29,13 +29,13 @@
    {% if user.imageUrl %}
     <img src="{{ asset(user.imageUrl) }}" alt="Profile Image" width="150">
 {% else %}
-    <img src="{{ asset('assets/imgP/logo.png') }}" alt="Default Profile" class="rounded-circle">
+    <img src="{{ asset('assets/imgP/logo2.png') }}" alt="Default Profile" class="rounded-circle">
 {% endif %}
 
 
 
                         <h2>{{ user.nom }} {{ user.prenom }}</h2>
-                        <h3>{{ user.roles }}</h3>
+                        <h3>{{ user.role }}</h3>
                     </div>
                 </div>
             </div>
@@ -64,7 +64,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-lg-3 col-md-4 label">Role</div>
-                                    <div class="col-lg-9 col-md-8">{{ user.roles }}</div>
+                                    <div class="col-lg-9 col-md-8">{{ user.role }}</div>
                                 </div>
                                 <div class="row">
                                     <div class="col-lg-3 col-md-4 label">Date of Birth</div>

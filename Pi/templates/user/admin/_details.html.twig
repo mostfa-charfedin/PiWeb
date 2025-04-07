@@ -1,6 +1,7 @@
 <div class="row">
     <div class="col-md-4 text-center">
-        <img src="{{ asset(user.imageUrl) ? asset( user.imageUrl) : asset('assets/imgP/logo.png') }}" 
+        <img src="{{ user.imageUrl is not empty ? asset(user.imageUrl) : asset('assets/imgP/logo2.png') }}" alt="User Image"
+
              class="img-fluid rounded-circle mb-3" width="150" height="150">
     </div>
     <div class="col-md-8">
@@ -16,9 +17,9 @@
             <div class="col-6">
                 <p><strong>Date of birth:</strong> {{ user.dateNaissance|date('d/m/Y') }}</p>
                 <p><strong>Statuts:</strong> 
-                    <span class="badge bg-{{ user.status ? 'success' : 'secondary' }}">
-                        {{ user.status ? 'Actif' : 'Inactif' }}
-                    </span>
+                      <span class="badge bg-{{ user.status == 'ACTIVE' ? 'success' : (user.status == 'BLOCKED' ? 'danger' : 'secondary') }}">
+                                                {{ user.status == 'ACTIVE' ? 'Actif' : (user.status == 'BLOCKED' ? 'Bloqué' : 'Inconnu') }}
+                                            </span>
                 </p>
             </div>
         </div>

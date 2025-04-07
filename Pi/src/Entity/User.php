@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Entity;
-
+use App\Enum\UserStatus;
+use App\Enum\UserRole;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -61,10 +62,9 @@ class User
     /**
      * @var string|null
      *
-     * @ORM\Column(name="role", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="role", type="string", length=20, nullable=true, options={"default"="'USER'"})
      */
     private $role = 'USER';
-
 
     /**
      * @var string|null
@@ -80,13 +80,16 @@ class User
      */
     private $numPhone;
 
-    /**
+
+/**
      * @var string|null
      *
      * @ORM\Column(name="status", type="string", length=20, nullable=true, options={"default"="'ACTIVE'"})
      */
     private $status = 'ACTIVE';
-
+  
+    
+    
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
@@ -132,17 +135,23 @@ class User
 
         return $this;
     }
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
 
-    public function setStatus(string $status): self
-    {
-        $this->status = $status;
 
-        return $this;
-    }
+
+    
+    public function getStatus(): string
+{
+    return $this->status;
+}
+
+
+public function setStatus(UserStatus $status): self
+{
+    $this->status = $status->value; 
+    return $this;
+}
+
+
     public function getImageUrl(): ?string
     {
         return $this->image_url;
@@ -205,14 +214,20 @@ class User
     }
     
 
-    
+    public function getRole(): string
+{
+    return $this->role;
+}
 
-    public function setRole(string $role): self
+
+    public function setRole(UserRole $role): self
     {
-        $this->role = $role;
+        $this->role = $role->value;
 
         return $this;
     }
+
+
     public function getPassword(): ?string
     {
         return $this->password;

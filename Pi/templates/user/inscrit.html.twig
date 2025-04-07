@@ -1,17 +1,35 @@
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Inscription</title>
 
+  <title>Sign Up</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
   <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
-  <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
   <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/quill/quill.snow.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/remixicon/remixicon.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/simple-datatables/style.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
 </head>
 
 <body>
+
   <main>
     <div class="container">
       <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
@@ -21,7 +39,7 @@
               
               <div class="d-flex justify-content-center py-4">
                 <a href="" class="logo d-flex align-items-center w-auto">
-                  <img src="{{ asset('assets/imgP/logo.png') }}" alt="">
+                  <img src="{{ asset('assets/imgP/logo2.png') }}" alt="">
                   <span class="d-none d-lg-block">Onboardify</span>
                 </a>
               </div>
@@ -39,61 +57,113 @@
         {% endfor %}
     </ul>
 {% endif %}
-
 {{ form_start(formB, {
     'method': 'POST', 
     'action': path('inscrit'), 
-    'attr': {'class': 'row g-3 needs-validation', 'novalidate': 'novalidate',
-    'enctype': 'multipart/form-data'}
+    'attr': {
+        'class': 'row g-3 needs-validation', 
+        'novalidate': 'novalidate',
+        'enctype': 'multipart/form-data'
+    }
 }) }}
 
-<!-- Nom & Prénom -->
+<!-- First name (Nom) -->
 <div class="col-md-6">
-    <label for="nom" class="form-label">First name</label>
+    <label for="{{ formB.nom.vars.id }}" class="form-label">First name</label>
     {{ form_widget(formB.nom, {'attr': {'class': 'form-control'}}) }}
+    {% if formB.nom.vars.errors|length %}
+      <div class="text-danger">
+        {% for error in formB.nom.vars.errors %}
+          <small>{{ error.message }}</small>
+        {% endfor %}
+      </div>
+    {% endif %}
 </div>
 
+<!-- Last name (Prénom) -->
 <div class="col-md-6">
-    <label for="prenom" class="form-label">Last name</label>
+    <label for="{{ formB.prenom.vars.id }}" class="form-label">Last name</label>
     {{ form_widget(formB.prenom, {'attr': {'class': 'form-control'}}) }}
+    {% if formB.prenom.vars.errors|length %}
+      <div class="text-danger">
+        {% for error in formB.prenom.vars.errors %}
+          <small>{{ error.message }}</small>
+        {% endfor %}
+      </div>
+    {% endif %}
 </div>
 
 <!-- Email -->
 <div class="col-md-6">
-    <label for="email" class="form-label">Email</label>
+    <label for="{{ formB.email.vars.id }}" class="form-label">Email</label>
     {{ form_widget(formB.email, {'attr': {'class': 'form-control'}}) }}
+    {% if formB.email.vars.errors|length %}
+      <div class="text-danger">
+        {% for error in formB.email.vars.errors %}
+          <small>{{ error.message }}</small>
+        {% endfor %}
+      </div>
+    {% endif %}
 </div>
 
-<!-- Mot de passe -->
+<!-- Password -->
 <div class="col-md-6">
-    <label for="password" class="form-label">Password</label>
+    <label for="{{ formB.password.vars.id }}" class="form-label">Password</label>
     {{ form_widget(formB.password, {'attr': {'class': 'form-control'}}) }}
+    {% if formB.password.vars.errors|length %}
+      <div class="text-danger">
+        {% for error in formB.password.vars.errors %}
+          <small>{{ error.message }}</small>
+        {% endfor %}
+      </div>
+    {% endif %}
 </div>
 
 <!-- CIN -->
 <div class="col-md-6">
-    <label for="cin" class="form-label">CIN</label>
+    <label for="{{ formB.cin.vars.id }}" class="form-label">CIN</label>
     {{ form_widget(formB.cin, {'attr': {'class': 'form-control'}}) }}
+    {% if formB.cin.vars.errors|length %}
+      <div class="text-danger">
+        {% for error in formB.cin.vars.errors %}
+          <small>{{ error.message }}</small>
+        {% endfor %}
+      </div>
+    {% endif %}
 </div>
 
-<!-- Statut -->
+<!-- Phone number (numPhone) -->
 <div class="col-md-6">
-    <label for="status" class="form-label">Phone number</label>
+    <label for="{{ formB.numPhone.vars.id }}" class="form-label">Phone number</label>
     {{ form_widget(formB.numPhone, {'attr': {'class': 'form-control'}}) }}
+    {% if formB.numPhone.vars.errors|length %}
+      <div class="text-danger">
+        {% for error in formB.numPhone.vars.errors %}
+          <small>{{ error.message }}</small>
+        {% endfor %}
+      </div>
+    {% endif %}
 </div>
 
-<!-- Date de naissance -->
+<!-- Date of birth (datenaissance) -->
 <div class="col-mt-3">
-    <label for="date_naissance" class="form-label">Birthday</label>
+    <label for="{{ formB.datenaissance.vars.id }}" class="form-label">Date of birth</label>
     {{ form_widget(formB.datenaissance, {'attr': {'class': 'form-control'}}) }}
+    {% if formB.datenaissance.vars.errors|length %}
+      <div class="text-danger">
+        {% for error in formB.datenaissance.vars.errors %}
+          <small>{{ error.message }}</small>
+        {% endfor %}
+      </div>
+    {% endif %}
 </div>
 
-<!-- Bouton en bas -->
+<!-- Submit button -->
 <div class="col-12 mt-3">
     <button class="btn btn-primary w-100" type="submit">Create account</button>
 </div>
 
-<!-- Lien vers le login -->
+<!-- Link to login -->
 <div class="col-12 text-center mt-2">
     <p class="small mb-0">Already have an account? <a href="{{ path('login') }}">Login</a></p>
 </div>

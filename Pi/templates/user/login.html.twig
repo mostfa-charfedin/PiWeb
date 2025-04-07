@@ -39,7 +39,7 @@
 
               <div class="d-flex justify-content-center py-4">
                 <a href="" class="logo d-flex align-items-center w-auto">
-                  <img src="{{ asset('assets/imgP/logo.png') }}" alt="">
+                  <img src="{{ asset('assets/imgP/logo2.png') }}" alt="">
                   <span class="d-none d-lg-block">Onboardify</span>
                 </a>
               </div>
@@ -58,29 +58,40 @@
 {{ form_start(form, {'attr': {'class': 'row g-3 needs-validation', 'novalidate': 'novalidate'}}) }}
 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-    <div class="col-12">
-        <label for="{{ form.email.vars.id }}" class="form-label">Email</label>
-        {% if form.email.vars.errors|length > 0 %}
-        <div class="invalid-feedback">
-        {% for error in form.email.vars.errors %}
-            <p>{{ error.message }}</p>
-        {% endfor %}
-        </div>
-        {% endif %}
-        
-        <div class="input-group has-validation">
-            <span class="input-group-text">@</span>
-            {{ form_widget(form.email, {'attr': {'class': 'form-control' }}) }}
-            <div class="invalid-feedback">Please enter your email.</div>
-        </div>
+<div class="col-12">
+  <label for="{{ form.email.vars.id }}" class="form-label">Email</label>
+  {{ form_widget(form.email, { 
+      'type': 'text', 
+      'attr': {
+          'class': 'form-control',
+          'placeholder': 'Enter your email'
+      }
+  }) }}
+  {% if form.email.vars.errors|length %}
+    <div class="text-danger mt-1">
+      {% for error in form.email.vars.errors %}
+        <p>{{ error.message }}</p>
+      {% endfor %}
     </div>
+  {% endif %}
+</div>
 
-    <div class="col-12">
-        <label class="form-label">Password</label>
-        {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
-
-        <div class="invalid-feedback">Please enter your password!</div>
+<div class="col-12">
+  <label for="{{ form.password.vars.id }}" class="form-label">Password</label>
+  {{ form_widget(form.password, { 
+      'attr': {
+          'class': 'form-control',
+          'placeholder': 'Enter your password'
+      }
+  }) }}
+  {% if form.password.vars.errors|length %}
+    <div class="text-danger mt-1">
+      {% for error in form.password.vars.errors %}
+        <p>{{ error.message }}</p>
+      {% endfor %}
     </div>
+  {% endif %}
+</div>
 
  
 

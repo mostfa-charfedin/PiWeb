@@ -42,11 +42,7 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="col-md-6 text-end">
-                                <a href="" class="btn btn-primary">
-                                    <i class="bi bi-plus-circle"></i> Ajouter un utilisateur
-                                </a>
-                            </div>
+                           
                         </div>
 
                         <div class="table-responsive">
@@ -54,13 +50,14 @@
                                 <thead class="table-light">
                                     <tr>
                                       
-                                        <th scope="col">Photo</th>
-                                        <th scope="col">Nom Complet</th>
-                                        <th scope="col">Email</th>
-                                        <th scope="col">Rôle</th>
-                                        <th scope="col">Téléphone</th>
-                                        <th scope="col">Statut</th>
-                                        <th scope="col">Actions</th>
+                                    <th scope="col">Photo</th>
+<th scope="col">Full Name</th>
+<th scope="col">Email</th>
+<th scope="col">Role</th>
+<th scope="col">Phone Number</th>
+<th scope="col">Status</th>
+<th scope="col">Actions</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -68,28 +65,39 @@
                                         <tr>
                                            
                                             <td>
-                                                <img src="{{ asset(user.imageUrl) ? asset( user.imageUrl) : asset('assets/imgP/logo.png') }}"
-                                                     alt="Profile" class="rounded-circle" width="40" height="40">
+   
+
+<img src="{{ user.imageUrl is not empty ? asset(user.imageUrl) : asset('assets/imgP/logo2.png') }}" alt="Profile Image" class="rounded-circle" width="40" height="40">
 
                                                       
                                             </td>
                                             <td>{{ user.nom }} {{ user.prenom }}</td>
                                             <td>{{ user.email }}</td>
-                                            <td>
-                                                <span class="badge
-                                                    {% if 'ROLE_ADMIN' in user.roles %}bg-danger
-                                                    {% elseif 'ROLE_MANAGER' in user.roles %}bg-warning text-dark
-                                                    {% else %}bg-primary
-                                                    {% endif %}">
-                                                    {{ user.roles|first|replace({'ROLE_': ''}) }}
-                                                </span>
-                                            </td>
+                                           <td>
+    <span class="badge
+        {% if 'ADMIN' in user.role %}bg-danger
+        {% elseif 'USER' in user.role %}bg-primary
+        {% else %}bg-warning text-dark
+        {% endif %}">
+        {% if 'ADMIN' in user.role %}
+            Admin
+        {% elseif 'USER' in user.role %}
+            User
+        {% else %}
+            Project Manager
+        {% endif %}
+    </span>
+</td>
+
                                             <td>{{ user.numPhone }}</td>
                                             <td>
-                                                <span class="badge bg-{{ user.status ? 'success' : 'secondary' }}">
-                                                    {{ user.status ? 'Actif' : 'Inactif' }}
-                                                </span>
+                                               <span class="badge bg-{{ user.status == 'ACTIVE' ? 'success' : (user.status == 'BLOCKED' ? 'danger' : 'secondary') }}">
+                                                {{ user.status == 'ACTIVE' ? 'Actif' : (user.status == 'BLOCKED' ? 'Bloqué' : 'Inconnu') }}
+                                            </span>
+
                                             </td>
+
+                                            
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <button type="button"
