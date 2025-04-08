@@ -1,13 +1,11 @@
-{# templates/integration/adminshow.html.twig #}
 {% extends 'sideBar.html.twig' %}
-
 {% block title %}Project Details{% endblock %}
 
 {% block content %}
 <main id="main" class="main">
   <div class="pagetitle d-flex justify-content-between align-items-center">
     <div>
-      <h1>Project Details</h1>
+      <h1>{{ projet.titre }}</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="{{ path('') }}">Home</a></li>
@@ -17,39 +15,47 @@
       </nav>
     </div>
     <a href="{{ path('projet_list') }}" class="btn btn-secondary">
-      <i class="bi bi-arrow-left"></i> Back to the list
+      <i class="bi bi-arrow-left"></i> Back
     </a>
-  </div><!-- End Page Title -->
+  </div>
 
   <section class="section">
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <div class="card">
+        <div class="card mb-4">
           <div class="card-body">
-            <h5 class="card-title">{{ projet.titre }}</h5>
-            
-            <div class="row mb-3">
-              <div class="col-sm-3">Project Manager:</div>
-              <div class="col-sm-9">{{ projet.iduser.nom }} {{ projet.iduser.prenom }}</div>
-            </div>
-            
-            <div class="row">
-              <div class="col-sm-12">
-                <strong>Description:</strong>
-                <p class="mt-2">{{ projet.description }}</p>
-              </div>
-            </div>
-            
-            <div class="d-flex justify-content-end mt-4">
-              <a href="{{ path('projet_edit', {'idProjet': projet.idProjet}) }}" class="btn btn-warning me-2">
-                <i class="bi bi-pencil-square"></i> Edit
-              </a>
-              <a href="{{ path('projet_delete', {'idProjet': projet.idProjet}) }}" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this project?')">
-                <i class="bi bi-trash"></i> Delete
-              </a>
-            </div>
+            <h5 class="card-title">Project Information</h5>
+            <p><strong>Manager:</strong> {{ projet.iduser.nom }} {{ projet.iduser.prenom }}</p>
+            <p><strong>Description:</strong> {{ projet.description }}</p>
           </div>
         </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5>Tasks</h5>
+          <a href="{{ path('tache_new', {'idProjet': projet.idProjet}) }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add Task
+          </a>
+        </div>
+
+        {% for tache in taches %}
+          <div class="card mb-2">
+            <div class="card-body">
+              <h6>{{ tache.titre }} <span class="badge bg-info text-dark">{{ tache.status }}</span></h6>
+              <p>{{ tache.description }}</p>
+              <small>Assigned to: {{ tache.iduser.nom }} {{ tache.iduser.prenom }}</small>
+              <div class="mt-2 text-end">
+                <a href="{{ path('tache_edit', {'idTache': tache.idtache}) }}" class="btn btn-sm btn-warning me-1">
+                  <i class="bi bi-pencil"></i> Edit
+                </a>
+                <a href="{{ path('tache_delete', {'idTache': tache.idtache}) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this task?')">
+                  <i class="bi bi-trash"></i> Delete
+                </a>
+              </div>
+            </div>
+          </div>
+        {% else %}
+          <p class="text-muted">No tasks yet.</p>
+        {% endfor %}
       </div>
     </div>
   </section>

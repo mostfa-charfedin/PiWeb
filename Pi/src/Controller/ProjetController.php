@@ -3,9 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\Projet;
+use App\Entity\Tache;
+use App\Form\TacheType;
 use App\Entity\User;
 use App\Form\ProjetType;
 use App\Repository\ProjetRepository;
+use App\Repository\TacheRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -79,29 +82,39 @@ class ProjetController extends AbstractController
         ]);
     }
     
-    // Route for viewing a project
-    #[Route('1/{idProjet}', name: 'projet_show', requirements: ['idProjet' => '\d+'])]
-    public function show(int $idProjet, ProjetRepository $projetRepository, SessionInterface $session, EntityManagerInterface $em): Response
-    {
-        // Check if user is logged in
-        if (!$session->get('id')) {
-            return $this->redirectToRoute('login');
-        }
-        
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-        
-        $projet = $projetRepository->find($idProjet);
-        
-        if (!$projet) {
-            throw $this->createNotFoundException('Project not found');
-        }
-        
-        return $this->render('integration/adminshow.html.twig', [
-            'projet' => $projet,
-            'user' => $user,
-        ]);
+/**
+ * @Route("/pi/projet/{idProjet}", name="projet_show", requirements={"idProjet"="\d+"})
+ */
+public function show(
+    int $idProjet,
+    ProjetRepository $projetRepository,
+    TacheRepository $tacheRepository, // inject Task repo
+    SessionInterface $session,
+    EntityManagerInterface $em
+): Response {
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
     }
+
+    $userId = $session->get('id');
+    $user = $em->getRepository(User::class)->find($userId);
+
+    $projet = $projetRepository->find($idProjet);
+
+    if (!$projet) {
+        throw $this->createNotFoundException('Project not found');
+    }
+
+    // Get tasks for this project
+    $taches = $tacheRepository->findBy(['idprojet' => $projet]);
+
+    return $this->render('integration/adminshow.html.twig', [
+        'projet' => $projet,
+        'taches' => $taches,
+        'user' => $user,
+    ]);
+}
+
     
     // Route for editing a project
     #[Route('/{idProjet}', name: 'projet_edit', requirements: ['idProjet' => '\d+'])]
@@ -152,4 +165,113 @@ class ProjetController extends AbstractController
         
         return $this->redirectToRoute('projet_list');
     }
+    #[Route('/projet/{idProjet}/tache/new', name: 'tache_new')]
+public function createTache(
+    int $idProjet,
+    Request $request,
+    EntityManagerInterface $em,
+    ProjetRepository $projetRepository,
+    SessionInterface $session
+): Response {
+    // Check if user is logged in
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
+    }
+
+    $userId = $session->get('id');
+    $user = $em->getRepository(User::class)->find($userId);
+
+    $projet = $projetRepository->find($idProjet);
+    if (!$projet) {
+        throw $this->createNotFoundException('Project not found');
+    }
+
+    $tache = new Tache();
+    $tache->setIdprojet($projet);
+
+    $form = $this->createForm(TacheType::class, $tache);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $em->persist($tache);
+        $em->flush();
+
+        return $this->redirectToRoute('projet_show', ['idProjet' => $idProjet]);
+    }
+
+    return $this->render('integration/task_form.html.twig', [
+        'formTache' => $form->createView(),
+        'edit_mode' => false,
+        'user' => $user,
+        'projet' => $projet
+    ]);
+}
+#[Route('/tache/{idTache}/edit', name: 'tache_edit')]
+public function editTache(
+    int $idTache,
+    Request $request,
+    EntityManagerInterface $em,
+    TacheRepository $tacheRepository,
+    SessionInterface $session
+): Response {
+    // Check if user is logged in
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
+    }
+
+    $userId = $session->get('id');
+    $user = $em->getRepository(User::class)->find($userId);
+
+    $tache = $tacheRepository->find($idTache);
+    if (!$tache) {
+        throw $this->createNotFoundException('Task not found');
+    }
+
+    $form = $this->createForm(TacheType::class, $tache);
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted() && $form->isValid()) {
+        $em->flush();
+
+        return $this->redirectToRoute('projet_show', [
+            'idProjet' => $tache->getIdprojet()->getIdProjet()
+        ]);
+    }
+
+    return $this->render('integration/task_form.html.twig', [
+        'formTache' => $form->createView(),
+        'edit_mode' => true,
+        'user' => $user,
+        'projet' => $tache->getIdprojet()
+    ]);
+}
+#[Route('/tache/{idTache}/delete', name: 'tache_delete')]
+public function deleteTache(
+    int $idTache,
+    TacheRepository $tacheRepository,
+    EntityManagerInterface $em,
+    SessionInterface $session
+): Response {
+    // Check if user is logged in
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
+    }
+
+    $userId = $session->get('id');
+    $user = $em->getRepository(User::class)->find($userId);
+
+    $tache = $tacheRepository->find($idTache);
+    if (!$tache) {
+        throw $this->createNotFoundException('Task not found');
+    }
+
+    $projetId = $tache->getIdprojet()->getIdProjet();
+
+    $em->remove($tache);
+    $em->flush();
+
+    return $this->redirectToRoute('projet_show', ['idProjet' => $projetId]);
+}
+
+    
 }
