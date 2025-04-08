@@ -24,30 +24,30 @@ class Tache
     /**
      * @var string|null
      *
-     * @ORM\Column(name="titre", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="titre", type="string", length=255, nullable=true)
      */
-    private $titre = 'NULL';
+    private $titre;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="Description", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="Description", type="string", length=255, nullable=true)
      */
-    private $description = 'NULL';
+    private $description;
 
     /**
      * @var int|null
      *
-     * @ORM\Column(name="date", type="integer", nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="date", type="integer", nullable=true)
      */
-    private $date = NULL;
+    private $date;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="status", type="string", length=50, nullable=true, options={"default"="'on progress'"})
+     * @ORM\Column(name="status", type="string", length=50, nullable=true, options={"default"="on progress"})
      */
-    private $status = '\'on progress\'';
+    private $status = 'on progress'; // Correct default value
 
     /**
      * @var \User
@@ -69,5 +69,74 @@ class Tache
      */
     private $idprojet;
 
+    public function getIdtache(): ?int
+    {
+        return $this->idtache;
+    }
 
+    public function getTitre(): ?string
+    {
+        return $this->titre;
+    }
+
+    public function setTitre(?string $titre): self
+    {
+        $this->titre = $titre;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getDate(): ?int
+    {
+        return $this->date;
+    }
+
+    public function setDate(?int $date): self
+    {
+        $this->date = $date;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getIduser(): ?User
+    {
+        return $this->iduser;
+    }
+
+    public function setIduser(?User $iduser): self
+    {
+        $this->iduser = $iduser;
+        return $this;
+    }
+
+    public function getIdprojet(): ?Projet
+    {
+        return $this->idprojet;
+    }
+
+    public function setIdprojet(?Projet $idprojet): self
+    {
+        $this->idprojet = $idprojet;
+        return $this;
+    }
 }

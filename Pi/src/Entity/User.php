@@ -214,7 +214,7 @@ public function setStatus(UserStatus $status): self
     }
     
 
-    public function getRole(): string
+    public function getRole(): ?string
 {
     return $this->role;
 }
