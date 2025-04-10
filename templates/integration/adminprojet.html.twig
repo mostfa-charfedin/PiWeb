@@ -1,0 +1,67 @@
+{# templates/integration/adminprojet.html.twig #}
+  {% extends 'sideBar.html.twig' %}
+
+{% block title %}{% if edit_mode %}Edit Project{% else %}Create a Project{% endif %}{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center">
+    <div>
+      <h1>{% if edit_mode %}Edit Project{% else %}Create a Project{% endif %}</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{{ path('') }}">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('projet_list') }}">Projects</a></li>
+          <li class="breadcrumb-item active">{% if edit_mode %}Edit{% else %}New{% endif %}</li>
+        </ol>
+      </nav>
+    </div>
+    <a href="{{ path('projet_list') }}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i> Back to the list
+    </a>
+  </div><!-- End Page Title -->
+
+  <section class="section">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-body">
+            <div class="pt-4 pb-2">
+              <h5 class="card-title text-center pb-0 fs-4">{% if edit_mode %}Edit Project{% else %}Create a Project{% endif %}</h5>
+              <p class="text-center small">{% if edit_mode %}Update{% else %}Fill in{% endif %} the project information</p>
+            </div>
+
+            {{ form_start(formProjet, {'attr': {'class': 'row g-3 needs-validation', 'novalidate': 'novalidate'}}) }}
+
+              <div class="col-12">
+                {{ form_label(formProjet.titre, 'Title', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(formProjet.titre, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(formProjet.titre) }}
+              </div>
+
+              <div class="col-12">
+                {{ form_label(formProjet.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(formProjet.description, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                {{ form_errors(formProjet.description) }}
+              </div>
+
+              <div class="col-12">
+                {{ form_label(formProjet.iduser, 'Project Manager', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(formProjet.iduser, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(formProjet.iduser) }}
+              </div>
+
+              <div class="col-12 mt-3">
+                <button class="btn btn-primary w-100" type="submit">
+                  {% if edit_mode %}Update Project{% else %}Create Project{% endif %}
+                </button>
+              </div>
+
+            {{ form_end(formProjet) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
