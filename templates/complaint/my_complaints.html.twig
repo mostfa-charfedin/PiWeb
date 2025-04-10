@@ -1,0 +1,234 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block title %}My Complaints{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/complaint.css') }}">
+    <style>
+        .complaint-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .complaint-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .status-pending {
+            border-left-color: orange;
+        }
+        .status-resolved {
+            border-left-color: green;
+        }
+        .status-rejected {
+            border-left-color: red;
+        }
+        .btn-action {
+            margin-right: 5px;
+        }
+        .modal-dialog {
+            max-width: 600px;
+        }
+        .complaint-image {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .badge-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .badge-pending {
+            background-color: orange;
+            color: white;
+        }
+        .badge-resolved {
+            background-color: green;
+            color: white;
+        }
+        .badge-rejected {
+            background-color: red;
+            color: white;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <section>
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>My Complaints</h1>
+                <a href="{{ path('app_complaint_new') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> New Complaint
+                </a>
+            </div>
+
+            <div class="row">
+                {% for complaint in complaints %}
+                    <div class="col-lg-6 col-md-6">
+                        <div class="card complaint-card status-{{ complaint.getStatusText()|lower }}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h3 class="card-title">{{ complaint.subject }}</h3>
+                                    <span class="badge badge-{{ complaint.getStatusText()|lower }}">
+                                        {{ complaint.getStatusText() }}
+                                    </span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <p>{{ complaint.content|length > 100 ? complaint.content|slice(0, 100) ~ '...' : complaint.content }}</p>
+                                </div>
+
+                                <div class="text-muted small mb-3">
+                                    Submitted on {{ complaint.createdAt|date('Y-m-d H:i') }}
+                                    {% if complaint.respondedBy %}
+                                        <br>Response by: {{ complaint.respondedBy.prenom }} {{ complaint.respondedBy.nom }}
+                                    {% endif %}
+                                </div>
+
+                                <div class="d-flex">
+                                    <button class="btn btn-outline-primary btn-sm view-complaint"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#complaintModal"
+                                            data-complaint-id="{{ complaint.id }}"
+                                            data-complaint-subject="{{ complaint.subject }}"
+                                            data-complaint-content="{{ complaint.content }}"
+                                            data-complaint-status="{{ complaint.getStatusText() }}"
+                                            data-complaint-response="{{ complaint.response }}"
+                                            data-complaint-created="{{ complaint.createdAt|date('Y-m-d H:i') }}"
+                                            {% if complaint.respondedBy %}
+                                        data-complaint-responder="{{ complaint.respondedBy.prenom }} {{ complaint.respondedBy.nom }}"
+                                            {% endif %}>
+                                        <i class="fas fa-eye"></i> View Details
+                                    </button>
+
+                                    <div class="ms-auto">
+                                        <a href="{{ path('app_complaint_edit', {id: complaint.id}) }}"
+                                           class="btn btn-outline-secondary btn-sm btn-action">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
+                                        <form method="POST" action="{{ path('app_complaint_delete', {id: complaint.id}) }}"
+                                              class="d-inline delete-form" data-id="{{ complaint.id }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ complaint.id) }}">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info">No complaints found.</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Complaint Details Modal -->
+    <div class="modal fade" id="complaintModal" tabindex="-1" aria-labelledby="complaintModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="complaintModalLabel">Complaint Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h4 id="modal-complaint-subject" class="mb-3"></h4>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span class="badge" id="modal-complaint-status"></span>
+                        <small class="text-muted" id="modal-complaint-date"></small>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Details:</h5>
+                        <p id="modal-complaint-content" class="p-3 bg-light rounded"></p>
+                    </div>
+
+                    <div id="response-section" class="mb-3">
+                        <h5>Admin Response:</h5>
+                        <p id="modal-complaint-response" class="p-3 bg-light rounded"></p>
+                        <small class="text-muted" id="modal-complaint-responder"></small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Complaint Modal Handling
+            const complaintModal = document.getElementById('complaintModal');
+            if (complaintModal) {
+                complaintModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const modalTitle = complaintModal.querySelector('.modal-title');
+                    const modalSubject = complaintModal.querySelector('#modal-complaint-subject');
+                    const modalContent = complaintModal.querySelector('#modal-complaint-content');
+                    const modalStatus = complaintModal.querySelector('#modal-complaint-status');
+                    const modalDate = complaintModal.querySelector('#modal-complaint-date');
+                    const modalResponse = complaintModal.querySelector('#modal-complaint-response');
+                    const modalResponder = complaintModal.querySelector('#modal-complaint-responder');
+                    const responseSection = complaintModal.querySelector('#response-section');
+
+                    // Extract info from data-* attributes
+                    const subject = button.getAttribute('data-complaint-subject');
+                    const content = button.getAttribute('data-complaint-content');
+                    const status = button.getAttribute('data-complaint-status');
+                    const response = button.getAttribute('data-complaint-response');
+                    const date = button.getAttribute('data-complaint-created');
+                    const responder = button.getAttribute('data-complaint-responder');
+
+                    // Update modal content
+                    modalTitle.textContent = 'Complaint Details';
+                    modalSubject.textContent = subject;
+                    modalContent.textContent = content;
+                    modalStatus.textContent = status;
+                    modalDate.textContent = 'Submitted on: ' + date;
+
+                    // Set status color
+                    if (status === 'Pending') {
+                        modalStatus.className = 'badge badge-pending';
+                    } else if (status === 'Resolved') {
+                        modalStatus.className = 'badge badge-resolved';
+                    } else {
+                        modalStatus.className = 'badge badge-rejected';
+                    }
+
+                    // Handle response section
+                    if (response && response.trim() !== '') {
+                        modalResponse.textContent = response;
+                        if (responder) {
+                            modalResponder.textContent = 'Response by: ' + responder;
+                        }
+                        responseSection.style.display = 'block';
+                    } else {
+                        responseSection.style.display = 'none';
+                    }
+                });
+            }
+
+            // Delete confirmation
+            document.querySelectorAll(".delete-form").forEach(form => {
+                form.addEventListener("submit", function(event) {
+                    event.preventDefault();
+                    if (confirm("Are you sure you want to delete this complaint?")) {
+                        this.submit();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

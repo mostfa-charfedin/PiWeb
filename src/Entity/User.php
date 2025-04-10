@@ -169,4 +169,9 @@ class User
         }
         return $this;
     }
+    // In App\Entity\User.php
+    public function getFullName(): string
+    {
+        return trim($this->getPrenom() . ' ' . $this->getNom());
+    }
 }

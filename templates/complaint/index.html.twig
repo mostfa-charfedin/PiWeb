@@ -1,0 +1,135 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block title %}Complaints Management{% endblock %}
+
+{% block content %}
+    <main id="main" class="main">
+        <div class="pagetitle">
+            <h1>Complaints Management</h1>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item active">Complaints</li>
+                </ol>
+            </nav>
+        </div><!-- End Page Title -->
+
+        <section class="section">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">All Complaints</h5>
+                            <div class="mb-3">
+                                <a href="{{ path('app_complaint_new') }}" class="btn btn-primary">
+                                    <i class="bi bi-plus-circle"></i> Create New
+                                </a>
+                            </div>
+
+                            {% if complaints|length > 0 %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover datatable">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">ID</th>
+                                            <th scope="col">User</th>
+                                            <th scope="col">Subject</th>
+                                            <th scope="col">Status</th>
+                                            <th scope="col">Date</th>
+                                            <th scope="col" class="text-center">Actions</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for complaint in complaints %}
+                                            <tr>
+                                                <td>{{ complaint.id }}</td>
+                                                <td>{{ complaint.user.email }}</td>
+                                                <td>{{ complaint.subject|slice(0, 30) }}{% if complaint.subject|length > 30 %}...{% endif %}</td>
+                                                <td>
+                                                    <span class="badge bg-{{ complaint.status is null ? 'warning' : (complaint.status ? 'success' : 'danger') }}">
+                                                        {{ complaint.status is null ? 'Pending' : (complaint.status ? 'Resolved' : 'Rejected') }}
+                                                    </span>
+                                                </td>
+                                                <td>{{ complaint.createdAt|date('Y-m-d H:i') }}</td>
+                                                <td class="text-center">
+                                                    <div class="d-inline-flex gap-2">
+                                                        <!-- View Button -->
+                                                        <a href="{{ path('app_complaint_show', {'id': complaint.id}) }}"
+                                                           class="btn btn-info btn-sm"
+                                                           title="View Details">
+                                                            <i class="bi bi-eye"></i>
+                                                        </a>
+
+                                                        <!-- Edit Button -->
+                                                        <a href="{{ path('admin_complaint_edit_status', {'id': complaint.id}) }}"
+                                                           class="btn btn-primary btn-sm"
+                                                           title="Edit">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </a>
+
+                                                        <!-- Delete Button -->
+                                                        <form action="{{ path('app_complaint_delete', {'id': complaint.id}) }}"
+                                                              method="post"
+                                                              class="d-inline"
+                                                              onsubmit="return confirm('Are you sure you want to delete this complaint?')">
+                                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ complaint.id) }}">
+                                                            <button type="submit" class="btn btn-danger btn-sm" title="Delete">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info" role="alert">
+                                    <i class="bi bi-info-circle me-1"></i> No complaints found.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main><!-- End #main -->
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center">
+        <i class="bi bi-arrow-up-short"></i>
+    </a>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- Vendor CSS Files -->
+    <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+    <link href="{{ asset('assets/vendor/simple-datatables/style.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- Vendor JS Files -->
+    <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/simple-datatables/simple-datatables.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize datatable
+            const datatables = document.querySelectorAll('.datatable');
+            datatables.forEach(datatable => {
+                new simpleDatatables.DataTable(datatable, {
+                    perPage: 10,
+                    labels: {
+                        placeholder: "Search...",
+                        perPage: "{select} entries per page",
+                        noRows: "No entries found",
+                        info: "Showing {start} to {end} of {rows} entries"
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}
