@@ -122,18 +122,35 @@
       </ul>
     </li>
     <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-toggle="collapse" href="#posts-nav" aria-expanded="false">
+        <i class="bi bi-file-post"></i><span>Complaints</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="posts-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+        <li>
+          <a href="{{ path('app_complaint_new') }}">
+            <i class="bi bi-plus"></i><span>Add Complaint</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ path('app_complaint_my_complaints') }}">
+            <i class="bi bi-eye"></i><span>My Complaints</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+    <li class="nav-item">
       <a class="nav-link " data-bs-target="#tables-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-layout-text-window-reverse"></i><span>Tables</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="tables-nav" class="nav-content collapse show" data-bs-parent="#sidebar-nav">
         <li>
           <a href="{{ path('admindashboard_postes') }}">
-            <i class="bi bi-circle"></i><span>General Tables</span>
+            <i class="bi bi-circle"></i><span>Reported Postes</span>
           </a>
         </li>
         <li>
-          <a href="tables-data.html" class="active">
-            <i class="bi bi-circle"></i><span>Data Tables</span>
+          <a href="{{ path('app_complaint_index') }}">
+            <i class="bi bi-circle"></i><span>Complaints</span>
           </a>
         </li>
       </ul>

@@ -1,0 +1,67 @@
+.complaint-card {
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.complaint-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.bg-pending {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.bg-resolved {
+    background-color: #28a745;
+    color: white;
+}
+
+.bg-rejected {
+    background-color: #dc3545;
+    color: white;
+}
+
+.card-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.btn-action {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.modal-content {
+    border-radius: 10px;
+}
+
+.modal-header {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}

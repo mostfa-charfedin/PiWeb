@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250410180750 extends AbstractMigration
+final class Version20250410213630 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -25,6 +25,9 @@ final class Version20250410180750 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE comment (id INT AUTO_INCREMENT NOT NULL, user_id INT DEFAULT NULL, poste_id INT DEFAULT NULL, created_at DATETIME NOT NULL, contenu VARCHAR(255) DEFAULT NULL, INDEX IDX_9474526CA76ED395 (user_id), INDEX IDX_9474526CA0905086 (poste_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8MB4 COLLATE `UTF8MB4_unicode_ci` ENGINE = InnoDB
+        SQL);
+        $this->addSql(<<<'SQL'
+            CREATE TABLE complaint (id INT AUTO_INCREMENT NOT NULL, user_id INT NOT NULL, responded_by_id INT DEFAULT NULL, subject VARCHAR(255) NOT NULL, content LONGTEXT NOT NULL, status TINYINT(1) DEFAULT NULL, response LONGTEXT DEFAULT NULL, created_at DATETIME NOT NULL, INDEX IDX_5F2732B5A76ED395 (user_id), INDEX IDX_5F2732B5296135A7 (responded_by_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8MB4 COLLATE `UTF8MB4_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE `like` (id INT AUTO_INCREMENT NOT NULL, user_id INT DEFAULT NULL, poste_id INT DEFAULT NULL, INDEX IDX_AC6340B3A76ED395 (user_id), INDEX IDX_AC6340B3A0905086 (poste_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8MB4 COLLATE `UTF8MB4_unicode_ci` ENGINE = InnoDB
@@ -49,6 +52,12 @@ final class Version20250410180750 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE comment ADD CONSTRAINT FK_9474526CA0905086 FOREIGN KEY (poste_id) REFERENCES poste (id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE complaint ADD CONSTRAINT FK_5F2732B5A76ED395 FOREIGN KEY (user_id) REFERENCES `user` (id)
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE complaint ADD CONSTRAINT FK_5F2732B5296135A7 FOREIGN KEY (responded_by_id) REFERENCES `user` (id)
         SQL);
         $this->addSql(<<<'SQL'
             ALTER TABLE `like` ADD CONSTRAINT FK_AC6340B3A76ED395 FOREIGN KEY (user_id) REFERENCES `user` (id)
@@ -80,6 +89,12 @@ final class Version20250410180750 extends AbstractMigration
             ALTER TABLE comment DROP FOREIGN KEY FK_9474526CA0905086
         SQL);
         $this->addSql(<<<'SQL'
+            ALTER TABLE complaint DROP FOREIGN KEY FK_5F2732B5A76ED395
+        SQL);
+        $this->addSql(<<<'SQL'
+            ALTER TABLE complaint DROP FOREIGN KEY FK_5F2732B5296135A7
+        SQL);
+        $this->addSql(<<<'SQL'
             ALTER TABLE `like` DROP FOREIGN KEY FK_AC6340B3A76ED395
         SQL);
         $this->addSql(<<<'SQL'
@@ -102,6 +117,9 @@ final class Version20250410180750 extends AbstractMigration
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE comment
+        SQL);
+        $this->addSql(<<<'SQL'
+            DROP TABLE complaint
         SQL);
         $this->addSql(<<<'SQL'
             DROP TABLE `like`

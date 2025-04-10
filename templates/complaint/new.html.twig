@@ -1,0 +1,149 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block title %}New Complaint{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .complaint-form-container {
+            background-color: rgba(249, 249, 249, 0.9);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            margin: 30px auto;
+        }
+        .form-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+        textarea.form-control {
+            min-height: 150px;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .char-counter {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-align: right;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="complaint-form-container">
+            <h1 class="form-title">Create New Complaint</h1>
+
+            {{ form_start(form) }}
+
+            <div class="form-group">
+                {{ form_label(form.subject) }}
+                {{ form_widget(form.subject, {
+                    'attr': {
+                        'class': 'form-control',
+                        'placeholder': 'Enter complaint subject...',
+                        'maxlength': 150
+                    }
+                }) }}
+                <div class="char-counter">
+                    <span id="subject-counter">0</span>/150 characters
+                </div>
+                {{ form_errors(form.subject) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.content) }}
+                {{ form_widget(form.content, {
+                    'attr': {
+                        'class': 'form-control',
+                        'placeholder': 'Describe your complaint in detail...',
+                        'maxlength': 2000
+                    }
+                }) }}
+                <div class="char-counter">
+                    <span id="content-counter">0</span>/2000 characters
+                </div>
+                {{ form_errors(form.content) }}
+            </div>
+
+            {% if form.response is defined %}
+                <div class="form-group">
+                    {{ form_label(form.response) }}
+                    {{ form_widget(form.response, {
+                        'attr': {
+                            'class': 'form-control',
+                            'placeholder': 'Admin response...'
+                        }
+                    }) }}
+                    {{ form_errors(form.response) }}
+                </div>
+            {% endif %}
+
+            {% if form.status is defined %}
+                <div class="form-group">
+                    {{ form_label(form.status) }}
+                    {{ form_widget(form.status, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.status) }}
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Submit Complaint
+            </button>
+
+            {{ form_end(form) }}
+
+            <div class="text-center mt-3">
+                <a href="{{ path('app_complaint_index') }}" class="btn btn-link">
+                    <i class="fas fa-arrow-left"></i> Back to list
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Subject character counter
+            const subjectInput = document.getElementById('{{ form.subject.vars.id }}');
+            const subjectCounter = document.getElementById('subject-counter');
+
+            if (subjectInput && subjectCounter) {
+                subjectCounter.textContent = subjectInput.value.length;
+                subjectInput.addEventListener('input', function() {
+                    subjectCounter.textContent = this.value.length;
+                });
+            }
+
+            // Content character counter
+            const contentInput = document.getElementById('{{ form.content.vars.id }}');
+            const contentCounter = document.getElementById('content-counter');
+
+            if (contentInput && contentCounter) {
+                contentCounter.textContent = contentInput.value.length;
+                contentInput.addEventListener('input', function() {
+                    contentCounter.textContent = this.value.length;
+                });
+            }
+        });
+    </script>
+{% endblock %}
