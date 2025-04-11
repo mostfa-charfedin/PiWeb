@@ -9,6 +9,7 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -102,6 +103,24 @@ class ProgrammebienetreType extends AbstractType
                 'constraints' => [
                     new Assert\NotBlank([
                         'message' => 'Please select an administrator!'
+                    ])
+                ]
+            ])
+            ->add('date_programme', DateTimeType::class, [
+                'label' => 'Program Date and Time',
+                'widget' => 'single_text',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Select program date and time',
+                    'min' => (new \DateTime())->format('Y-m-d\TH:i')
+                ],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Veuillez sélectionner une date et une heure pour le programme!'
+                    ]),
+                    new Assert\GreaterThanOrEqual([
+                        'value' => 'now',
+                        'message' => 'La date et l\'heure du programme ne peuvent pas être dans le passé!'
                     ])
                 ]
             ])

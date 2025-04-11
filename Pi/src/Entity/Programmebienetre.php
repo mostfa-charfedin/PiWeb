@@ -53,6 +53,13 @@ class Programmebienetre
      */
     private $iduser;
 
+    /**
+     * @var \DateTime|null
+     *
+     * @ORM\Column(name="date_programme", type="date", nullable=false)
+     */
+    private $dateProgramme;
+
     public function getIdprogramme(): ?int
     {
         return $this->idprogramme;
@@ -99,6 +106,17 @@ class Programmebienetre
     public function setIduser(?\App\Entity\User $iduser): self
     {
         $this->iduser = $iduser;
+        return $this;
+    }
+
+    public function getDateProgramme(): ?\DateTimeInterface
+    {
+        return $this->dateProgramme;
+    }
+
+    public function setDateProgramme(?\DateTimeInterface $dateProgramme): self
+    {
+        $this->dateProgramme = $dateProgramme;
         return $this;
     }
 }
