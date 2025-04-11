@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use GuzzleHttp\Client; // Ajout de l'importation pour Guzzle
 
 #[Route('/poste')]
 final class PosteController extends AbstractController
@@ -225,6 +226,7 @@ final class PosteController extends AbstractController
             'categories' => $categoryRepository->findAll(),
         ]);
     }
+
     #[Route('/{id}', name: 'app_poste_show', methods: ['GET'])]
     public function show(Poste $poste): Response
     {
@@ -271,8 +273,6 @@ final class PosteController extends AbstractController
                         $oldImagePath = $this->getParameter('upload_directory').'/'.$poste->getImage();
                         if (file_exists($oldImagePath)) {
                             unlink($oldImagePath);
-
-
                         }
                     }
                     $poste->setImage($newFilename);
@@ -398,5 +398,85 @@ final class PosteController extends AbstractController
         }
 
         return $this->json(['comments' => $comments]);
+    }
+
+    #[Route('/comment/check-toxicity', name: 'check_comment_toxicity', methods: ['POST'])]
+    public function checkCommentToxicity(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $commentText = $data['content'] ?? '';
+
+        if (empty($commentText)) {
+            return new JsonResponse(['error' => 'Comment content is empty'], 400);
+        }
+
+        $apiKey = $this->getParameter('huggingface_api_key');
+        $apiUrl = 'https://api-inference.huggingface.co/models/unitary/toxic-bert';
+
+        $client = new Client();
+
+        try {
+            $response = $client->post($apiUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => [
+                    'inputs' => $commentText,
+                ],
+                'timeout' => 10, // Timeout pour éviter les blocages
+            ]);
+
+            $result = json_decode($response->getBody()->getContents(), true);
+
+            // Log pour debug (optionnel)
+            // error_log('Hugging Face Response: ' . print_r($result, true));
+
+            // Extraction du score de toxicité
+            $toxicityScore = 0.0;
+            if (is_array($result) && !empty($result)) {
+                foreach ($result[0] as $item) {
+                    if (isset($item['label']) && $item['label'] === 'toxic') {
+                        $toxicityScore = $item['score'];
+                        break;
+                    }
+                }
+            }
+
+            return new JsonResponse([
+                'isToxic' => $toxicityScore >= 0.8, // Seuil à 0.8 comme dans votre code Java
+                'score' => $toxicityScore,
+            ]);
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            $errorMessage = $e->hasResponse() ? $e->getResponse()->getBody()->getContents() : $e->getMessage();
+            return new JsonResponse(['error' => 'API request failed: ' . $errorMessage], 500);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Unexpected error: ' . $e->getMessage()], 500);
+        }
+    }
+    #[Route('/comment/report/{id}', name: 'comment_report', methods: ['POST'])]
+    public function reportComment(int $id, EntityManagerInterface $entityManager, SessionInterface $session): JsonResponse
+    {
+        $userId = $session->get('id');
+        if (!$userId) {
+            return new JsonResponse(['success' => false, 'message' => 'Utilisateur non authentifié'], 403);
+        }
+
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            $session->invalidate();
+            return new JsonResponse(['success' => false, 'message' => 'Utilisateur non trouvé'], 403);
+        }
+
+        $comment = $entityManager->getRepository(Comment::class)->find($id);
+        if (!$comment) {
+            return new JsonResponse(['success' => false, 'message' => 'Commentaire non trouvé'], 404);
+        }
+
+        $comment->setSignaled(true);
+        $entityManager->persist($comment);
+        $entityManager->flush();
+
+        return new JsonResponse(['success' => true, 'message' => 'Commentaire signalé avec succès']);
     }
 }

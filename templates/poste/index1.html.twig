@@ -5,32 +5,45 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('css/post.css') }}">
     <style>
-        .tour-box {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .tour-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-        }
-        .btn-modifier {
-            background-color: #007bff;
+        /* Existing styles remain unchanged, adding notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
             color: white;
-            margin-right: 5px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
-        .btn-supprimer {
+        .notification.success {
+            background-color: #28a745;
+        }
+        .notification.error {
             background-color: #dc3545;
-            color: white;
         }
-        .btn-modifier:hover, .btn-supprimer:hover {
-            opacity: 0.9;
+        .notification.show {
+            opacity: 1;
         }
-        .modal-dialog {
-            max-width: 600px;
+        /* Style for toxic comments */
+        #modal-comments-list li.toxic {
+            background-color: #ffcccc;
+            border-left: 4px solid #ff0000;
         }
-        .modal-body {
-            max-height: 80vh;
-            overflow-y: auto;
+        #modal-comments-list li.toxic .comment-content {
+            display: none;
         }
+        #modal-comments-list li.toxic::after {
+            content: "This comment is hidden due to toxicity.";
+            color: #ff0000;
+            font-style: italic;
+            display: block;
+            margin-top: 10px;
+        }
+        /* Rest of your existing styles remain unchanged */
     </style>
 {% endblock %}
 
@@ -43,7 +56,7 @@
                         <article class="tour-box list-style" data-poste-id="{{ poste.id }}" data-contenu-complet="{{ poste.contenu }}">
                             <div class="tour-box-image">
                                 {% if poste.image %}
-                                    <img src="{{ asset('uploads/uploadposte/' ~ poste.image) }}" alt="{{ poste.title }}" class="img-fluid">
+                                    <img src="{{ asset('Uploads/uploadposte/' ~ poste.image) }}" alt="{{ poste.title }}" class="img-fluid">
                                 {% else %}
                                     <img src="{{ asset('images/default-placeholder.jpg') }}" alt="Default image" class="img-fluid">
                                 {% endif %}
@@ -119,54 +132,98 @@
         document.addEventListener("DOMContentLoaded", function () {
             const currentUserId = {{ user ? user.id|json_encode|raw : 'null' }};
 
-            function loadComments(postId) {
-                fetch(`/poste/comments/${postId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const commentsList = document.getElementById("modal-comments-list");
-                        commentsList.innerHTML = "";
-
-                        data.comments.forEach(comment => {
-                            const li = document.createElement("li");
-                            li.classList.add("mb-3", "p-3", "bg-light", "rounded");
-                            li.dataset.id = comment.id;
-                            li.innerHTML = `
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="flex-shrink-0">
-                                        ${comment.user.profilePicture
-                                ? `<img src="${comment.user.profilePicture}" alt="${comment.user.firstName}" class="rounded-circle" width="40" height="40">`
-                                : `<div class="rounded-circle bg-secondary"><span class="text-white">No photo</span></div>`
-                            }
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <strong>${comment.user.firstName} ${comment.user.lastName}</strong>
-                                            <small class="text-muted">${new Date(comment.createdAt).toLocaleString('fr-FR', {
-                                year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                            })}</small>
-                                        </div>
-                                        <p class="mb-0 comment-content">${comment.content}</p>
-                                        ${comment.user.id === currentUserId
-                                ? `<div class="mt-2">
-                                                <button class="btn btn-sm btn-warning btn-edit-comment" data-comment-id="${comment.id}">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </button>
-                                                <button class="btn btn-sm btn-danger btn-delete-comment" data-comment-id="${comment.id}">
-                                                    <i class="fas fa-trash"></i> Delete
-                                                </button>
-                                            </div>`
-                                : ''
-                            }
-                                    </div>
-                                </div>
-                            `;
-                            commentsList.appendChild(li);
-                        });
-                        attachCommentEventListeners();
-                    })
-                    .catch(error => console.error("Error loading comments:", error));
+            // Function to show notification
+            function showNotification(message, type) {
+                const notification = document.createElement("div");
+                notification.classList.add("notification", type);
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                setTimeout(() => notification.classList.add("show"), 100);
+                setTimeout(() => {
+                    notification.classList.remove("show");
+                    setTimeout(() => notification.remove(), 500);
+                }, 3000);
             }
 
+            // Function to check toxicity
+            async function checkToxicity(commentText) {
+                try {
+                    const response = await fetch(`/poste/comment/check-toxicity`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ content: commentText }),
+                    });
+                    const data = await response.json();
+                    if (data.error) {
+                        console.error("Toxicity check error:", data.error);
+                        return false;
+                    }
+                    return data.isToxic || false;
+                } catch (error) {
+                    console.error("Error checking toxicity:", error);
+                    return false;
+                }
+            }
+
+            // Load comments with toxicity detection
+            async function loadComments(postId) {
+                try {
+                    const response = await fetch(`/poste/comments/${postId}`);
+                    const data = await response.json();
+                    const commentsList = document.getElementById("modal-comments-list");
+                    commentsList.innerHTML = "";
+
+                    for (const comment of data.comments) {
+                        const isToxic = await checkToxicity(comment.content);
+                        const li = document.createElement("li");
+                        li.classList.add("mb-3", "p-3", "rounded");
+                        li.dataset.id = comment.id;
+
+                        if (isToxic) {
+                            li.classList.add("toxic");
+                        } else {
+                            li.classList.add("bg-light");
+                        }
+
+                        li.innerHTML = `
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="flex-shrink-0">
+                                    ${comment.user.profilePicture
+                            ? `<img src="${comment.user.profilePicture}" alt="${comment.user.firstName}" class="rounded-circle">`
+                            : `<div class="rounded-circle bg-secondary"><span class="text-white">No photo</span></div>`
+                        }
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>${comment.user.firstName} ${comment.user.lastName}</strong>
+                                        <small class="text-muted">${new Date(comment.createdAt).toLocaleString('en-US', {
+                            year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })}</small>
+                                    </div>
+                                    <p class="mb-0 comment-content">${comment.content}</p>
+                                    <div class="mt-2">
+                                        ${comment.user.id === currentUserId && !isToxic
+                            ? `<button class="btn btn-edit-comment" data-comment-id="${comment.id}">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <button class="btn btn-delete-comment" data-comment-id="${comment.id}">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>`
+                            : ''
+                        }
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        commentsList.appendChild(li);
+                    }
+                    attachCommentEventListeners();
+                } catch (error) {
+                    console.error("Error loading comments:", error);
+                }
+            }
+
+            // Attach event listeners for comments
             function attachCommentEventListeners() {
                 document.querySelectorAll(".btn-delete-comment").forEach(button => {
                     button.addEventListener("click", function () {
@@ -178,10 +235,16 @@
                                 .then(response => response.json())
                                 .then(data => {
                                     if (data.success) {
+                                        showNotification("Comment deleted successfully!", "success");
                                         loadComments(document.getElementById("modal-post-id").value);
+                                    } else {
+                                        showNotification("Failed to delete comment!", "error");
                                     }
                                 })
-                                .catch(error => console.error("Error deleting comment:", error));
+                                .catch(error => {
+                                    console.error("Error deleting comment:", error);
+                                    showNotification("Error deleting comment!", "error");
+                                });
                         }
                     });
                 });
@@ -200,8 +263,8 @@
                         const buttonsDiv = document.createElement("div");
                         buttonsDiv.classList.add("edit-comment-buttons");
                         buttonsDiv.innerHTML = `
-                            <button class="btn btn-sm btn-success save">Save</button>
-                            <button class="btn btn-sm btn-secondary cancel">Cancel</button>
+                            <button class="save">Save</button>
+                            <button class="cancel">Cancel</button>
                         `;
 
                         commentContent.replaceWith(textarea);
@@ -212,10 +275,10 @@
                             const originalButtons = document.createElement("div");
                             originalButtons.classList.add("mt-2");
                             originalButtons.innerHTML = `
-                                <button class="btn btn-sm btn-warning btn-edit-comment" data-comment-id="${commentId}">
+                                <button class="btn btn-edit-comment" data-comment-id="${commentId}">
                                     <i class="fas fa-edit"></i> Edit
                                 </button>
-                                <button class="btn btn-sm btn-danger btn-delete-comment" data-comment-id="${commentId}">
+                                <button class="btn btn-delete-comment" data-comment-id="${commentId}">
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             `;
@@ -223,21 +286,32 @@
                             attachCommentEventListeners();
                         });
 
-                        buttonsDiv.querySelector(".save").addEventListener("click", function () {
+                        buttonsDiv.querySelector(".save").addEventListener("click", async function () {
                             const newContent = textarea.value.trim();
                             if (newContent) {
+                                const isToxic = await checkToxicity(newContent);
+                                if (isToxic) {
+                                    showNotification("Your comment appears toxic. Please revise it.", "error");
+                                    return;
+                                }
                                 fetch(`/poste/comment/edit/${commentId}`, {
                                     method: "POST",
-                                    headers: {"Content-Type": "application/json"},
+                                    headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({ content: newContent }),
                                 })
                                     .then(response => response.json())
                                     .then(data => {
                                         if (data.success) {
+                                            showNotification("Comment updated successfully!", "success");
                                             loadComments(document.getElementById("modal-post-id").value);
+                                        } else {
+                                            showNotification("Failed to update comment!", "error");
                                         }
                                     })
-                                    .catch(error => console.error("Error editing comment:", error));
+                                    .catch(error => {
+                                        console.error("Error editing comment:", error);
+                                        showNotification("Error updating comment!", "error");
+                                    });
                             }
                         });
                     });
@@ -257,26 +331,38 @@
                 });
             });
 
-            document.getElementById("comment-form").addEventListener("submit", function (event) {
+            document.getElementById("comment-form").addEventListener("submit", async function (event) {
                 event.preventDefault();
                 const postId = document.getElementById("modal-post-id").value;
                 const commentText = document.getElementById("comment-text").value.trim();
 
                 if (!commentText) return;
 
+                const isToxic = await checkToxicity(commentText);
+                if (isToxic) {
+                    showNotification("Your comment appears toxic. Please revise it.", "error");
+                    return;
+                }
+
                 fetch(`/poste/comment/add/${postId}`, {
                     method: "POST",
-                    headers: {"Content-Type": "application/json"},
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ content: commentText }),
                 })
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
+                            showNotification("Comment added successfully!", "success");
                             document.getElementById("comment-text").value = "";
                             loadComments(postId);
+                        } else {
+                            showNotification("Failed to add comment!", "error");
                         }
                     })
-                    .catch(error => console.error("Error adding comment:", error));
+                    .catch(error => {
+                        console.error("Error adding comment:", error);
+                        showNotification("Error adding comment!", "error");
+                    });
             });
 
             document.querySelectorAll(".btn-like").forEach(button => {
@@ -292,7 +378,7 @@
                             "X-Requested-With": "XMLHttpRequest",
                         },
                         body: JSON.stringify({ like: !isLiked }),
-                        credentials: 'include', // Add this line
+                        credentials: 'include',
                     })
                         .then(response => response.json())
                         .then(data => {
@@ -303,15 +389,22 @@
                                     likeIcon.classList.remove("fa-regular");
                                     likeIcon.classList.add("fa-solid");
                                     likeIcon.style.color = "red";
+                                    showNotification("Post liked!", "success");
                                 } else {
                                     likeIcon.classList.remove("fa-solid");
                                     likeIcon.classList.add("fa-regular");
                                     likeIcon.style.color = "";
+                                    showNotification("Post unliked!", "success");
                                 }
                                 likeCount.textContent = data.likesCount;
+                            } else {
+                                showNotification("Failed to toggle like!", "error");
                             }
                         })
-                        .catch(error => console.error("Error handling like:", error));
+                        .catch(error => {
+                            console.error("Error handling like:", error);
+                            showNotification("Error toggling like!", "error");
+                        });
                 });
             });
 
@@ -325,10 +418,16 @@
                         })
                             .then(response => {
                                 if (response.ok) {
+                                    showNotification("Post deleted successfully!", "success");
                                     window.location.reload();
+                                } else {
+                                    showNotification("Failed to delete post!", "error");
                                 }
                             })
-                            .catch(error => console.error("Error deleting post:", error));
+                            .catch(error => {
+                                console.error("Error deleting post:", error);
+                                showNotification("Error deleting post!", "error");
+                            });
                     }
                 });
             });

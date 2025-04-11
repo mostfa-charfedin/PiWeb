@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Comment; // Ajout de l'entité Comment
 use App\Entity\Message;
 use App\Entity\Poste;
+use App\Repository\CommentRepository; // Ajout du repository Comment
 use App\Repository\MessageRepository;
 use App\Repository\PosteRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,47 +18,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/admindashboard')]
 class BackController extends AbstractController
 {
-    // Gestion des messages signalés
-    #[Route('/messages', name: 'admindashboard_messages', methods: ['GET'])]
-    
-    public function reportedMessages(MessageRepository $messageRepository): Response
-    {
-        $messages = $messageRepository->findBy(['signaled' => true], ['createdAt' => 'ASC']);
-        return $this->render('back/messages.html.twig', [
-            'messages' => $messages,
-        ]);
-    }
-
-    #[Route('/messages/unreport/{id}', name: 'admin_unreport_message', methods: ['GET'])]
-    public function unreportMessage(MessageRepository $messageRepository, EntityManagerInterface $entityManager, int $id): RedirectResponse
-    {
-        $message = $messageRepository->find($id);
-
-        if (!$message) {
-            $this->addFlash('error', 'Message not found.');
-        } else {
-            $message->setSignaled(false);
-            $entityManager->flush();
-            $this->addFlash('success', 'Message unreported successfully.');
-        }
-
-        return $this->redirectToRoute('admindashboard_messages');
-    }
-
-    #[Route('/messages/delete/{id}', name: 'admindashboard_delete_message', methods: ['POST'])]
-    
-    public function deleteMessage(Message $message, EntityManagerInterface $entityManager): RedirectResponse
-    {
-        $entityManager->remove($message);
-        $entityManager->flush();
-
-        $this->addFlash('success', 'Message deleted successfully.');
-        return $this->redirectToRoute('admindashboard_messages');
-    }
-
     // Gestion des postes signalés
     #[Route('/postes', name: 'admindashboard_postes', methods: ['GET'])]
-    
     public function reportedPostes(PosteRepository $posteRepository): Response
     {
         $postes = $posteRepository->findBy(['signaled' => true]);
@@ -82,7 +45,6 @@ class BackController extends AbstractController
     }
 
     #[Route('/postes/delete/{id}', name: 'admindashboard_delete_poste', methods: ['POST'])]
-    
     public function deletePoste(Poste $poste, EntityManagerInterface $entityManager): RedirectResponse
     {
         $entityManager->remove($poste);
@@ -90,5 +52,41 @@ class BackController extends AbstractController
 
         $this->addFlash('success', 'Poste deleted successfully.');
         return $this->redirectToRoute('admindashboard_postes');
+    }
+
+    // Gestion des commentaires signalés
+    #[Route('/comments', name: 'admindashboard_comments', methods: ['GET'])]
+    public function reportedComments(CommentRepository $commentRepository): Response
+    {
+        $comments = $commentRepository->findBy(['signaled' => true]);
+        return $this->render('back/comments.html.twig', [
+            'comments' => $comments,
+        ]);
+    }
+
+    #[Route('/comments/unreport/{id}', name: 'admin_unreport_comment', methods: ['GET'])]
+    public function unreportComment(CommentRepository $commentRepository, EntityManagerInterface $entityManager, int $id): RedirectResponse
+    {
+        $comment = $commentRepository->find($id);
+
+        if (!$comment) {
+            $this->addFlash('error', 'Commentaire non trouvé.');
+        } else {
+            $comment->setSignaled(false);
+            $entityManager->flush();
+            $this->addFlash('success', 'Commentaire désignalé avec succès.');
+        }
+
+        return $this->redirectToRoute('admindashboard_comments');
+    }
+
+    #[Route('/comments/delete/{id}', name: 'admindashboard_delete_comment', methods: ['POST'])]
+    public function deleteComment(Comment $comment, EntityManagerInterface $entityManager): RedirectResponse
+    {
+        $entityManager->remove($comment);
+        $entityManager->flush();
+
+        $this->addFlash('success', 'Commentaire supprimé avec succès.');
+        return $this->redirectToRoute('admindashboard_comments');
     }
 }
