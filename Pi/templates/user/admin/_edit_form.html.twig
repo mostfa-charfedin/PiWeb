@@ -1,0 +1,149 @@
+
+                            
+                         <div class="container">
+    <div class="row justify-content-center">
+    
+        <div class="col-lg-8">
+            {{ form_start(form, {'attr': {'id': 'user-edit-form', 'class': 'row g-3'}}) }}
+            
+            <div class="card">
+                <div class="card-body">
+                <input type="hidden" name="_token" value="{{ csrf_token('user_update') }}">
+
+
+                    <!-- Formulaire -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        {{ form_widget(form.nom, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'First Name'
+                                            }
+                                        }) }}
+                                        <label for="{{ form.nom.vars.id }}">First Name</label>
+                                        {{ form_errors(form.nom) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-floating mb-3">
+                                        {{ form_widget(form.prenom, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'Last Name'
+                                            }
+                                        }) }}
+                                        <label for="{{ form.prenom.vars.id }}">Last Name</label>
+                                        {{ form_errors(form.prenom) }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-floating mb-3">
+                                {{ form_widget(form.email, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'placeholder': 'Email'
+                                    }
+                                }) }}
+                                <label for="{{ form.email.vars.id }}">Email</label>
+                                {{ form_errors(form.email) }}
+                            </div>
+                            
+                            <div class="col-mt-3">
+                                <div class="form-floating mb-3">
+                                    {{ form_widget(form.numPhone, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Phone'
+                                        }
+                                    }) }}
+                                    <label for="{{ form.numPhone.vars.id }}">Phone</label>
+                                    {{ form_errors(form.numPhone) }}
+                                </div>
+                            </div>
+                            
+                            <div class="col-mt-3">
+                                <div class="form-floating mb-3">
+                                    {{ form_widget(form.dateNaissance, {
+                                        'attr': {'class': 'form-control',
+                                            'placeholder': 'Date of birth'}
+                                    }) }}
+                                    <label for="{{ form.dateNaissance.vars.id }}">Date of birth</label>
+                                    {{ form_errors(form.dateNaissance) }}
+                                </div>
+                            </div>
+
+
+ <!-- Le champ Role -->
+                            <div class="col-mt-3">
+                                <div class="form-floating mb-3">
+                                    {{ form_widget(form.role, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Select Role'
+                                        }
+                                    }) }}
+                                    <label for="{{ form.role.vars.id }}">Role</label>
+                                    {{ form_errors(form.role) }}
+                                </div>
+                            </div>
+                          
+                            
+                            <!-- Le champ Status -->
+                            <div class="col-mt-3">
+                                <div class="form-floating mb-3">
+                                    {{ form_widget(form.status, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Select Status'
+                                        }
+                                    }) }}
+                                    <label for="{{ form.status.vars.id }}">Status</label>
+                                    {{ form_errors(form.status) }}
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-primary px-4">
+                                    <i class="bi bi-save"></i> Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+                            
+
+
+
+<style>
+    .form-control, .form-select {
+        border-radius: 0.375rem;
+        padding: 0.5rem 1rem;
+    }
+    .form-floating > .form-control {
+        padding: 1rem 0.75rem;
+    }
+    .form-floating > label {
+        padding: 0.75rem;
+    }
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+    .card {
+        border-radius: 0.5rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+</style>

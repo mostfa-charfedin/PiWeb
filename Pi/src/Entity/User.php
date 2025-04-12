@@ -1,9 +1,10 @@
 <?php
 
 namespace App\Entity;
-
+use App\Enum\UserStatus;
+use App\Enum\UserRole;
 use Doctrine\ORM\Mapping as ORM;
-use phpDocumentor\Reflection\Types\Boolean;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * User
@@ -11,7 +12,7 @@ use phpDocumentor\Reflection\Types\Boolean;
  * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="email", columns={"email"}), @ORM\UniqueConstraint(name="cin", columns={"cin"})})
  * @ORM\Entity
  */
-class User
+class User 
 {
     /**
      * @var int
@@ -23,77 +24,72 @@ class User
     private $id;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="nom", type="string", length=255, nullable=true, options={"default"="NULL"})
+
      */
     private $nom;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="prenom", type="string", length=255, nullable=true, options={"default"="NULL"})
+
      */
     private $prenom;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="email", type="string", length=255, nullable=true, options={"default"="NULL"})
+
      */
     private $email ;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="password", type="string", length=255, nullable=true, options={"default"="NULL"})
+
      */
     private $password ;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="cin", type="integer", nullable=true, options={"default"="NULL"})
+    
      */
     private $cin ;
 
     /**
-     * @var \DateTime|null
-     *
      * @ORM\Column(name="dateNaissance", type="date", nullable=true, options={"default"="NULL"})
+
      */
     private $datenaissance ;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="role", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="role", type="string", length=20, nullable=true, options={"default"="'USER'"})
      */
     private $role = 'USER';
-
 
     /**
      * @var string|null
      *
      * @ORM\Column(name="image_url", type="string", length=255, nullable=true, options={"default"="NULL"})
      */
-    private ?string $image_url; 
+    private ?string $image_url= null; 
     
 
-    /**
-     * @var int|null
-     *
-     * @ORM\Column(name="numPhone", type="integer", nullable=true)
+     /**
+     * @ORM\Column(type="integer")
+
      */
     private $numPhone;
 
-    /**
+
+/**
      * @var string|null
      *
      * @ORM\Column(name="status", type="string", length=20, nullable=true, options={"default"="'ACTIVE'"})
      */
-    private $status = '\'ACTIVE\'';
-
+    private $status = 'ACTIVE';
+  
+    
+    
     /**
      * @var \Doctrine\Common\Collections\Collection
      *
@@ -139,17 +135,23 @@ class User
 
         return $this;
     }
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
 
-    public function setStatus(string $status): self
-    {
-        $this->status = $status;
 
-        return $this;
-    }
+
+    
+    public function getStatus(): string
+{
+    return $this->status;
+}
+
+
+public function setStatus(UserStatus $status): self
+{
+    $this->status = $status->value; 
+    return $this;
+}
+
+
     public function getImageUrl(): ?string
     {
         return $this->image_url;
@@ -217,12 +219,15 @@ class User
     return $this->role;
 }
 
-    public function setRole(string $role): self
+
+    public function setRole(UserRole $role): self
     {
-        $this->role = $role;
+        $this->role = $role->value;
 
         return $this;
     }
+
+
     public function getPassword(): ?string
     {
         return $this->password;

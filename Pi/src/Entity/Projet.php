@@ -24,16 +24,16 @@ class Projet
     /**
      * @var string|null
      *
-     * @ORM\Column(name="titre", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="titre", type="string", length=255, nullable=true)
      */
-    private $titre = 'NULL';
+    private $titre;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="Description", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="Description", type="string", length=255, nullable=true)
      */
-    private $description = 'NULL';
+    private $description;
 
     /**
      * @var \User
@@ -45,5 +45,43 @@ class Projet
      */
     private $iduser;
 
+    // ✅ Getters and Setters
 
+    public function getIdprojet(): ?int
+    {
+        return $this->idprojet;
+    }
+
+    public function getTitre(): ?string
+    {
+        return $this->titre ?? '';
+    }
+
+    public function setTitre(?string $titre): self
+    {
+        $this->titre = $titre;
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description ?? '';
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    public function getIduser()
+    {
+        return $this->iduser;
+    }
+
+    public function setIduser($iduser): self
+    {
+        $this->iduser = $iduser;
+        return $this;
+    }
 }
