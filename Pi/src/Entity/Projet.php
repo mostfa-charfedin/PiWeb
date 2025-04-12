@@ -3,47 +3,27 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User;
 
-/**
- * Projet
- *
- * @ORM\Table(name="projet", indexes={@ORM\Index(name="idUser", columns={"idUser"})})
- * @ORM\Entity
- */
+#[ORM\Table(name: 'projet')]
+#[ORM\Index(name: 'idUser', columns: ['idUser'])]
+#[ORM\Entity]
 class Projet
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="idProjet", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $idprojet;
+    #[ORM\Column(name: 'idProjet', type: 'integer', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
+    private int $idprojet;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="titre", type="string", length=255, nullable=true)
-     */
-    private $titre;
+    #[ORM\Column(name: 'titre', type: 'string', length: 255, nullable: true)]
+    private ?string $titre = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="Description", type="string", length=255, nullable=true)
-     */
-    private $description;
+    #[ORM\Column(name: 'Description', type: 'string', length: 255, nullable: true)]
+    private ?string $description = null;
 
-    /**
-     * @var \User
-     *
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idUser", referencedColumnName="id")
-     * })
-     */
-    private $iduser;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'idUser', referencedColumnName: 'id')]
+    private ?User $iduser = null;
 
     // ✅ Getters and Setters
 
@@ -74,12 +54,12 @@ class Projet
         return $this;
     }
 
-    public function getIduser()
+    public function getIduser(): ?User
     {
         return $this->iduser;
     }
 
-    public function setIduser($iduser): self
+    public function setIduser(?User $iduser): self
     {
         $this->iduser = $iduser;
         return $this;

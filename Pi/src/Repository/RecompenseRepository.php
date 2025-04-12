@@ -38,4 +38,6 @@ class RecompenseRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+    // Add your custom repository methods here
 } 
