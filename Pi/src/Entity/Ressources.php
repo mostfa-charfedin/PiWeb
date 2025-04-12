@@ -54,7 +54,7 @@ class Ressources
      *
      * @ORM\Column(name="noteAverage", type="float", precision=10, scale=0, nullable=false)
      */
-    private $noteaverage = '0';
+    private $noteaverage = 0;
 
     /**
      * @var \User
@@ -66,5 +66,87 @@ class Ressources
      */
     private $id;
 
+    // Getter and Setter for $idresource
+    public function getIdresource(): ?int
+    {
+        return $this->idresource;
+    }
 
+    public function setIdresource(int $idresource): self
+    {
+        $this->idresource = $idresource;
+        return $this;
+    }
+
+    // Getter and Setter for $type
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): self
+    {
+        $this->type = $type;
+        return $this;
+    }
+
+    // Getter and Setter for $description
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): self
+    {
+        $this->description = $description;
+        return $this;
+    }
+
+    // Getter and Setter for $titre
+    public function getTitre(): ?string
+    {
+        return $this->titre;
+    }
+
+    public function setTitre(?string $titre): self
+    {
+        $this->titre = $titre;
+        return $this;
+    }
+
+    // Getter and Setter for $lien
+    public function getLien(): ?string
+    {
+        return $this->lien;
+    }
+
+    public function setLien(?string $lien): self
+    {
+        $this->lien = $lien;
+        return $this;
+    }
+
+    // Getter and Setter for $noteaverage
+    public function getNoteaverage(): float
+    {
+        return $this->noteaverage;
+    }
+
+    public function setNoteaverage(float $noteaverage): self
+    {
+        $this->noteaverage = $noteaverage;
+        return $this;
+    }
+
+    // Getter and Setter for $id (User)
+    public function getId(): ?\User
+    {
+        return $this->id;
+    }
+
+    public function setId(?\User $id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
 }
