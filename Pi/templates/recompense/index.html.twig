@@ -1,6 +1,11 @@
-{% extends 'sideBar.html.twig' %}
+{% extends 'sidebar.html.twig' %}
 
 {% block title %}Rewards List{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block content %}
 <main id="main" class="main">
@@ -8,34 +13,41 @@
     <h1>Rewards List</h1>
     <nav>
       <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ path('app_programmebienetre_index') }}">Home</a></li>
-        <li class="breadcrumb-item">Rewards</li>
-        <li class="breadcrumb-item active">List</li>
+        <li class="breadcrumb-item"><a href="{{ path('app_program_rewards') }}">Home</a></li>
+        <li class="breadcrumb-item active">Rewards</li>
       </ol>
     </nav>
-  </div>
+  </div><!-- End Page Title -->
 
   <section class="section">
     <div class="row">
       <div class="col-lg-12">
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">All Rewards</h5>
-            
-            <div class="table-responsive">
-              <table class="table table-hover datatable">
+            <div class="card-body">
+              <h5 class="card-title d-flex justify-content-between align-items-center">
+                All Rewards
+                <a href="{{ path('app_recompense_new') }}" class="btn btn-success btn-sm">
+                  <i class="bi bi-plus-lg"></i> Add New Reward
+                </a>
+              </h5>
+
+              <!-- Table with stripped rows -->
+              <table class="table table-striped">
                 <thead>
                   <tr>
-                    <th>Type</th>
-                    <th>Attribution Date</th>
-                    <th>Status</th>
-                    <th>Program</th>
-                    <th>Actions</th>
+                    <th scope="col">#</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Attribution Date</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Program</th>
+                    <th scope="col">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                {% for recompense in recompenses %}
+                  {% for recompense in recompenses %}
                   <tr>
+                    <th scope="row">{{ loop.index }}</th>
                     <td>{{ recompense.type }}</td>
                     <td>{{ recompense.dateattribution ? recompense.dateattribution|date('Y-m-d') : '' }}</td>
                     <td>
@@ -45,53 +57,52 @@
                     </td>
                     <td>{{ recompense.idprogramme ? recompense.idprogramme.titre : 'N/A' }}</td>
                     <td>
-                      <div class="btn-group" role="group">
-                        <a href="{{ path('app_recompense_show', {'idrecompense': recompense.idrecompense}) }}" 
-                           class="btn btn-primary btn-sm">
-                          <i class="bi bi-eye"></i>
-                        </a>
-                        <a href="{{ path('app_recompense_edit', {'idrecompense': recompense.idrecompense}) }}" 
-                           class="btn btn-warning btn-sm">
-                          <i class="bi bi-pencil"></i>
-                        </a>
-                        <form method="post" action="{{ path('app_recompense_delete', {'idrecompense': recompense.idrecompense}) }}" onsubmit="return confirm('Are you sure you want to delete this reward?');" style="display: inline;">
-                          <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ recompense.idrecompense) }}">
-                          <button class="btn btn-danger btn-sm">
-                            <i class="bi bi-trash"></i>
-                          </button>
-                        </form>
-                      </div>
+                      <a href="{{ path('app_recompense_show', {'idrecompense': recompense.idrecompense}) }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-eye"></i>
+                      </a>
+                      <a href="{{ path('app_recompense_edit', {'idrecompense': recompense.idrecompense}) }}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-pencil-square"></i>
+                      </a>
+                      <form method="post" action="{{ path('app_recompense_delete', {'idrecompense': recompense.idrecompense}) }}" style="display: inline-block;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ recompense.idrecompense) }}">
+                        <button class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this reward?');">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
                     </td>
                   </tr>
-                {% else %}
+                  {% else %}
                   <tr>
-                    <td colspan="5" class="text-center">No rewards found</td>
+                    <td colspan="6" class="text-center">No rewards found.</td>
                   </tr>
-                {% endfor %}
+                  {% endfor %}
                 </tbody>
               </table>
+              <!-- End Table with stripped rows -->
             </div>
           </div>
         </div>
       </div>
     </div>
   </section>
-</main>
+</main><!-- End #main -->
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add smooth fade-in animation for card
-            const card = document.querySelector('.card');
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                card.style.transition = 'all 0.3s ease';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, 100);
+            // Add smooth fade-in animation for table rows
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach((row, index) => {
+                row.style.opacity = '0';
+                row.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '1';
+                    row.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
         });
     </script>
 {% endblock %}

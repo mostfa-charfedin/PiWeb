@@ -105,6 +105,16 @@ class ProgrammebienetreRepository extends ServiceEntityRepository
         }
     }
 
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder('p')
+            ->leftJoin('p.iduser', 'u')
+            ->addSelect('u')
+            ->orderBy('p.titre', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
     // /**
     //  * @return Programmebienetre[] Returns an array of Programmebienetre objects
     //  */

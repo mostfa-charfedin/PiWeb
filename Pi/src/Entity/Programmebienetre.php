@@ -5,60 +5,31 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
 
-/**
- * Programmebienetre
- *
- * @ORM\Table(name="programmebienetre", indexes={@ORM\Index(name="idUser", columns={"idUser"})})
- * @ORM\Entity
- */
+#[ORM\Table(name: 'programmebienetre')]
+#[ORM\Index(name: 'idUser', columns: ['idUser'])]
+#[ORM\Entity]
 class Programmebienetre
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="idProgramme", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $idprogramme;
+    #[ORM\Column(name: 'idProgramme', type: 'integer', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
+    private int $idprogramme;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="titre", type="string", length=255, nullable=false)
-     */
-    private $titre;
+    #[ORM\Column(name: 'titre', type: 'string', length: 255, nullable: false)]
+    private ?string $titre = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="type", type="string", length=255, nullable=false)
-     */
-    private $type;
+    #[ORM\Column(name: 'type', type: 'string', length: 255, nullable: false)]
+    private ?string $type = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="description", type="string", length=255, nullable=false)
-     */
-    private $description;
+    #[ORM\Column(name: 'description', type: 'string', length: 255, nullable: false)]
+    private ?string $description = null;
 
-    /**
-     * @var \App\Entity\User|null
-     *
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idUser", referencedColumnName="id", nullable=false)
-     * })
-     */
-    private $iduser;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'idUser', referencedColumnName: 'id', nullable: false)]
+    private ?User $iduser = null;
 
-    /**
-     * @var \DateTime|null
-     *
-     * @ORM\Column(name="date_programme", type="date", nullable=false)
-     */
-    private $dateProgramme;
+    #[ORM\Column(name: 'date_programme', type: 'date', nullable: false)]
+    private ?\DateTimeInterface $dateProgramme = null;
 
     public function getIdprogramme(): ?int
     {
@@ -98,12 +69,12 @@ class Programmebienetre
         return $this;
     }
 
-    public function getIduser(): ?\App\Entity\User
+    public function getIduser(): ?User
     {
         return $this->iduser;
     }
 
-    public function setIduser(?\App\Entity\User $iduser): self
+    public function setIduser(?User $iduser): self
     {
         $this->iduser = $iduser;
         return $this;

@@ -2,59 +2,45 @@
 
 namespace App\Entity;
 
+use App\Repository\RecompenseRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * Recompense
- *
- * @ORM\Table(name="recompense", indexes={@ORM\Index(name="idProgramme", columns={"idProgramme"})})
- * @ORM\Entity
- */
+#[ORM\Entity(repositoryClass: RecompenseRepository::class)]
+#[ORM\Table(name: 'recompense')]
 class Recompense
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="idRecompense", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $idrecompense;
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(name: 'idRecompense', type: 'integer')]
+    private ?int $idrecompense = null;
 
-    /**
-     * @var \DateTime|null
-     *
-     * @ORM\Column(name="dateAttribution", type="date", nullable=true)
-     */
-    private $dateattribution = null;
+    #[ORM\Column(name: 'type', type: 'string', length: 255)]
+    private ?string $type = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="type", type="string", length=255, nullable=true)
-     */
-    private $type = null;
+    #[ORM\Column(name: 'dateAttribution', type: 'date', nullable: true)]
+    private ?\DateTimeInterface $dateattribution = null;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="statusRecompence", type="string", length=255, nullable=true)
-     */
-    private $statusrecompence = null;
+    #[ORM\Column(name: 'statusRecompence', type: 'string', length: 255, nullable: true)]
+    private ?string $statusrecompence = null;
 
-    /**
-     * @var \Programmebienetre
-     *
-     * @ORM\ManyToOne(targetEntity="Programmebienetre")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idProgramme", referencedColumnName="idProgramme")
-     * })
-     */
-    private $idprogramme;
+    #[ORM\ManyToOne(targetEntity: Programmebienetre::class)]
+    #[ORM\JoinColumn(name: 'idProgramme', referencedColumnName: 'idProgramme', nullable: false)]
+    private ?Programmebienetre $idprogramme = null;
 
     public function getIdrecompense(): ?int
     {
         return $this->idrecompense;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+        return $this;
     }
 
     public function getDateattribution(): ?\DateTimeInterface
@@ -65,17 +51,6 @@ class Recompense
     public function setDateattribution(?\DateTimeInterface $dateattribution): self
     {
         $this->dateattribution = $dateattribution;
-        return $this;
-    }
-
-    public function getType(): ?string
-    {
-        return $this->type;
-    }
-
-    public function setType(?string $type): self
-    {
-        $this->type = $type;
         return $this;
     }
 
@@ -90,12 +65,12 @@ class Recompense
         return $this;
     }
 
-    public function getIdprogramme(): ?\App\Entity\Programmebienetre
+    public function getIdprogramme(): ?Programmebienetre
     {
         return $this->idprogramme;
     }
 
-    public function setIdprogramme(?\App\Entity\Programmebienetre $idprogramme): self
+    public function setIdprogramme(?Programmebienetre $idprogramme): self
     {
         $this->idprogramme = $idprogramme;
         return $this;

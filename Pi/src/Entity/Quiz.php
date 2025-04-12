@@ -4,58 +4,75 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * Quiz
- *
- * @ORM\Table(name="quiz")
- * @ORM\Entity
- */
+#[ORM\Table(name: 'quiz')]
+#[ORM\Entity]
 class Quiz
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="idQuiz", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $idquiz;
+    #[ORM\Column(name: 'idQuiz', type: 'integer', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
+    private int $idquiz;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="nom", type="string", length=255, nullable=true, options={"default"="NULL"})
-     */
-    private $nom = 'NULL';
+    #[ORM\Column(name: 'nom', type: 'string', length: 255, nullable: true)]
+    private ?string $nom = null;
 
-    /**
-     * @var \DateTime|null
-     *
-     * @ORM\Column(name="dateCreation", type="date", nullable=true, options={"default"="NULL"})
-     */
-    private $datecreation = 'NULL';
+    #[ORM\Column(name: 'dateCreation', type: 'date', nullable: true)]
+    private ?\DateTimeInterface $datecreation = null;
 
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="User", inversedBy="idquiz")
-     * @ORM\JoinTable(name="score",
-     *   joinColumns={
-     *     @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz")
-     *   },
-     *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="idUser", referencedColumnName="id")
-     *   }
-     * )
-     */
-    private $iduser = array();
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'idquiz')]
+    #[ORM\JoinTable(name: 'score')]
+    #[ORM\JoinColumn(name: 'idQuiz', referencedColumnName: 'idQuiz')]
+    #[ORM\InverseJoinColumn(name: 'idUser', referencedColumnName: 'id')]
+    private \Doctrine\Common\Collections\Collection $iduser;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         $this->iduser = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
+    public function getIdquiz(): ?int
+    {
+        return $this->idquiz;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(?string $nom): self
+    {
+        $this->nom = $nom;
+        return $this;
+    }
+
+    public function getDatecreation(): ?\DateTimeInterface
+    {
+        return $this->datecreation;
+    }
+
+    public function setDatecreation(?\DateTimeInterface $datecreation): self
+    {
+        $this->datecreation = $datecreation;
+        return $this;
+    }
+
+    public function getIduser(): \Doctrine\Common\Collections\Collection
+    {
+        return $this->iduser;
+    }
+
+    public function addIduser(User $iduser): self
+    {
+        if (!$this->iduser->contains($iduser)) {
+            $this->iduser[] = $iduser;
+        }
+        return $this;
+    }
+
+    public function removeIduser(User $iduser): self
+    {
+        $this->iduser->removeElement($iduser);
+        return $this;
+    }
 }

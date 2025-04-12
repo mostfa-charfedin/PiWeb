@@ -6,114 +6,67 @@ use App\Enum\UserRole;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * User
- *
- * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="email", columns={"email"}), @ORM\UniqueConstraint(name="cin", columns={"cin"})})
- * @ORM\Entity
- */
+#[ORM\Table(name: 'user')]
+#[ORM\UniqueConstraint(name: 'email', columns: ['email'])]
+#[ORM\UniqueConstraint(name: 'cin', columns: ['cin'])]
+#[ORM\Entity]
 class User 
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $id;
+    #[ORM\Column(name: 'id', type: 'integer', nullable: false)]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
+    private int $id;
 
-    /**
-     * @ORM\Column(name="nom", type="string", length=255, nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: 'nom', type: 'string', length: 255, nullable: true)]
+    private ?string $nom = null;
 
-     */
-    private $nom;
+    #[ORM\Column(name: 'prenom', type: 'string', length: 255, nullable: true)]
+    private ?string $prenom = null;
 
-    /**
-     * @ORM\Column(name="prenom", type="string", length=255, nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: 'email', type: 'string', length: 255, nullable: true)]
+    private ?string $email = null;
 
-     */
-    private $prenom;
+    #[ORM\Column(name: 'password', type: 'string', length: 255, nullable: true)]
+    private ?string $password = null;
 
-    /**
-     * @ORM\Column(name="email", type="string", length=255, nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: 'cin', type: 'integer', nullable: true)]
+    private ?int $cin = null;
 
-     */
-    private $email ;
+    #[ORM\Column(name: 'dateNaissance', type: 'date', nullable: true)]
+    private ?\DateTimeInterface $datenaissance = null;
 
-    /**
-     * @ORM\Column(name="password", type="string", length=255, nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: 'role', type: 'string', length: 20, nullable: true, options: ['default' => 'USER'])]
+    private string $role = 'USER';
 
-     */
-    private $password ;
+    #[ORM\Column(name: 'image_url', type: 'string', length: 255, nullable: true)]
+    private ?string $image_url = null;
 
-    /**
-     * @ORM\Column(name="cin", type="integer", nullable=true, options={"default"="NULL"})
-    
-     */
-    private $cin ;
+    #[ORM\Column(type: 'integer')]
+    private int $numPhone;
 
-    /**
-     * @ORM\Column(name="dateNaissance", type="date", nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: 'status', type: 'string', length: 20, nullable: true, options: ['default' => 'ACTIVE'])]
+    private string $status = 'ACTIVE';
 
-     */
-    private $datenaissance ;
+    #[ORM\ManyToMany(targetEntity: Quiz::class, mappedBy: 'iduser')]
+    private \Doctrine\Common\Collections\Collection $idquiz;
 
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="role", type="string", length=20, nullable=true, options={"default"="'USER'"})
-     */
-    private $role = 'USER';
-
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="image_url", type="string", length=255, nullable=true, options={"default"="NULL"})
-     */
-    private ?string $image_url= null; 
-    
-
-     /**
-     * @ORM\Column(type="integer")
-
-     */
-    private $numPhone;
-
-
-/**
-     * @var string|null
-     *
-     * @ORM\Column(name="status", type="string", length=20, nullable=true, options={"default"="'ACTIVE'"})
-     */
-    private $status = 'ACTIVE';
-  
-    
-    
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="Quiz", mappedBy="iduser")
-     */
-    private $idquiz = array();
-
-    /**
-     * Constructor
-     */
     public function __construct()
     {
         $this->idquiz = new \Doctrine\Common\Collections\ArrayCollection();
     }
+
     public function getId(): ?int
     {
         return $this->id;
     }
+
     public function setId(int $id): self
     {
         $this->id = $id;
 
         return $this;
     }
+
     public function getNumPhone(): ?int
     {
         return $this->numPhone;
@@ -125,10 +78,12 @@ class User
 
         return $this;
     }
+
     public function getCin(): ?int
     {
         return $this->cin;
     }
+
     public function setCin(int $cin): self
     {
         $this->cin = $cin;
@@ -136,35 +91,28 @@ class User
         return $this;
     }
 
-
-
-    
     public function getStatus(): string
-{
-    return $this->status;
-}
+    {
+        return $this->status;
+    }
 
-
-public function setStatus(UserStatus $status): self
-{
-    $this->status = $status->value; 
-    return $this;
-}
-
+    public function setStatus(UserStatus $status): self
+    {
+        $this->status = $status->value; 
+        return $this;
+    }
 
     public function getImageUrl(): ?string
     {
         return $this->image_url;
     }
     
-    
     public function setImageUrl(?string $image_url): self
-{
-    $this->image_url = $image_url;
-    return $this;
-}
+    {
+        $this->image_url = $image_url;
+        return $this;
+    }
     
-
     public function getNom(): ?string
     {
         return $this->nom;
@@ -200,6 +148,7 @@ public function setStatus(UserStatus $status): self
 
         return $this;
     }
+
     public function getRoles(): string
     {
         // Ensure roles from the database are prefixed with "ROLE_"
@@ -213,12 +162,10 @@ public function setStatus(UserStatus $status): self
         return implode(',', array_unique($roles));
     }
     
-
     public function getRole(): ?string
-{
-    return $this->role;
-}
-
+    {
+        return $this->role;
+    }
 
     public function setRole(UserRole $role): self
     {
@@ -227,23 +174,22 @@ public function setStatus(UserStatus $status): self
         return $this;
     }
 
-
     public function getPassword(): ?string
     {
         return $this->password;
     }
+
     public function getDatenaissance(): ?\DateTimeInterface
-{
-    return $this->datenaissance;
-}
+    {
+        return $this->datenaissance;
+    }
 
-public function setDatenaissance(?\DateTimeInterface $datenaissance): self
-{
-    $this->datenaissance = $datenaissance;
+    public function setDatenaissance(?\DateTimeInterface $datenaissance): self
+    {
+        $this->datenaissance = $datenaissance;
 
-    return $this;
-}
-
+        return $this;
+    }
 
     public function setPassword(string $password): self
     {
