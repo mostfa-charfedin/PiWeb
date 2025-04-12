@@ -5,6 +5,8 @@ use App\Enum\UserStatus;
 use App\Enum\UserRole;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * User
@@ -12,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="email", columns={"email"}), @ORM\UniqueConstraint(name="cin", columns={"cin"})})
  * @ORM\Entity
  */
-class User 
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     /**
      * @var int
@@ -200,17 +202,16 @@ public function setStatus(UserStatus $status): self
 
         return $this;
     }
-    public function getRoles(): string
+    public function getRoles(): array
     {
-        // Ensure roles from the database are prefixed with "ROLE_"
-        $roles = $this->role ? [$this->role] : [];
-    
-        // Convert "user" to "ROLE_USER"
-        $roles = array_map(fn($role) => strtoupper($role), $roles);
-        $roles = array_map(fn($role) => str_starts_with($role, 'ROLE_') ? $role : 'ROLE_' . $role, $roles);
-    
-        // Remove duplicates and join the roles as a string, separated by commas
-        return implode(',', array_unique($roles));
+        $role = $this->role ?: '';
+        $role = strtoupper($role);
+        
+        if (!empty($role) && !str_starts_with($role, 'ROLE_')) {
+            $role = 'ROLE_' . $role;
+        }
+        
+        return empty($role) ? ['ROLE_USER'] : [$role];
     }
     
 
@@ -218,6 +219,7 @@ public function setStatus(UserStatus $status): self
 {
     return $this->role;
 }
+
 
 
     public function setRole(UserRole $role): self
@@ -228,10 +230,6 @@ public function setStatus(UserStatus $status): self
     }
 
 
-    public function getPassword(): ?string
-    {
-        return $this->password;
-    }
     public function getDatenaissance(): ?\DateTimeInterface
 {
     return $this->datenaissance;
@@ -245,10 +243,35 @@ public function setDatenaissance(?\DateTimeInterface $datenaissance): self
 }
 
 
+public function getPassword(): ?string
+{
+    return $this->password;
+}
     public function setPassword(string $password): self
     {
         $this->password = $password;
 
         return $this;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+    
+    public function getSalt(): ?string
+    {
+        return null; // Not needed when using modern hashing algorithms
+    }
+
+    public function eraseCredentials(): void
+    {
+        // If you store any temporary sensitive data on the user, clear it here
+        // $this->plainPassword = null;
+    }
+
+    public function getUsername(): string
+    {
+        return $this->getUserIdentifier();
     }
 }

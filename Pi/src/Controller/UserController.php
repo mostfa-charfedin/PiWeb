@@ -25,10 +25,8 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use App\Enum\UserStatus;
 use App\Enum\UserRole;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\Choice;
-use Symfony\Component\Form\FormErrorIterator;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 
 class UserController extends AbstractController
@@ -143,45 +141,59 @@ class UserController extends AbstractController
     }
         
 
-
- /**
+    
+/**
  * @Route("/login", name="login", methods={"GET", "POST"})
  */
-public function login(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
-{
-    $error = $request->getSession()->get('login_error');
-    
-    $user = new User();
-    $form = $this->createForm(LoginformType::class, $user);
+public function login(
+    Request $request,
+    EntityManagerInterface $entityManager,
+    UserPasswordHasherInterface $passwordHasher,
+    SessionInterface $session
+): Response {
+    $form = $this->createForm(LoginFormType::class);
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
+        // Méthode 1: Accès direct aux champs (recommandée)
+        $email = $form->get('email')->getData();
+        $password = $form->get('password')->getData();
 
-        // Récupérer l'utilisateur par email
-        $existingUser = $entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
+        // Méthode alternative 2: Via getData()
+        // $credentials = $form->getData();
+        // $email = $credentials['email'];
+        // $password = $credentials['password'];
 
-        // Vérifier l'existence et le mot de passe
-        if (!$existingUser || $existingUser->getPassword() !== $form->get('password')->getData()) {
-            $this->addFlash('error', 'Invalid email or password.');
+        // Debug: Vérifiez les valeurs
+        // dd($email, $password);
+
+        $user = $entityManager->getRepository(User::class)
+            ->findOneBy(['email' => $email]);
+
+        if (!$user) {
+            $this->addFlash('error', 'Aucun utilisateur trouvé avec cet email');
             return $this->redirectToRoute('login');
         }
 
-        // 🔒 Vérifier si le compte est bloqué
-        if ($existingUser->getStatus() !== 'ACTIVE') {
-            $this->addFlash('error', 'Your account is blocked.');
+        if (!$passwordHasher->isPasswordValid($user, $password)) {
+            $this->addFlash('error', 'Mot de passe incorrect');
             return $this->redirectToRoute('login');
         }
 
-        // ✅ Connexion réussie : stocker les infos en session
-        $session->set('id', $existingUser->getId());
-        $session->set('role', $existingUser->getRoles());
+        if ($user->getStatus() !== 'ACTIVE') {
+            $this->addFlash('error', 'Compte désactivé');
+            return $this->redirectToRoute('login');
+        }
 
+    
+       $session->set('id', $user->getId());
+       $session->set('role', $user->getRole());
         return $this->redirectToRoute('profile');
     }
 
     return $this->render('user/login.html.twig', [
         'form' => $form->createView(),
-        'error' => $error,
+        'error' => null
     ]);
 }
 

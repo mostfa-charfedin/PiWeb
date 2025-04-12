@@ -2,8 +2,8 @@ security:
     # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
          App\Entity\User:
-            algorithm: bcrypt
-            cost: 12 # Ajustez le coût selon vos besoins
+            algorithm: 'auto'
+            cost: 10 # Ajustez le coût selon vos besoins
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
          app_user_provider:
