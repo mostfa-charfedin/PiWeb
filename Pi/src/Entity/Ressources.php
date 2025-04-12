@@ -66,5 +66,82 @@ class Ressources
      */
     private $id;
 
+    public function getIdresource(): ?int
+    {
+        return $this->idresource;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): static
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getTitre(): ?string
+    {
+        return $this->titre;
+    }
+
+    public function setTitre(?string $titre): static
+    {
+        $this->titre = $titre;
+
+        return $this;
+    }
+
+    public function getLien(): ?string
+    {
+        return $this->lien;
+    }
+
+    public function setLien(?string $lien): static
+    {
+        $this->lien = $lien;
+
+        return $this;
+    }
+
+    public function getNoteaverage(): ?float
+    {
+        return $this->noteaverage;
+    }
+
+    public function setNoteaverage(float $noteaverage): static
+    {
+        $this->noteaverage = $noteaverage;
+
+        return $this;
+    }
+
+    public function getId(): ?User
+    {
+        return $this->id;
+    }
+
+    public function setId(?User $id): static
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
 
 }

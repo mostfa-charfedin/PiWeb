@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -48,6 +49,59 @@ class Avis
      * @ORM\Column(name="commentaire", type="text", length=65535, nullable=true, options={"default"="NULL"})
      */
     private $commentaire = 'NULL';
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getIdprogramme(): ?int
+    {
+        return $this->idprogramme;
+    }
+
+    public function setIdprogramme(?int $idprogramme): static
+    {
+        $this->idprogramme = $idprogramme;
+
+        return $this;
+    }
+
+    public function getIduser(): ?int
+    {
+        return $this->iduser;
+    }
+
+    public function setIduser(?int $iduser): static
+    {
+        $this->iduser = $iduser;
+
+        return $this;
+    }
+
+    public function getRating(): ?int
+    {
+        return $this->rating;
+    }
+
+    public function setRating(?int $rating): static
+    {
+        $this->rating = $rating;
+
+        return $this;
+    }
+
+    public function getCommentaire(): ?string
+    {
+        return $this->commentaire;
+    }
+
+    public function setCommentaire(?string $commentaire): static
+    {
+        $this->commentaire = $commentaire;
+
+        return $this;
+    }
 
 
 }

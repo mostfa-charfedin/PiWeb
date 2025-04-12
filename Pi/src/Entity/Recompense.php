@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Programmebienetre; // ✅ Ajout de l'importation de Programmebienetre
 
 /**
  * Recompense
@@ -24,33 +26,84 @@ class Recompense
     /**
      * @var \DateTime|null
      *
-     * @ORM\Column(name="dateAttribution", type="date", nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="dateAttribution", type="date", nullable=true)
      */
-    private $dateattribution = 'NULL';
+    private $dateattribution = null;  // Définir null au lieu de 'NULL'
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="type", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="type", type="string", length=255, nullable=true)
      */
-    private $type = 'NULL';
+    private ?string $type = null;  // Définir null au lieu de 'NULL'
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="statusRecompence", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="statusRecompence", type="string", length=255, nullable=true)
      */
-    private $statusrecompence = 'NULL';
+    private ?string $statusrecompence = null;  // Définir null au lieu de 'NULL'
 
     /**
-     * @var \Programmebienetre
+     * @var Programmebienetre|null
      *
-     * @ORM\ManyToOne(targetEntity="Programmebienetre")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Programmebienetre")
      * @ORM\JoinColumns({
      *   @ORM\JoinColumn(name="idProgramme", referencedColumnName="idProgramme")
      * })
      */
     private $idprogramme;
 
+    public function getIdrecompense(): ?int
+    {
+        return $this->idrecompense;
+    }
 
+    public function getDateattribution(): ?\DateTimeInterface
+    {
+        return $this->dateattribution;
+    }
+
+    public function setDateattribution(?\DateTimeInterface $dateattribution): static
+    {
+        $this->dateattribution = $dateattribution;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): static
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getStatusrecompence(): ?string
+    {
+        return $this->statusrecompence;
+    }
+
+    public function setStatusrecompence(?string $statusrecompence): static
+    {
+        $this->statusrecompence = $statusrecompence;
+
+        return $this;
+    }
+
+    public function getIdprogramme(): ?Programmebienetre
+    {
+        return $this->idprogramme;
+    }
+
+    public function setIdprogramme(?Programmebienetre $idprogramme): static
+    {
+        $this->idprogramme = $idprogramme;
+
+        return $this;
+    }
 }

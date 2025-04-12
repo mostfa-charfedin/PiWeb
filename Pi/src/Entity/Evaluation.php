@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -48,6 +49,59 @@ class Evaluation
      * @ORM\Column(name="dateEvaluation", type="datetime", nullable=false, options={"default"="current_timestamp()"})
      */
     private $dateevaluation = 'current_timestamp()';
+
+    public function getIdevaluation(): ?int
+    {
+        return $this->idevaluation;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function setId(int $id): static
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
+    public function getIdresource(): ?int
+    {
+        return $this->idresource;
+    }
+
+    public function setIdresource(int $idresource): static
+    {
+        $this->idresource = $idresource;
+
+        return $this;
+    }
+
+    public function getNote(): ?int
+    {
+        return $this->note;
+    }
+
+    public function setNote(?int $note): static
+    {
+        $this->note = $note;
+
+        return $this;
+    }
+
+    public function getDateevaluation(): ?\DateTimeInterface
+    {
+        return $this->dateevaluation;
+    }
+
+    public function setDateevaluation(\DateTimeInterface $dateevaluation): static
+    {
+        $this->dateevaluation = $dateevaluation;
+
+        return $this;
+    }
 
 
 }

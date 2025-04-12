@@ -3,6 +3,9 @@
 namespace App\Entity;
 use App\Enum\UserStatus;
 use App\Enum\UserRole;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -248,6 +251,33 @@ public function setDatenaissance(?\DateTimeInterface $datenaissance): self
     public function setPassword(string $password): self
     {
         $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Quiz>
+     */
+    public function getIdquiz(): Collection
+    {
+        return $this->idquiz;
+    }
+
+    public function addIdquiz(Quiz $idquiz): static
+    {
+        if (!$this->idquiz->contains($idquiz)) {
+            $this->idquiz->add($idquiz);
+            $idquiz->addIduser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIdquiz(Quiz $idquiz): static
+    {
+        if ($this->idquiz->removeElement($idquiz)) {
+            $idquiz->removeIduser($this);
+        }
 
         return $this;
     }

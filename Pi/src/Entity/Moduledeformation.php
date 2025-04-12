@@ -35,5 +35,34 @@ class Moduledeformation
      */
     private $sujet = 'NULL';
 
+    public function getIdmodule(): ?int
+    {
+        return $this->idmodule;
+    }
+
+    public function getTitre(): ?string
+    {
+        return $this->titre;
+    }
+
+    public function setTitre(?string $titre): static
+    {
+        $this->titre = $titre;
+
+        return $this;
+    }
+
+    public function getSujet(): ?string
+    {
+        return $this->sujet;
+    }
+
+    public function setSujet(?string $sujet): static
+    {
+        $this->sujet = $sujet;
+
+        return $this;
+    }
+
 
 }
