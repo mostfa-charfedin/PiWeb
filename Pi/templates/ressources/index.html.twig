@@ -19,34 +19,54 @@
     </a>
   </div>
 
+  <!-- Advanced Search Modal Trigger -->
+  <div class="d-flex justify-content-end mb-4">
+    <!-- Blue Filter Button -->
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filtersModal">
+      <i class="bi bi-funnel"></i> Filter
+    </button>
+  </div>
+
+  <!-- Modal for Filters -->
+  <div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="filtersModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="filtersModalLabel">Advanced Filters</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form method="GET" action="{{ path('app_ressources_index') }}">
+            <div class="mb-3">
+              <label for="searchTitle" class="form-label">Search by Title</label>
+              <input type="text" id="searchTitle" name="searchTitle" class="form-control" value="{{ app.request.get('searchTitle') }}" placeholder="Enter resource title">
+            </div>
+            <div class="mb-3">
+              <label for="type" class="form-label">Filter by Type</label>
+              <select id="type" name="type" class="form-select">
+                <option value="">All Types</option>
+                <option value="Article" {% if app.request.get('type') == 'Article' %}selected{% endif %}>Article</option>
+                <option value="Video" {% if app.request.get('type') == 'Video' %}selected{% endif %}>Video</option>
+                <option value="Blog" {% if app.request.get('type') == 'Blog' %}selected{% endif %}>Blog</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="searchDescription" class="form-label">Search by Description</label>
+              <input type="text" id="searchDescription" name="searchDescription" class="form-control" value="{{ app.request.get('searchDescription') }}" placeholder="Enter description">
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <section class="section">
     <div class="row">
       <div class="col-12">
         <div class="card shadow-sm rounded">
           <div class="card-body">
             <h5 class="card-title mb-4">Ressources List</h5>
-
-            <!-- Advanced Filters Form -->
-            <form method="GET" action="{{ path('app_ressources_index') }}" class="d-flex justify-content-between mb-4 p-4 border rounded shadow-sm">
-              <div class="form-group flex-fill me-2">
-                <label for="searchTitle" class="form-label">Search by Title</label>
-                <input type="text" id="searchTitle" name="searchTitle" class="form-control" value="{{ app.request.get('searchTitle') }}" placeholder="Search by title">
-              </div>
-              <div class="form-group flex-fill me-2">
-                <label for="type" class="form-label">Filter by Type</label>
-                <select id="type" name="type" class="form-select">
-                  <option value="">All Types</option>
-                  <option value="Article" {% if app.request.get('type') == 'Article' %}selected{% endif %}>Article</option>
-                  <option value="Video" {% if app.request.get('type') == 'Video' %}selected{% endif %}>Video</option>
-                  <option value="Blog" {% if app.request.get('type') == 'Blog' %}selected{% endif %}>Blog</option>
-                </select>
-              </div>
-              <div class="form-group flex-fill me-2">
-                <label for="searchDescription" class="form-label">Search by Description</label>
-                <input type="text" id="searchDescription" name="searchDescription" class="form-control" value="{{ app.request.get('searchDescription') }}" placeholder="Search by description">
-              </div>
-              <button type="submit" class="btn btn-primary mt-4 mt-sm-0">Apply Filters</button>
-            </form>
 
             <!-- Ressources Table -->
             <div class="table-responsive">
@@ -63,7 +83,7 @@
                 </thead>
                 <tbody>
                   {% for ressource in ressources %}
-                    <tr>
+                    <tr class="table-row-hover">
                       <td>{{ ressource.titre }}</td>
                       <td>{{ ressource.type }}</td>
                       <td>{{ ressource.description }}</td>
@@ -100,4 +120,48 @@
     </div>
   </section>
 </main>
+
+{% block stylesheets %}
+<style>
+  /* Floating Search Input */
+  #searchTitle, #searchDescription {
+    transition: all 0.3s ease;
+    padding-left: 30px;
+  }
+
+  #searchTitle:focus, #searchDescription:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
+  }
+
+  /* Search icon inside the input */
+  #searchTitle:focus ~ i, #searchDescription:focus ~ i {
+    color: #0056b3;
+  }
+
+  /* Table Row Hover Effect */
+  .table-row-hover:hover {
+    background-color: #f1f1f1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  /* Modal Animation */
+  .modal.fade .modal-dialog {
+    transform: translateY(-50px);
+    opacity: 0;
+    transition: all 0.4s ease;
+  }
+
+  .modal.show .modal-dialog {
+    transform: translateY(0);
+    opacity: 1;
+  }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
+
 {% endblock %}

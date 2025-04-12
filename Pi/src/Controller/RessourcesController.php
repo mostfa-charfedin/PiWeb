@@ -16,15 +16,46 @@ use Symfony\Component\Routing\Annotation\Route;
 class RessourcesController extends AbstractController
 {
     #[Route('', name: 'app_ressources_index', methods: ['GET'])]
-    public function index(EntityManagerInterface $em, SessionInterface $session): Response
+    public function index(Request $request, EntityManagerInterface $em, SessionInterface $session): Response
     {
+        // Check if user is logged in
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
 
+        // Retrieve the logged-in user from session
         $user = $em->getRepository(User::class)->find($session->get('id'));
-        $ressources = $em->getRepository(Ressources::class)->findAll();
 
+        // Get search filter criteria from query parameters
+        $searchTitle = $request->query->get('searchTitle');
+        $type = $request->query->get('type');
+        $searchDescription = $request->query->get('searchDescription');
+
+        // Create the base query to filter resources
+        $queryBuilder = $em->getRepository(Ressources::class)->createQueryBuilder('r');
+
+        // Apply Title filter if it's set
+        if ($searchTitle) {
+            $queryBuilder->andWhere('r.titre LIKE :searchTitle')
+                         ->setParameter('searchTitle', '%' . $searchTitle . '%');
+        }
+
+        // Apply Type filter if it's set
+        if ($type) {
+            $queryBuilder->andWhere('r.type = :type')
+                         ->setParameter('type', $type);
+        }
+
+        // Apply Description filter if it's set
+        if ($searchDescription) {
+            $queryBuilder->andWhere('r.description LIKE :searchDescription')
+                         ->setParameter('searchDescription', '%' . $searchDescription . '%');
+        }
+
+        // Execute the query
+        $ressources = $queryBuilder->getQuery()->getResult();
+
+        // Return the filtered results to the view
         return $this->render('ressources/index.html.twig', [
             'ressources' => $ressources,
             'user' => $user,
