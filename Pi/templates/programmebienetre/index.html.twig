@@ -47,7 +47,14 @@
                     <td>{{ program.titre }}</td>
                     <td>{{ program.type }}</td>
                     <td>{{ program.description }}</td>
-                    <td>{{ program.userid.nom }} {{ program.userid.prenom }}</td>
+                    <td>
+                      {# Vérification si program.iduser existe et a les propriétés nom et prenom #}
+                      {% if program.iduser %}
+                        {{ program.iduser.nom }} {{ program.iduser.prenom }}
+                      {% else %}
+                        No manager
+                      {% endif %}
+                    </td>
                     <td>
                       <a href="{{ path('app_programmebienetre_show', {'idprogramme': program.idprogramme}) }}" class="btn btn-info btn-sm">
                         <i class="bi bi-eye"></i>
