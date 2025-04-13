@@ -71,14 +71,19 @@ class RessourcesController extends AbstractController
 
         $user = $em->getRepository(User::class)->find($session->get('id'));
         $ressource = new Ressources();
+        
+        // Set the user before creating the form
+        $ressource->setId($user);
+        
         $form = $this->createForm(RessourcesType::class, $ressource);
-
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // User is already set, just persist the resource
             $em->persist($ressource);
             $em->flush();
 
+            $this->addFlash('success', 'Resource created successfully!');
             return $this->redirectToRoute('app_ressources_index');
         }
 
@@ -112,13 +117,14 @@ class RessourcesController extends AbstractController
         }
 
         $user = $em->getRepository(User::class)->find($session->get('id'));
-
+        
         $form = $this->createForm(RessourcesType::class, $ressource);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
 
+            $this->addFlash('success', 'Resource updated successfully!');
             return $this->redirectToRoute('app_ressources_index');
         }
 
@@ -139,6 +145,7 @@ class RessourcesController extends AbstractController
         if ($this->isCsrfTokenValid('delete'.$ressource->getIdresource(), $request->getPayload()->getString('_token'))) {
             $em->remove($ressource);
             $em->flush();
+            $this->addFlash('success', 'Resource deleted successfully!');
         }
 
         return $this->redirectToRoute('app_ressources_index');

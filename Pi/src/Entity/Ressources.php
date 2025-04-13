@@ -24,30 +24,30 @@ class Ressources
     /**
      * @var string|null
      *
-     * @ORM\Column(name="type", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="type", type="string", length=255, nullable=true)
      */
-    private $type = 'NULL';
+    private $type = 'Document'; // Default type is "Document"
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="description", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="description", type="string", length=255, nullable=true)
      */
-    private $description = 'NULL';
+    private $description;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="titre", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="titre", type="string", length=255, nullable=true)
      */
-    private $titre = 'NULL';
+    private $titre;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="lien", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="lien", type="string", length=255, nullable=true)
      */
-    private $lien = 'NULL';
+    private $lien;
 
     /**
      * @var float
@@ -84,7 +84,7 @@ class Ressources
         return $this->type;
     }
 
-    public function setType(?string $type): self
+    public function setType(string $type): self
     {
         $this->type = $type;
         return $this;
@@ -139,14 +139,15 @@ class Ressources
     }
 
     // Getter and Setter for $id (User)
-    public function getId(): ?\User
+    public function getId(): ?User
     {
         return $this->id;
     }
 
-    public function setId(?\User $id): self
+    public function setId(?User $id): self
     {
         $this->id = $id;
         return $this;
     }
 }
+
