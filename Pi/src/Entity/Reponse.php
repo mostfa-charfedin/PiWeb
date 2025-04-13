@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Reponse
  *
  * @ORM\Table(name="reponse", indexes={@ORM\Index(name="idQuestion", columns={"idQuestion"})})
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Repository\ReponseRepository")
  */
 class Reponse
 {
@@ -24,40 +24,64 @@ class Reponse
     /**
      * @var string|null
      *
-     * @ORM\Column(name="Response", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="Response", type="string", length=255, nullable=true)
      */
-    private $response = 'NULL';
+    private $response;
 
     /**
      * @var string|null
      *
-     * @ORM\Column(name="status", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="status", type="string", length=255, nullable=true)
      */
-    private $status = 'NULL';
+    private $status;
 
     /**
      * @var \Question
      *
-     * @ORM\ManyToOne(targetEntity="Question")
+     * @ORM\ManyToOne(targetEntity="App\Entity\Question", inversedBy="responses")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idQuestion", referencedColumnName="idQuestion")
+     *   @ORM\JoinColumn(name="idQuestion", referencedColumnName="idQuestion", nullable=false)
      * })
      */
     private $idquestion;
 
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="Question", mappedBy="repense")
-     */
-    private $question = array();
+    
 
-    /**
-     * Constructor
-     */
-    public function __construct()
+    public function getIdreponse(): ?int
     {
-        $this->question = new \Doctrine\Common\Collections\ArrayCollection();
+        return $this->idreponse;
     }
 
+    public function getResponse(): ?string
+    {
+        return $this->response;
+    }
+
+    public function setResponse(?string $response): self
+    {
+        $this->response = $response;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(?string $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getIdquestion(): ?Question
+    {
+        return $this->idquestion;
+    }
+
+    public function setIdquestion(?Question $idquestion): self
+    {
+        $this->idquestion = $idquestion;
+        return $this;
+    }
 }
