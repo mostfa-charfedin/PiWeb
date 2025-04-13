@@ -2,54 +2,41 @@
 
 namespace App\Entity;
 
+use App\Repository\ReponseRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Question;
 
 /**
- * Reponse
- *
- * @ORM\Table(name="reponse", indexes={@ORM\Index(name="idQuestion", columns={"idQuestion"})})
- * @ORM\Entity(repositoryClass="App\Repository\ReponseRepository")
+ * @ORM\Entity(repositoryClass=ReponseRepository::class)
+ * @ORM\Table(name="reponse")
  */
 class Reponse
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="idReponse", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Column(name="idReponse", type="integer")
      */
-    private $idreponse;
+    private $idReponse;
 
     /**
-     * @var string|null
-     *
-     * @ORM\Column(name="Response", type="string", length=255, nullable=true)
+     * @ORM\Column(name="Response", type="string", length=255)
      */
     private $response;
 
+  /**
+ * @ORM\Column(name="status", type="string", length=10)
+ */
+private $status;
     /**
-     * @var string|null
-     *
-     * @ORM\Column(name="status", type="string", length=255, nullable=true)
+     * @ORM\ManyToOne(targetEntity=Question::class, inversedBy="reponses")
+     * @ORM\JoinColumn(name="idQuestion", referencedColumnName="idQuestion", nullable=false, onDelete="CASCADE")
      */
-    private $status;
+    private $question;
 
-    /**
-     * @var \Question
-     *
-     * @ORM\ManyToOne(targetEntity="App\Entity\Question", inversedBy="responses")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idQuestion", referencedColumnName="idQuestion", nullable=false)
-     * })
-     */
-    private $idquestion;
-
-    
-
-    public function getIdreponse(): ?int
+    public function getIdReponse(): ?int
     {
-        return $this->idreponse;
+        return $this->idReponse;
     }
 
     public function getResponse(): ?string
@@ -57,7 +44,7 @@ class Reponse
         return $this->response;
     }
 
-    public function setResponse(?string $response): self
+    public function setResponse(string $response): self
     {
         $this->response = $response;
         return $this;
@@ -67,21 +54,26 @@ class Reponse
     {
         return $this->status;
     }
-
-    public function setStatus(?string $status): self
+    
+    public function setStatus(string $status): self
     {
         $this->status = $status;
         return $this;
     }
 
-    public function getIdquestion(): ?Question
+    public function getQuestion(): ?Question
     {
-        return $this->idquestion;
+        return $this->question;
     }
 
-    public function setIdquestion(?Question $idquestion): self
+    public function setQuestion(?Question $question): self
     {
-        $this->idquestion = $idquestion;
+        $this->question = $question;
         return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->response ?? '';
     }
 }

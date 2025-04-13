@@ -25,23 +25,20 @@ class ReponseController extends AbstractController
         QuestionRepository $questionRepository,
         SessionInterface $session
     ): Response {
-        // Check if user is logged in
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
 
-        // Get user
         $userId = $session->get('id');
         $user = $em->getRepository(User::class)->find($userId);
 
-        // Get the question
         $question = $questionRepository->find($idQuestion);
         if (!$question) {
             throw $this->createNotFoundException('Question not found');
         }
 
         $reponse = new Reponse();
-        $reponse->setIdquestion($question);
+        $reponse->setQuestion($question);
 
         $form = $this->createForm(ReponseType::class, $reponse);
         $form->handleRequest($request);
@@ -50,10 +47,10 @@ class ReponseController extends AbstractController
             $em->persist($reponse);
             $em->flush();
 
-            return $this->redirectToRoute('question_show', ['idQuestion' => $idQuestion]);
+            return $this->redirectToRoute('question_show', ['id' => $idQuestion]);
         }
 
-        return $this->render('integration/reponse_form.html.twig', [
+        return $this->render('quiz/reponseForm.html.twig', [
             'formReponse' => $form->createView(),
             'edit_mode' => false,
             'user' => $user,
@@ -69,12 +66,10 @@ class ReponseController extends AbstractController
         EntityManagerInterface $em,
         SessionInterface $session
     ): Response {
-        // Check if user is logged in
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
 
-        // Get user
         $userId = $session->get('id');
         $user = $em->getRepository(User::class)->find($userId);
 
@@ -90,7 +85,7 @@ class ReponseController extends AbstractController
             $em->flush();
 
             return $this->redirectToRoute('question_show', [
-                'idQuestion' => $reponse->getIdquestion()->getIdQuestion()
+                'id' => $reponse->getQuestion()->getIdQuestion(),
             ]);
         }
 
@@ -98,7 +93,7 @@ class ReponseController extends AbstractController
             'formReponse' => $form->createView(),
             'edit_mode' => true,
             'user' => $user,
-            'question' => $reponse->getIdquestion(),
+            'question' => $reponse->getQuestion(),
         ]);
     }
 
@@ -109,12 +104,10 @@ class ReponseController extends AbstractController
         EntityManagerInterface $em,
         SessionInterface $session
     ): Response {
-        // Check if user is logged in
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
 
-        // Get user
         $userId = $session->get('id');
         $user = $em->getRepository(User::class)->find($userId);
 
@@ -123,11 +116,11 @@ class ReponseController extends AbstractController
             throw $this->createNotFoundException('Reponse not found');
         }
 
-        $questionId = $reponse->getIdquestion()->getIdQuestion();
+        $questionId = $reponse->getQuestion()->getIdQuestion();
 
         $em->remove($reponse);
         $em->flush();
 
-        return $this->redirectToRoute('question_show', ['idQuestion' => $questionId]);
+        return $this->redirectToRoute('question_show', ['id' => $questionId]);
     }
 }

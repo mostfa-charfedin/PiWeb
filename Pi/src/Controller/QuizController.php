@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class QuizController extends AbstractController
 {
@@ -26,13 +25,10 @@ class QuizController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-
-        $quizzes = $quizRepository->findAll();
+        $user = $em->getRepository(User::class)->find($session->get('id'));
 
         return $this->render('quiz/ListQuiz.html.twig', [
-            'quizzes' => $quizzes,
+            'quizzes' => $quizRepository->findAll(),
             'user' => $user,
         ]);
     }
@@ -44,9 +40,7 @@ class QuizController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-
+        $user = $em->getRepository(User::class)->find($session->get('id'));
         $quiz = new Quiz();
 
         if (method_exists($quiz, 'setUser')) {
@@ -59,7 +53,6 @@ class QuizController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($quiz);
             $em->flush();
-
             return $this->redirectToRoute('app_home');
         }
 
@@ -77,9 +70,6 @@ class QuizController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-
         $quiz = $quizRepository->find($id);
         if (!$quiz) {
             throw $this->createNotFoundException('Quiz not found');
@@ -96,7 +86,7 @@ class QuizController extends AbstractController
         return $this->render('quiz/QuizForm.html.twig', [
             'formQuiz' => $form->createView(),
             'edit_mode' => true,
-            'user' => $user,
+            'user' => $em->getRepository(User::class)->find($session->get('id')),
         ]);
     }
 
@@ -107,52 +97,43 @@ class QuizController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-
         $quiz = $quizRepository->find($id);
         if (!$quiz) {
             throw $this->createNotFoundException('Quiz not found');
         }
 
+        // Fetch questions from repository or rely on Quiz.questions
         $questions = $questionRepository->findBy(['quiz' => $quiz]);
 
         return $this->render('quiz/QuizShow.html.twig', [
             'quiz' => $quiz,
             'questions' => $questions,
-            'user' => $user,
+            'user' => $em->getRepository(User::class)->find($session->get('id')),
         ]);
     }
 
-    
-    #[Route('/quiz/{id}/delete', name: 'quiz_delete', requirements: ['id' => '\d+'],methods: ['POST'])]
-    public function delete(
-        Request $request,
-        int $id,
-        QuizRepository $quizRepository,
-        EntityManagerInterface $em,
-        CsrfTokenManagerInterface $csrfTokenManager,
-        SessionInterface $session
-    ): Response {
+    #[Route('/quiz/{id}/delete', name: 'quiz_delete', methods: ['POST'])]
+    public function delete(Request $request, int $id, QuizRepository $quizRepository, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager, SessionInterface $session): Response
+    {
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
-    
+
         $quiz = $quizRepository->find($id);
         if (!$quiz) {
             throw $this->createNotFoundException('Quiz not found');
         }
-    
+
         $submittedToken = $request->request->get('_token');
-        $tokenId = 'delete' . $quiz->getIdquiz(); 
-    
+        $tokenId = 'delete' . $quiz->getIdquiz();
+
         if (!$csrfTokenManager->isTokenValid(new CsrfToken($tokenId, $submittedToken))) {
             throw $this->createAccessDeniedException('Invalid CSRF token');
         }
-    
+
         $em->remove($quiz);
         $em->flush();
-    
+
         return $this->redirectToRoute('app_home');
     }
 }

@@ -29,9 +29,9 @@ class Question
 
     /**
      * @ORM\ManyToOne(targetEntity=Quiz::class, inversedBy="questions")
-     * @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz", nullable=false)
+     * @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz", nullable=false, onDelete="CASCADE")
      */
-    private $idQuiz;
+    private $quiz;
 
     /**
      * @ORM\OneToMany(targetEntity=Reponse::class, mappedBy="question", cascade={"persist", "remove"}, orphanRemoval=true)
@@ -59,14 +59,14 @@ class Question
         return $this;
     }
 
-    public function getIdQuiz(): ?Quiz
+    public function getQuiz(): ?Quiz
     {
-        return $this->idQuiz;
+        return $this->quiz;
     }
 
-    public function setIdQuiz(?Quiz $quiz): self
+    public function setQuiz(?Quiz $quiz): self
     {
-        $this->idQuiz = $quiz;
+        $this->quiz = $quiz;
         return $this;
     }
 
@@ -91,6 +91,7 @@ class Question
     public function removeReponse(Reponse $reponse): self
     {
         if ($this->reponses->removeElement($reponse)) {
+            // Set the owning side to null (unless already changed)
             if ($reponse->getQuestion() === $this) {
                 $reponse->setQuestion(null);
             }
@@ -101,6 +102,6 @@ class Question
 
     public function __toString(): string
     {
-        return $this->question ?? '';
+        return (string) $this->question;
     }
 }

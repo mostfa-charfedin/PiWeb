@@ -1,0 +1,32 @@
+{# templates/quiz/reponseForm.html.twig #}
+{% extends 'sideBar.html.twig' %}
+
+{% block title %}
+    {{ edit_mode ? 'Edit Response' : 'Create Response' }}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ edit_mode ? 'Edit Response' : 'Add New Response' }}</h2>
+
+    {{ form_start(formReponse) }}
+
+    <div class="mb-3">
+        {{ form_label(formReponse.response, 'Response Text') }}
+        {{ form_widget(formReponse.response, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(formReponse.response) }}
+    </div>
+
+    <div class="form-check mb-3">
+        {{ form_widget(formReponse.status, {'attr': {'class': 'form-check-input'}}) }}
+        {{ form_label(formReponse.status, 'Correct?', {'label_attr': {'class': 'form-check-label'}}) }}
+        {{ form_errors(formReponse.status) }}
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        {{ edit_mode ? 'Update' : 'Submit' }}
+    </button>
+
+    {{ form_end(formReponse) }}
+</div>
+{% endblock %}

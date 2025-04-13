@@ -5,40 +5,33 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use App\Entity\Question;
 
 /**
- * Quiz
- *
- * @ORM\Table(name="quiz")
  * @ORM\Entity(repositoryClass="App\Repository\QuizRepository")
+ * @ORM\Table(name="quiz")
  */
 class Quiz
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="idQuiz", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Column(name="idQuiz", type="integer")
      */
     private $idquiz;
 
     /**
-     * @var string|null
-     *
      * @ORM\Column(name="nom", type="string", length=255, nullable=true)
      */
     private $nom;
 
     /**
-     * @var \DateTime|null
-     *
      * @ORM\Column(name="dateCreation", type="datetime", nullable=true)
      */
     private $datecreation;
 
     /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Question", mappedBy="quiz", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity=Question::class, mappedBy="quiz", orphanRemoval=true, cascade={"persist", "remove"})
      */
     private $questions;
 
@@ -46,8 +39,6 @@ class Quiz
     {
         $this->questions = new ArrayCollection();
     }
-
-    
 
     public function getIdquiz(): ?int
     {

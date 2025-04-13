@@ -4,10 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Question;
 use App\Entity\Quiz;
+use App\Entity\Reponse;
 use App\Entity\User;
 use App\Form\QuestionType;
 use App\Repository\QuestionRepository;
-use App\Repository\QuizRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,29 +17,21 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class QuestionController extends AbstractController
 {
-    // Route for creating a new question for a specific quiz
-    #[Route('/quiz/{quizId}/question/new', name: 'question_new', requirements: ['quizId' => '\d+'])]
-    public function new(
-        int $quizId,
-        Request $request,
-        QuizRepository $quizRepository,
-        EntityManagerInterface $em,
-        SessionInterface $session
-    ): Response {
-        if (!$session->get('id')) {
-            return $this->redirectToRoute('login');
-        }
+    #[Route('/question/new/{quizId}', name: 'question_new')]
+    public function new(int $quizId, Request $request, EntityManagerInterface $em): Response
+    {
+        $quiz = $em->getRepository(Quiz::class)->find($quizId);
 
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-
-        $quiz = $quizRepository->find($quizId);
         if (!$quiz) {
             throw $this->createNotFoundException('Quiz not found');
         }
 
         $question = new Question();
         $question->setQuiz($quiz);
+
+        for ($i = 0; $i < 3; $i++) {
+            $question->addReponse(new Reponse());
+        }
 
         $form = $this->createForm(QuestionType::class, $question);
         $form->handleRequest($request);
@@ -48,18 +40,14 @@ class QuestionController extends AbstractController
             $em->persist($question);
             $em->flush();
 
-            return $this->redirectToRoute('quiz_show', ['id' => $quizId]);
+            return $this->redirectToRoute('quiz_show', ['id' => $quiz->getIdquiz()]);
         }
 
-        return $this->render('integration/question_form.html.twig', [
-            'formQuestion' => $form->createView(),
-            'edit_mode' => false,
-            'user' => $user,
-            'quiz' => $quiz,
+        return $this->render('quiz/reponseForm.html.twig', [
+            'form' => $form->createView()
         ]);
     }
 
-    // Route for editing a question
     #[Route('/question/{id}/edit', name: 'question_edit', requirements: ['id' => '\d+'])]
     public function edit(
         int $id,
@@ -72,8 +60,7 @@ class QuestionController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
+        $user = $em->getRepository(User::class)->find($session->get('id'));
 
         $question = $questionRepository->find($id);
         if (!$question) {
@@ -87,7 +74,7 @@ class QuestionController extends AbstractController
             $em->flush();
 
             return $this->redirectToRoute('quiz_show', [
-                'id' => $question->getQuiz()->getId()
+                'id' => $question->getQuiz()->getIdquiz()
             ]);
         }
 
@@ -99,8 +86,7 @@ class QuestionController extends AbstractController
         ]);
     }
 
-    // Route for deleting a question
-    #[Route('/question/{id}/delete', name: 'question_delete', requirements: ['id' => '\d+'])]
+    #[Route('/question/{id}/delete', name: 'question_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function delete(
         int $id,
         QuestionRepository $questionRepository,
@@ -111,19 +97,42 @@ class QuestionController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-
         $question = $questionRepository->find($id);
         if (!$question) {
             throw $this->createNotFoundException('Question not found');
         }
 
-        $quizId = $question->getQuiz()->getId();
+        $quizId = $question->getQuiz()->getIdquiz();
 
         $em->remove($question);
         $em->flush();
 
         return $this->redirectToRoute('quiz_show', ['id' => $quizId]);
+    }
+
+    #[Route('/question/{id}', name: 'question_show', requirements: ['id' => '\d+'])]
+    public function show(
+        int $id,
+        QuestionRepository $questionRepository,
+        SessionInterface $session,
+        EntityManagerInterface $em
+    ): Response {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        $user = $em->getRepository(User::class)->find($session->get('id'));
+        $question = $questionRepository->find($id);
+
+        if (!$question) {
+            throw $this->createNotFoundException('Question not found');
+        }
+
+        return $this->render('quiz/question_show.html.twig', [
+            'question' => $question,
+            'reponses' => $question->getReponses(),
+            'user' => $user,
+            'quiz' => $question->getQuiz(),
+        ]);
     }
 }
