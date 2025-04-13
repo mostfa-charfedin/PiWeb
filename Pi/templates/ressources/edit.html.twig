@@ -23,6 +23,23 @@
   <section class="section">
     <div class="row justify-content-center">
       <div class="col-12 col-md-8">
+        <!-- Flash Messages -->
+        {% for message in app.flashes('success') %}
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-1"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-octagon me-1"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+
         <!-- Edit Ressource Form Card -->
         <div class="card shadow-lg mb-4 rounded-3 hover-card">
           <div class="card-body">
@@ -32,27 +49,37 @@
             {{ form_start(form) }}
               <!-- Titre Field -->
               <div class="mb-3">
-                {{ form_row(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Resource Title'}}) }}
+                {{ form_label(form.titre, 'Resource Title', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.titre, {'attr': {'class': 'form-control' ~ (form_errors(form.titre) ? ' is-invalid' : '')}}) }}
+                {{ form_errors(form.titre) }}
               </div>
 
               <!-- Type Field (dropdown) -->
               <div class="mb-3">
-                {{ form_row(form.type, {'attr': {'class': 'form-select', 'style': 'font-weight: 600;'}}) }}
+                {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.type, {'attr': {'class': 'form-select' ~ (form_errors(form.type) ? ' is-invalid' : '')}}) }}
+                {{ form_errors(form.type) }}
               </div>
 
               <!-- Description Field -->
               <div class="mb-3">
-                {{ form_row(form.description, {'attr': {'class': 'form-control', 'placeholder': 'Write a short description'}}) }}
+                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control' ~ (form_errors(form.description) ? ' is-invalid' : '')}}) }}
+                {{ form_errors(form.description) }}
               </div>
 
               <!-- Link Field -->
               <div class="mb-3">
-                {{ form_row(form.lien, {'attr': {'class': 'form-control', 'placeholder': 'Link to the resource (optional)'}}) }}
+                {{ form_label(form.lien, 'Link to the resource (optional)', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.lien, {'attr': {'class': 'form-control' ~ (form_errors(form.lien) ? ' is-invalid' : '')}}) }}
+                {{ form_errors(form.lien) }}
               </div>
 
               <!-- Noteaverage Field -->
               <div class="mb-3">
-                {{ form_row(form.noteaverage, {'attr': {'class': 'form-control', 'placeholder': 'Average Rating (0-10)'}}) }}
+                {{ form_label(form.noteaverage, 'Average Rating (0-10)', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.noteaverage, {'attr': {'class': 'form-control' ~ (form_errors(form.noteaverage) ? ' is-invalid' : '')}}) }}
+                {{ form_errors(form.noteaverage) }}
               </div>
 
               <!-- Submit Button -->
@@ -146,6 +173,40 @@
   .form-control:focus, .form-select:focus {
     border-color: #0056b3;
     box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
+  }
+
+  /* Validation Error Styling */
+  .is-invalid {
+    border-color: #dc3545;
+  }
+
+  .is-invalid:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+  }
+
+  .invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+  }
+
+  /* Alert Styling */
+  .alert {
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+
+  .alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+  }
+
+  .alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
   }
 
   /* Hover Effect for Buttons */

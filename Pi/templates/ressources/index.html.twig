@@ -1,12 +1,12 @@
 {% extends 'sideBar.html.twig' %}
 
-{% block title %}Ressources Index{% endblock %}
+{% block title %}Ressources{% endblock %}
 
 {% block content %}
 <main id="main" class="main">
   <div class="pagetitle d-flex justify-content-between align-items-center">
     <div>
-      <h1>Ressources Index</h1>
+      <h1>Ressources</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="#">Home</a></li>
@@ -15,101 +15,98 @@
       </nav>
     </div>
     <a href="{{ path('app_ressources_new') }}" class="btn btn-primary">
-      <i class="bi bi-plus"></i> Create New
+      <i class="bi bi-plus-circle"></i> Create New
     </a>
-  </div>
-
-  <!-- Advanced Search Modal Trigger -->
-  <div class="d-flex justify-content-end mb-4">
-    <!-- Blue Filter Button -->
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#filtersModal">
-      <i class="bi bi-funnel"></i> Filter
-    </button>
-  </div>
-
-  <!-- Modal for Filters -->
-  <div class="modal fade" id="filtersModal" tabindex="-1" aria-labelledby="filtersModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="filtersModalLabel">Advanced Filters</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form method="GET" action="{{ path('app_ressources_index') }}">
-            <div class="mb-3">
-              <label for="searchTitle" class="form-label">Search by Title</label>
-              <input type="text" id="searchTitle" name="searchTitle" class="form-control" value="{{ app.request.get('searchTitle') }}" placeholder="Enter resource title">
-            </div>
-            <div class="mb-3">
-              <label for="type" class="form-label">Filter by Type</label>
-              <select id="type" name="type" class="form-select">
-                <option value="">All Types</option>
-                <option value="Article" {% if app.request.get('type') == 'Article' %}selected{% endif %}>Article</option>
-                <option value="Video" {% if app.request.get('type') == 'Video' %}selected{% endif %}>Video</option>
-                <option value="Blog" {% if app.request.get('type') == 'Blog' %}selected{% endif %}>Blog</option>
-                <option value="Document" {% if app.request.get('Document') == 'Document' %}selected{% endif %}>Document</option>
-              </select>
-            </div>
-            <div class="mb-3">
-              <label for="searchDescription" class="form-label">Search by Description</label>
-              <input type="text" id="searchDescription" name="searchDescription" class="form-control" value="{{ app.request.get('searchDescription') }}" placeholder="Enter description">
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
-          </form>
-        </div>
-      </div>
-    </div>
   </div>
 
   <section class="section">
     <div class="row">
       <div class="col-12">
+        <!-- Flash Messages -->
+        {% for label, messages in app.flashes %}
+          {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+              {% if label == 'success' %}
+                <i class="bi bi-check-circle me-1"></i>
+              {% elseif label == 'error' %}
+                <i class="bi bi-exclamation-octagon me-1"></i>
+              {% endif %}
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endfor %}
+
+        <!-- Search and Filter Form -->
+        <div class="card shadow-sm rounded mb-4">
+          <div class="card-body">
+            <form method="GET" class="row g-3">
+              <div class="col-md-4">
+                <input type="text" name="searchTitle" class="form-control" placeholder="Search by title..." value="{{ app.request.query.get('searchTitle') }}">
+              </div>
+              <div class="col-md-3">
+                <select name="type" class="form-select">
+                  <option value="">All Types</option>
+                  <option value="Document" {% if app.request.query.get('type') == 'Document' %}selected{% endif %}>Document</option>
+                  <option value="Video" {% if app.request.query.get('type') == 'Video' %}selected{% endif %}>Video</option>
+                  <option value="Article" {% if app.request.query.get('type') == 'Article' %}selected{% endif %}>Article</option>
+                  <option value="Blog" {% if app.request.query.get('type') == 'Blog' %}selected{% endif %}>Blog</option>
+                  <option value="Tutorial" {% if app.request.query.get('type') == 'Tutorial' %}selected{% endif %}>Tutorial</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <input type="text" name="searchDescription" class="form-control" placeholder="Search by description..." value="{{ app.request.query.get('searchDescription') }}">
+              </div>
+              <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Resources List -->
         <div class="card shadow-sm rounded">
           <div class="card-body">
-            <h5 class="card-title mb-4">Ressources List</h5>
-
-            <!-- Ressources Table -->
             <div class="table-responsive">
-              <table class="table table-striped table-bordered table-hover">
+              <table class="table table-hover">
                 <thead>
                   <tr>
-                    <th>Titre</th>
+                    <th>Title</th>
                     <th>Type</th>
                     <th>Description</th>
-                    <th>Lien</th>
-                    <th>Noteaverage</th>
+                    <th>Rating</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for ressource in ressources %}
-                    <tr class="table-row-hover">
+                    <tr>
                       <td>{{ ressource.titre }}</td>
                       <td>{{ ressource.type }}</td>
                       <td>{{ ressource.description }}</td>
-                      <td>
-                        {% if ressource.lien %}
-                          <a href="{{ ressource.lien }}" target="_blank" class="text-primary">{{ ressource.lien }}</a>
-                        {% else %}
-                          <span class="text-muted">No link</span>
-                        {% endif %}
-                      </td>
                       <td>{{ ressource.noteaverage }}</td>
                       <td>
-                        <div class="btn-group">
-                          <a href="{{ path('app_ressources_show', {'idresource': ressource.idresource}) }}" class="btn btn-info btn-sm">
-                            <i class="bi bi-eye"></i> Show
+                        <div class="btn-group" role="group">
+                          <a href="{{ path('app_ressources_show', {'idresource': ressource.idresource}) }}" class="btn btn-sm btn-info">
+                            <i class="bi bi-eye"></i>
                           </a>
-                          <a href="{{ path('app_ressources_edit', {'idresource': ressource.idresource}) }}" class="btn btn-warning btn-sm">
-                            <i class="bi bi-pencil"></i> Edit
+                          <a href="{{ path('app_ressources_edit', {'idresource': ressource.idresource}) }}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i>
                           </a>
+                          <form method="post" action="{{ path('app_ressources_delete', {'idresource': ressource.idresource}) }}" onsubmit="return confirm('Are you sure you want to delete this resource?');" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ressource.idresource) }}">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                              <i class="bi bi-trash"></i>
+                            </button>
+                          </form>
                         </div>
                       </td>
                     </tr>
                   {% else %}
                     <tr>
-                      <td colspan="6" class="text-center">No resources found</td>
+                      <td colspan="5" class="text-center">No resources found</td>
                     </tr>
                   {% endfor %}
                 </tbody>
@@ -124,39 +121,60 @@
 
 {% block stylesheets %}
 <style>
-  /* Floating Search Input */
-  #searchTitle, #searchDescription {
-    transition: all 0.3s ease;
-    padding-left: 30px;
+  /* Alert Styling */
+  .alert {
+    border-radius: 10px;
+    margin-bottom: 1rem;
   }
 
-  #searchTitle:focus, #searchDescription:focus {
+  .alert-success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+  }
+
+  .alert-danger {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+  }
+
+  /* Card Styling */
+  .card {
+    border-radius: 10px;
+  }
+
+  /* Table Styling */
+  .table {
+    margin-bottom: 0;
+  }
+
+  .table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+  }
+
+  .table td {
+    vertical-align: middle;
+  }
+
+  /* Button Styling */
+  .btn-group .btn {
+    margin-right: 5px;
+  }
+
+  .btn-group .btn:last-child {
+    margin-right: 0;
+  }
+
+  /* Search Form Styling */
+  .form-control, .form-select {
+    transition: all 0.3s ease;
+  }
+
+  .form-control:focus, .form-select:focus {
     border-color: #0056b3;
     box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
-  }
-
-  /* Search icon inside the input */
-  #searchTitle:focus ~ i, #searchDescription:focus ~ i {
-    color: #0056b3;
-  }
-
-  /* Table Row Hover Effect */
-  .table-row-hover:hover {
-    background-color: #f1f1f1;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  /* Modal Animation */
-  .modal.fade .modal-dialog {
-    transform: translateY(-50px);
-    opacity: 0;
-    transition: all 0.4s ease;
-  }
-
-  .modal.show .modal-dialog {
-    transform: translateY(0);
-    opacity: 1;
   }
 </style>
 {% endblock %}

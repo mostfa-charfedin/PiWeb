@@ -63,13 +63,13 @@ class RessourcesController extends AbstractController
     }
 
     #[Route('/new', name: 'app_ressources_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $em, SessionInterface $session): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
 
-        $user = $em->getRepository(User::class)->find($session->get('id'));
+        $user = $entityManager->getRepository(User::class)->find($session->get('id'));
         $ressource = new Ressources();
         
         // Set the user before creating the form
@@ -78,13 +78,19 @@ class RessourcesController extends AbstractController
         $form = $this->createForm(RessourcesType::class, $ressource);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // User is already set, just persist the resource
-            $em->persist($ressource);
-            $em->flush();
-
-            $this->addFlash('success', 'Resource created successfully!');
-            return $this->redirectToRoute('app_ressources_index');
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                try {
+                    $entityManager->persist($ressource);
+                    $entityManager->flush();
+                    $this->addFlash('success', 'Resource created successfully!');
+                    return $this->redirectToRoute('app_ressources_index');
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'An error occurred while creating the resource. Please try again.');
+                }
+            } else {
+                $this->addFlash('error', 'Please correct the errors in the form.');
+            }
         }
 
         return $this->render('ressources/new.html.twig', [
@@ -110,22 +116,35 @@ class RessourcesController extends AbstractController
     }
 
     #[Route('/{idresource}/edit', name: 'app_ressources_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Ressources $ressource, EntityManagerInterface $em, SessionInterface $session): Response
+    public function edit(Request $request, Ressources $ressource, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
 
-        $user = $em->getRepository(User::class)->find($session->get('id'));
+        $user = $entityManager->getRepository(User::class)->find($session->get('id'));
+        
+        // Ensure the resource belongs to the current user
+        if ($ressource->getId() !== $user) {
+            $this->addFlash('error', 'You do not have permission to edit this resource.');
+            return $this->redirectToRoute('app_ressources_index');
+        }
         
         $form = $this->createForm(RessourcesType::class, $ressource);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
-
-            $this->addFlash('success', 'Resource updated successfully!');
-            return $this->redirectToRoute('app_ressources_index');
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                try {
+                    $entityManager->flush();
+                    $this->addFlash('success', 'Resource updated successfully!');
+                    return $this->redirectToRoute('app_ressources_index');
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'An error occurred while updating the resource. Please try again.');
+                }
+            } else {
+                $this->addFlash('error', 'Please correct the errors in the form.');
+            }
         }
 
         return $this->render('ressources/edit.html.twig', [
