@@ -1,0 +1,307 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Resource Performance Overview</h1>
+</div>
+
+<section class="section">
+    <div class="row">
+        <!-- Statistics Chart -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-primary bg-opacity-10">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-bar-chart-fill text-primary me-2"></i>
+                        Resource Performance Statistics
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="min-height: 300px;">
+                        {% for evaluation in evaluations|sort((a, b) => b.note <=> a.note) %}
+                            {% set resourceId = evaluation.idResource %}
+                            <div class="chart-row mb-3">
+                                <div class="chart-label" style="width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                                    {% if resourceTitles[resourceId] is defined %}
+                                        {{ resourceTitles[resourceId] }}
+                                    {% else %}
+                                        Resource #{{ resourceId }}
+                                    {% endif %}
+                                </div>
+                                <div class="chart-bar-container" style="flex-grow: 1;">
+                                    <div class="chart-bar {% if evaluation.note >= 7 %}bg-success{% elseif evaluation.note >= 4 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                         style="width: {{ (evaluation.note/10 * 100)|round }}%;">
+                                        <span class="chart-value">{{ evaluation.note }}/10</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outstanding Resources Table -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-success bg-opacity-10">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-trophy-fill text-success me-2"></i>
+                            Outstanding Resources
+                        </h5>
+                        <a href="{{ path('app_evaluation_new') }}" class="btn btn-success d-flex align-items-center">
+                            <i class="bi bi-plus-circle me-2"></i>Add New Evaluation
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Resource Title</th>
+                                <th>Performance Score</th>
+                                <th>Evaluation Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set sortedEvaluations = evaluations|sort((a, b) => b.note <=> a.note) %}
+                            {% for evaluation in sortedEvaluations|slice(0, 2) %}
+                                <tr>
+                                    <td>
+                                        {% set resourceId = evaluation.idResource %}
+                                        {% if resourceTitles[resourceId] is defined %}
+                                            <strong>{{ resourceTitles[resourceId] }}</strong>
+                                        {% else %}
+                                            <span class="text-muted">Resource #{{ resourceId }} (Title not found)</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success rounded-pill">
+                                            <i class="bi bi-star-fill me-1"></i>
+                                            {{ evaluation.note }}/10
+                                        </span>
+                                    </td>
+                                    <td>{{ evaluation.dateEvaluation ? evaluation.dateEvaluation|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_evaluation_show', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_evaluation_edit', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-warning btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        <i class="bi bi-info-circle me-2"></i>No evaluations available
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources Needing Improvement Table -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-danger bg-opacity-10">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                        Resources Needing Improvement
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Resource Title</th>
+                                <th>Performance Score</th>
+                                <th>Evaluation Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set sortedEvaluations = evaluations|sort((a, b) => a.note <=> b.note) %}
+                            {% for evaluation in sortedEvaluations|slice(0, 2) %}
+                                <tr>
+                                    <td>
+                                        {% set resourceId = evaluation.idResource %}
+                                        {% if resourceTitles[resourceId] is defined %}
+                                            <strong>{{ resourceTitles[resourceId] }}</strong>
+                                        {% else %}
+                                            <span class="text-muted">Resource #{{ resourceId }} (Title not found)</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger rounded-pill">
+                                            <i class="bi bi-exclamation-circle-fill me-1"></i>
+                                            {{ evaluation.note }}/10
+                                        </span>
+                                    </td>
+                                    <td>{{ evaluation.dateEvaluation ? evaluation.dateEvaluation|date('Y-m-d H:i:s') : 'N/A' }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_evaluation_show', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_evaluation_edit', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-warning btn-sm">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted">
+                                        <i class="bi bi-info-circle me-2"></i>No evaluations available
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .card-header {
+        border-bottom: none;
+        padding: 1rem 1.25rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .badge {
+        padding: 0.5em 0.8em;
+        font-weight: 500;
+    }
+
+    .btn-group {
+        box-shadow: none;
+    }
+
+    .btn-outline-info, .btn-outline-warning {
+        border-width: 1px;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .btn-outline-warning:hover {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
+    /* Chart Styles */
+    .chart-container {
+        padding: 1rem 0;
+    }
+
+    .chart-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .chart-label {
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .chart-bar-container {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        height: 30px;
+        overflow: hidden;
+    }
+
+    .chart-bar {
+        height: 100%;
+        border-radius: 4px;
+        transition: all 0.6s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+    }
+
+    .chart-bar.bg-success {
+        background-color: #28a745;
+    }
+
+    .chart-bar.bg-warning {
+        background-color: #ffc107;
+    }
+
+    .chart-bar.bg-danger {
+        background-color: #dc3545;
+    }
+
+    .chart-value {
+        color: white;
+        font-weight: 500;
+        font-size: 0.875rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* Make warning text darker for better readability */
+    .bg-warning .chart-value {
+        color: #212529;
+    }
+
+    @media (max-width: 767px) {
+        .card-header {
+            padding: 0.75rem 1rem;
+        }
+
+        .table th, .table td {
+            padding: 0.75rem;
+        }
+
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+
+        .chart-label {
+            width: 120px !important;
+        }
+    }
+</style>
+{% endblock %}

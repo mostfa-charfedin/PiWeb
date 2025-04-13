@@ -52,22 +52,32 @@
 
        <li class="nav-item dropdown pe-3">
   <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" id="dropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-    {% if user.imageUrl %}
+    {% if user and user.imageUrl %}
       <img src="{{ asset(user.imageUrl) }}" alt="Profile Image" width="40" height="40" class="rounded-circle">
     {% else %}
       <img src="{{ asset('assets/imgP/logo2.png') }}" alt="Default Profile" width="40" height="40" class="rounded-circle">
     {% endif %}
-    <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.nom }} {{ user.prenom }}</span>
+    <span class="d-none d-md-block dropdown-toggle ps-2">
+      {% if user %}
+        {{ user.nom }} {{ user.prenom }}
+      {% else %}
+        Guest
+      {% endif %}
+    </span>
   </a>
   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" aria-labelledby="dropdownMenuLink">
-    <li class="dropdown-header">
-      <h6>{{ user.nom }} &nbsp; {{ user.prenom }}</h6>
-      <span>{{ user.roles }}</span>
-    </li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item d-flex align-items-center" href="{{ path('profile') }}"><i class="bi bi-person"></i> My Profile</a></li>
-    <li><hr class="dropdown-divider"></li>
-    <li><a class="dropdown-item d-flex align-items-center" href="{{ path('logout') }}"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
+    {% if user %}
+      <li class="dropdown-header">
+        <h6>{{ user.nom }} &nbsp; {{ user.prenom }}</h6>
+        <span>{{ user.roles }}</span>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item d-flex align-items-center" href="{{ path('profile') }}"><i class="bi bi-person"></i> My Profile</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item d-flex align-items-center" href="{{ path('logout') }}"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
+    {% else %}
+      <li><a class="dropdown-item d-flex align-items-center" href="{{ path('login') }}"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
+    {% endif %}
   </ul>
 </li>
       </ul>
@@ -102,8 +112,26 @@
         <i class="bi bi-circle"></i><span>ressources</span>
       </a>
     </li>
+        
         </ul>
-      </li><!-- End Tables Nav -->
+      </li><!-- End Tables Nav -->  
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#Fedi-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-layout-text-window-reverse"></i><span>Fedi</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="Fedi-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          
+          
+        <li>
+            <a href="{{ path('app_evaluation_index') }}">
+              <i class="bi bi-circle"></i><span>Evaluations</span>
+            </a>
+          </li>
+        </ul>
+      </li><!-- End Fedi Nav --> 
+
+
 
       <li class="nav-item">
         <a class="nav-link" href="{{ path('profile') }}">
