@@ -204,14 +204,17 @@ public function setStatus(UserStatus $status): self
     }
     public function getRoles(): array
     {
-        $role = $this->role ?: '';
-        $role = strtoupper($role);
+        // Normalisation du rôle stocké en base
+        $baseRole = $this->role ?: 'USER'; // Valeur par défaut si vide
         
-        if (!empty($role) && !str_starts_with($role, 'ROLE_')) {
+        // Conversion au format Symfony
+        $role = strtoupper($baseRole);
+        if (!str_starts_with($role, 'ROLE_')) {
             $role = 'ROLE_' . $role;
         }
         
-        return empty($role) ? ['ROLE_USER'] : [$role];
+        // Tous les utilisateurs ont au moins ROLE_USER
+        return array_unique([$role, 'ROLE_USER']);
     }
     
 
