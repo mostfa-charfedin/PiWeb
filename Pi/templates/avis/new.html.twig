@@ -1,4 +1,4 @@
-{% extends 'sidebar.html.twig' %}
+{% extends 'navBar.html.twig' %}
 
 {% block title %}New Review{% endblock %}
 
@@ -23,35 +23,43 @@
                         <h5 class="card-title">Give your review for "{{ programme.titre }}"</h5>
 
                         <div class="pt-4">
-                            {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
                             
                             <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label">Rating</label>
+                                <label class="col-sm-2 col-form-label">{{ form_label(form.rating) }}</label>
                                 <div class="col-sm-10">
-                                    <div class="rating-stars mb-2">
+                                    <div class="input-group">
                                         {{ form_widget(form.rating, {
                                             'attr': {
                                                 'class': 'form-control',
                                                 'min': '1',
                                                 'max': '5',
-                                                'placeholder': 'Rating from 1 to 5'
+                                                'placeholder': 'Enter a rating from 1 to 5'
                                             }
                                         }) }}
+                                        <span class="input-group-text">
+                                            <i class="bi bi-star-fill text-warning"></i>
+                                        </span>
                                     </div>
-                                    <small class="text-muted">Give a rating from 1 to 5 stars</small>
+                                    {{ form_errors(form.rating) }}
+                                    <small class="text-muted">Rate from 1 to 5 stars</small>
                                 </div>
                             </div>
 
                             <div class="row mb-3">
-                                <label class="col-sm-2 col-form-label">Comment</label>
+                                <label class="col-sm-2 col-form-label">{{ form_label(form.commentaire) }}</label>
                                 <div class="col-sm-10">
                                     {{ form_widget(form.commentaire, {
                                         'attr': {
                                             'class': 'form-control',
-                                            'rows': '5',
-                                            'placeholder': 'Your review of the program...'
+                                            'rows': '4',
+                                            'placeholder': 'Share your experience with this program...',
+                                            'minlength': '10',
+                                            'maxlength': '1000'
                                         }
                                     }) }}
+                                    {{ form_errors(form.commentaire) }}
+                                    <small class="text-muted">Minimum 10 characters, maximum 1000 characters</small>
                                 </div>
                             </div>
 
@@ -59,9 +67,9 @@
                                 <div class="col-sm-10 offset-sm-2">
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-check-circle me-1"></i>
-                                        Submit
+                                        Submit Review
                                     </button>
-                                    <a href="{{ path('app_programmebienetre_show', {'idprogramme': programme.idprogramme}) }}" class="btn btn-secondary">
+                                    <a href="{{ path('app_programmebienetre_show', {'idprogramme': programme.idprogramme}) }}" class="btn btn-secondary ms-2">
                                         <i class="bi bi-x-circle me-1"></i>
                                         Cancel
                                     </a>
@@ -78,10 +86,148 @@
 </main>
 {% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .card {
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control:focus {
+            border-color: #4154f1;
+            box-shadow: 0 0 0 0.2rem rgba(65, 84, 241, 0.25);
+        }
+
+        .input-group-text {
+            background-color: #f6f9ff;
+            border-color: #4154f1;
+        }
+
+        .btn-primary {
+            background-color: #4154f1;
+            border-color: #4154f1;
+        }
+
+        .btn-primary:hover {
+            background-color: #3445c6;
+            border-color: #3445c6;
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        .invalid-feedback {
+            display: none;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+
+        .was-validated .form-control:invalid ~ .invalid-feedback {
+            display: block;
+        }
+    </style>
+{% endblock %}
+
 {% block javascripts %}
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const ratingInput = form.querySelector('[name="avis[rating]"]');
+            const commentInput = form.querySelector('[name="avis[commentaire]"]');
+            
+            // Custom validation messages
+            const messages = {
+                rating: {
+                    required: 'Please enter a rating',
+                    range: 'Rating must be between 1 and 5'
+                },
+                comment: {
+                    required: 'Please enter a comment',
+                    minLength: 'Your comment must be at least 10 characters long',
+                    maxLength: 'Your comment cannot be longer than 1000 characters'
+                }
+            };
+
+            // Add custom validation for rating
+            ratingInput.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                if (isNaN(value)) {
+                    this.setCustomValidity(messages.rating.required);
+                } else if (value < 1 || value > 5) {
+                    this.setCustomValidity(messages.rating.range);
+                } else {
+                    this.setCustomValidity('');
+                }
+                this.reportValidity();
+            });
+
+            // Add custom validation for comment
+            commentInput.addEventListener('input', function() {
+                const length = this.value.trim().length;
+                if (length === 0) {
+                    this.setCustomValidity(messages.comment.required);
+                } else if (length < 10) {
+                    this.setCustomValidity(messages.comment.minLength);
+                } else if (length > 1000) {
+                    this.setCustomValidity(messages.comment.maxLength);
+                } else {
+                    this.setCustomValidity('');
+                }
+                this.reportValidity();
+            });
+
+            // Form validation
+            form.addEventListener('submit', function(event) {
+                let isValid = true;
+
+                // Validate rating
+                const ratingValue = parseInt(ratingInput.value);
+                if (isNaN(ratingValue) || ratingValue < 1 || ratingValue > 5) {
+                    ratingInput.setCustomValidity(messages.rating.range);
+                    isValid = false;
+                }
+
+                // Validate comment
+                const commentLength = commentInput.value.trim().length;
+                if (commentLength < 10 || commentLength > 1000) {
+                    commentInput.setCustomValidity(
+                        commentLength < 10 ? messages.comment.minLength : messages.comment.maxLength
+                    );
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+
+                form.classList.add('was-validated');
+            });
+
+            // Real-time character count for comment
+            const commentCharCount = document.createElement('small');
+            commentCharCount.className = 'text-muted d-block mt-1';
+            commentInput.parentNode.appendChild(commentCharCount);
+
+            function updateCharCount() {
+                const length = commentInput.value.trim().length;
+                commentCharCount.textContent = `${length}/1000 characters`;
+                commentCharCount.style.color = length < 10 || length > 1000 ? '#dc3545' : '';
+            }
+
+            commentInput.addEventListener('input', updateCharCount);
+            updateCharCount(); // Initial count
+
             // Animation d'entrée du formulaire
             const card = document.querySelector('.card');
             card.style.opacity = '0';

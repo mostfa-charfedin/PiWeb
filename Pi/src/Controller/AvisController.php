@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Avis;
+use App\Entity\Programmebienetre;
 use App\Form\AvisType;
 use App\Repository\AvisRepository;
 use App\Repository\ProgrammebienetreRepository;
@@ -12,10 +13,33 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
+use App\Entity\User;
 
 #[Route('/avis')]
 class AvisController extends AbstractController
 {
+    #[Route('/', name: 'app_avis_index', methods: ['GET'])]
+    public function index(AvisRepository $avisRepository, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        // Vérifier si l'utilisateur est connecté
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        // Récupérer l'utilisateur
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        return $this->render('avis/index.html.twig', [
+            'avis' => $avisRepository->findAll(),
+            'user' => $user
+        ]);
+    }
+
     #[Route('/new/{idprogramme}', name: 'app_avis_new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
@@ -31,12 +55,19 @@ class AvisController extends AbstractController
 
         $programme = $programmebienetreRepository->find($idprogramme);
         if (!$programme) {
-            throw $this->createNotFoundException('Programme non trouvé');
+            throw $this->createNotFoundException('Program not found');
+        }
+
+        // Récupérer l'utilisateur
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
         }
 
         $avis = new Avis();
-        $avis->setIdprogramme($programme);
-        $avis->setIduser($session->get('id'));
+        $avis->setProgramme($programme);
+        $avis->setUser($user);
 
         $form = $this->createForm(AvisType::class, $avis);
         $form->handleRequest($request);
@@ -45,31 +76,40 @@ class AvisController extends AbstractController
             $entityManager->persist($avis);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_programmebienetre_show', ['idprogramme' => $idprogramme], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_avis_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('programmebienetre/avis.html.twig', [
+        return $this->render('avis/new.html.twig', [
             'avis' => $avis,
             'form' => $form,
             'programme' => $programme,
+            'user' => $user,
         ]);
     }
 
-    #[Route('/{idavis}/edit', name: 'app_avis_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_avis_edit', methods: ['GET', 'POST'])]
     public function edit(
         Request $request,
-        Avis $avis,
+        #[MapEntity] Avis $avis,
         EntityManagerInterface $entityManager,
-        SessionInterface $session
+        SessionInterface $session,
+        ProgrammebienetreRepository $programmebienetreRepository
     ): Response {
         // Vérifier si l'utilisateur est connecté
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
 
+        // Récupérer l'utilisateur
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
         // Vérifier si l'utilisateur est l'auteur de l'avis
-        if ($avis->getIduser() !== $session->get('id')) {
-            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à modifier cet avis');
+        if ($avis->getUser()->getId() !== $userId) {
+            throw $this->createAccessDeniedException('You are not authorized to edit this review');
         }
 
         $form = $this->createForm(AvisType::class, $avis);
@@ -78,20 +118,21 @@ class AvisController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_programmebienetre_show', ['idprogramme' => $avis->getIdprogramme()->getIdprogramme()], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_avis_index', [], Response::HTTP_SEE_OTHER);
         }
 
-        return $this->render('programmebienetre/avis.html.twig', [
+        return $this->render('avis/edit.html.twig', [
             'avis' => $avis,
             'form' => $form,
-            'programme' => $avis->getIdprogramme(),
+            'programme' => $avis->getProgramme(),
+            'user' => $user,
         ]);
     }
 
-    #[Route('/{idavis}', name: 'app_avis_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_avis_delete', methods: ['POST'])]
     public function delete(
         Request $request,
-        Avis $avis,
+        #[MapEntity] Avis $avis,
         EntityManagerInterface $entityManager,
         SessionInterface $session
     ): Response {
@@ -101,15 +142,15 @@ class AvisController extends AbstractController
         }
 
         // Vérifier si l'utilisateur est l'auteur de l'avis
-        if ($avis->getIduser() !== $session->get('id')) {
-            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à supprimer cet avis');
+        if ($avis->getUser()->getId() !== $session->get('id')) {
+            throw $this->createAccessDeniedException('You are not authorized to delete this review');
         }
 
-        if ($this->isCsrfTokenValid('delete'.$avis->getIdavis(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$avis->getId(), $request->request->get('_token'))) {
             $entityManager->remove($avis);
             $entityManager->flush();
         }
 
-        return $this->redirectToRoute('app_programmebienetre_show', ['idprogramme' => $avis->getIdprogramme()->getIdprogramme()], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_avis_index', [], Response::HTTP_SEE_OTHER);
     }
 }

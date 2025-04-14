@@ -18,21 +18,34 @@ class ProgrammebienetreController extends AbstractController
     #[Route('/programmebienetre', name: 'app_programmebienetre_index', methods: ['GET'])]
     public function index(ProgrammebienetreRepository $programmebienetreRepository, SessionInterface $session, EntityManagerInterface $em): Response
     {
-        // Check if user is logged in
+        // Vérifie si l'utilisateur est connecté
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
-
-        // Get the user from the session
+    
+        // Récupérer l'utilisateur
         $userId = $session->get('id');
         $user = $em->getRepository(User::class)->find($userId);
-
+    
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur non trouvé');
+        }
+    
+        // Récupérer les programmes
         $programmebienetres = $programmebienetreRepository->findAll();
-
-        return $this->render('programmebienetre/index.html.twig', [
-            'programmebienetres' => $programmebienetres,
-            'user' => $user,
-        ]);
+    
+        // Affichage différent selon le rôle
+        if ($user->getRole() === 'ADMIN') {
+            return $this->render('programmebienetre/index.html.twig', [
+                'programmebienetres' => $programmebienetres,
+                'user' => $user,
+            ]);
+        } else {
+            return $this->render('programmebienetre/user_index.html.twig', [
+                'programmebienetres' => $programmebienetres,
+                'user' => $user,
+            ]);
+        }
     }
 
     #[Route('/programmebienetre/new', name: 'app_programmebienetre_new', methods: ['GET', 'POST'])]
@@ -81,11 +94,17 @@ class ProgrammebienetreController extends AbstractController
         // Get the user from the session
         $userId = $session->get('id');
         $user = $em->getRepository(User::class)->find($userId);
-
-        return $this->render('programmebienetre/show.html.twig', [
-            'programmebienetre' => $programmebienetre,
-            'user' => $user,
-        ]);
+        if ($user->getRole() === 'ADMIN') {
+            return $this->render('programmebienetre/show.html.twig', [
+                'programmebienetre' => $programmebienetre,
+                'user' => $user,
+            ]);
+        } else {
+            return $this->render('programmebienetre/user_show.html.twig', [
+                'programmebienetre' => $programmebienetre,
+                'user' => $user,
+            ]);
+        }
     }
 
     #[Route('/programmebienetre/{idprogramme}/edit', name: 'app_programmebienetre_edit', methods: ['GET', 'POST'])]
@@ -128,3 +147,4 @@ class ProgrammebienetreController extends AbstractController
         return $this->redirectToRoute('app_programmebienetre_index', [], Response::HTTP_SEE_OTHER);
     }
 }
+

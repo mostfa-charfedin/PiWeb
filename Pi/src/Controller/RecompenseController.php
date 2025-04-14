@@ -74,10 +74,17 @@ class RecompenseController extends AbstractController
 
         $recompense = new Recompense();
         $idprogramme = $request->query->get('idprogramme');
+        
+        if (!$idprogramme) {
+            $this->addFlash('error', 'Program ID is required to create a reward.');
+            return $this->redirectToRoute('app_programmebienetre_index');
+        }
+        
         $programme = $entityManager->getRepository(\App\Entity\Programmebienetre::class)->find($idprogramme);
         
         if (!$programme) {
-            throw $this->createNotFoundException('Program not found');
+            $this->addFlash('error', 'Program not found.');
+            return $this->redirectToRoute('app_programmebienetre_index');
         }
         
         $recompense->setIdprogramme($programme);
@@ -86,10 +93,15 @@ class RecompenseController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($recompense);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_recompense_program', ['idprogramme' => $idprogramme], Response::HTTP_SEE_OTHER);
+            try {
+                $entityManager->persist($recompense);
+                $entityManager->flush();
+                
+                $this->addFlash('success', 'Reward created successfully.');
+                return $this->redirectToRoute('app_recompense_program', ['idprogramme' => $idprogramme], Response::HTTP_SEE_OTHER);
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'An error occurred while creating the reward.');
+            }
         }
 
         return $this->render('recompense/new.html.twig', [

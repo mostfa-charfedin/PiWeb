@@ -1,24 +1,6 @@
 {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
     
     <div class="row mb-3">
-        <label class="col-sm-2 col-form-label">Note</label>
-        <div class="col-sm-10">
-            <div class="rating-stars mb-2">
-                {{ form_widget(form.rating, {
-                    'attr': {
-                        'class': 'form-control',
-                        'min': '1',
-                        'max': '5',
-                        'placeholder': 'Note de 1 à 5'
-                    }
-                }) }}
-            </div>
-            <small class="text-muted">Donnez une note de 1 à 5 étoiles</small>
-            {{ form_errors(form.rating) }}
-        </div>
-    </div>
-
-    <div class="row mb-3">
         <label class="col-sm-2 col-form-label">Commentaire</label>
         <div class="col-sm-10">
             {{ form_widget(form.commentaire, {

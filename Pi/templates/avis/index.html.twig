@@ -1,4 +1,4 @@
-{% extends 'sidebar.html.twig' %}
+{% extends 'navBar.html.twig' %}
 
 {% block title %}Reviews List{% endblock %}
 
@@ -40,7 +40,7 @@
                                 <tbody>
                                     {% for avi in avis %}
                                         <tr>
-                                            <td>{{ avi.idprogramme }}</td>
+                                            <td>{{ avi.programme.titre }}</td>
                                             <td>
                                                 <div class="rating">
                                                     {% for i in 1..5 %}
@@ -55,17 +55,14 @@
                                             <td>{{ avi.commentaire }}</td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    <a href="{{ path('app_avis_show', {'id': avi.id}) }}" class="btn btn-info btn-sm">
-                                                        <i class="bi bi-eye"></i>
-                                                    </a>
-                                                    {% if user and user.id == avi.iduser %}
-                                                        <a href="{{ path('app_avis_edit', {'id': avi.id}) }}" class="btn btn-primary btn-sm">
+                                                    {% if user and user.id == avi.user.id %}
+                                                        <a href="{{ path('app_avis_edit', {'id': avi.id}) }}" class="btn btn-primary btn-sm" title="Edit">
                                                             <i class="bi bi-pencil"></i>
                                                         </a>
                                                         <form method="post" action="{{ path('app_avis_delete', {'id': avi.id}) }}" style="display: inline-block;"
                                                               onsubmit="return confirm('Are you sure you want to delete this review?');">
                                                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avi.id) }}">
-                                                            <button class="btn btn-danger btn-sm">
+                                                            <button class="btn btn-danger btn-sm" title="Delete">
                                                                 <i class="bi bi-trash"></i>
                                                             </button>
                                                         </form>
