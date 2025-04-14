@@ -160,7 +160,7 @@ class UserController extends AbstractController
                 $entityManager->persist($user);
                 $entityManager->flush();
                 $this->addFlash('success', 'Your profile has been updated successfully.');
-                return $this->redirectToRoute('profile');
+             
             }
         }
         
@@ -303,7 +303,7 @@ public function login(
         $pagination = $paginator->paginate(
             $query,
             $request->query->getInt('page', 1),
-            10 
+            2 
         );
 
         return $this->render('user/admin/UsersManag.html.twig', [
@@ -421,7 +421,7 @@ public function editModal(int $id, Request $request, EntityManagerInterface $ent
  * @Route("/admin/user/{id}/update", name="admin_user_update", methods={"POST"})
  */
 public function update(int $id, Request $request, SessionInterface $session, 
-EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    EntityManagerInterface $entityManager): Response
 {
     if (!$session->get('id')) {
         return $this->render('user/login.html.twig');
@@ -429,21 +429,14 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
 
     $userId = $session->get('id');
     $userS = $entityManager->getRepository(User::class)->find($userId);
-    if (!$userS) {
-        throw $this->createNotFoundException('User not found');
-    }
-    if ($userS->getRole() !== 'ADMIN') {  
-       
+    if (!$userS || $userS->getRole() !== 'ADMIN') {
         return $this->render('user/admin/404.html.twig');
     }
-
 
     $user = $entityManager->getRepository(User::class)->find($id);
     if (!$user) {
         throw $this->createNotFoundException('User not found');
     }
-
-
 
     $form = $this->createFormBuilder($user, [
         'csrf_protection' => true,
@@ -451,6 +444,7 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     ])
     ->add('nom', TextType::class, [
         'label' => false,
+        'empty_data' => '',
         'constraints' => [
             new Assert\NotBlank(['message' => 'First name is required']),
             new Assert\Length([
@@ -463,6 +457,7 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     ])
     ->add('prenom', TextType::class, [
         'label' => false,
+        'empty_data' => '',
         'constraints' => [
             new Assert\NotBlank(['message' => 'Last name is required']),
             new Assert\Length([
@@ -475,6 +470,7 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     ])
     ->add('email', EmailType::class, [
         'label' => false,
+        'empty_data' => '',
         'constraints' => [
             new Assert\NotBlank(['message' => 'Email is required']),
             new Assert\Email(['message' => 'Please enter a valid email']),
@@ -486,6 +482,7 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     ])
     ->add('numPhone', TextType::class, [
         'label' => false,
+        'empty_data' => '0',
         'constraints' => [
             new Assert\NotBlank(['message' => 'Phone number is required']),
             new Assert\Regex([
@@ -496,7 +493,8 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     ])
     ->add('dateNaissance', DateType::class, [
         'widget' => 'single_text',
-        'required' => false,
+        'label' => false,
+        'empty_data' => '',
         'constraints' => [
             new Assert\LessThan([
                 'value' => '-18 years',
@@ -504,22 +502,21 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
             ])
         ]
     ])
-        ->add('role', ChoiceType::class, [
-            'choices' => UserRole::choices(), 
-            'label' => 'Role',
-            'mapped' => false, 
-        ])
-        ->add('status', ChoiceType::class, [
-            'choices' => UserStatus::choices(), 
-            'label' => 'Status',
-            'mapped' => false, 
-        ])
-        ->getForm();
+    ->add('role', ChoiceType::class, [
+        'choices' => UserRole::choices(),
+        'label' => 'Role',
+        'mapped' => false,
+    ])
+    ->add('status', ChoiceType::class, [
+        'choices' => UserStatus::choices(),
+        'label' => 'Status',
+        'mapped' => false,
+    ])
+    ->getForm();
 
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
-        $errors = $validator->validate($user);
         $roleString = $form->get('role')->getData();
         if (is_string($roleString)) {
             $user->setRole(UserRole::tryFrom($roleString));
@@ -531,43 +528,27 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
         }
 
         $entityManager->flush();
-        $this->addFlash('success', 'Profile has been updated successfully.');
+
         return new JsonResponse(['success' => true]);
     }
-    $this->addFlash('error', 'Error updating profile.');
+
     return new JsonResponse([
         'success' => false,
         'errors' => $this->getAllFormErrors($form),
     ], Response::HTTP_BAD_REQUEST);
-    
 }
 
 
-private function getAllFormErrors(\Symfony\Component\Form\FormInterface $form): array
+private function getAllFormErrors($form): array
 {
     $errors = [];
-
-    foreach ($form->getErrors(true, true) as $error) {
-        $origin = $error->getOrigin();
-        $name = $origin?->getName() ?? 'form';
-        $errors[$name][] = $error->getMessage();
+    foreach ($form->all() as $child) {
+        foreach ($child->getErrors(true) as $error) {
+            $errors[$child->getName()][] = $error->getMessage();
+        }
     }
-
     return $errors;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
