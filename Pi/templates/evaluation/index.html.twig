@@ -82,6 +82,12 @@
                                             <a href="{{ path('app_evaluation_show', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-info btn-sm">
                                                 <i class="bi bi-eye"></i>
                                             </a>
+                                            <form method="post" action="{{ path('app_evaluation_delete', {'idevaluation': evaluation.idEvaluation}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ?');" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evaluation.idEvaluation) }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>
@@ -139,6 +145,12 @@
                                             <a href="{{ path('app_evaluation_show', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-info btn-sm">
                                                 <i class="bi bi-eye"></i>
                                             </a>
+                                            <form method="post" action="{{ path('app_evaluation_delete', {'idevaluation': evaluation.idEvaluation}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ?');" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evaluation.idEvaluation) }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
                                         </div>
                                     </td>
                                 </tr>

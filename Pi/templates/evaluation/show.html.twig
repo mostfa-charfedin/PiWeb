@@ -15,9 +15,16 @@
         </ol>
       </nav>
     </div>
-    <a href="{{ path('app_evaluation_index') }}" class="btn btn-outline-primary rounded-pill px-4 back-btn">
-      <i class="bi bi-arrow-left me-2"></i> Back to List
-    </a>
+    <div class="d-flex gap-2">
+      <a href="{{ path('app_evaluation_index') }}" class="btn btn-outline-primary rounded-pill px-4 back-btn">
+        <i class="bi bi-arrow-left me-2"></i> Back to List
+      </a>
+      <a href="{{ path('app_evaluation_delete', {'idevaluation': evaluation.idEvaluation}) }}" 
+         onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ?');" 
+         class="btn btn-outline-danger rounded-pill px-4 delete-btn">
+        <i class="bi bi-trash me-2"></i> Delete
+      </a>
+    </div>
   </div>
 
   <section class="section">
@@ -315,6 +322,21 @@
     color: white;
     transform: translateX(-5px);
     box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+  }
+
+  .delete-btn {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
+  }
+
+  .delete-btn:hover {
+    background: linear-gradient(45deg, #D50000, #FF5252);
+    color: white;
+    transform: translateX(5px);
+    box-shadow: 0 6px 20px rgba(255, 82, 82, 0.4);
   }
 
   .date-section::before {

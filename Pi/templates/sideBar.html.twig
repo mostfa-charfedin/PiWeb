@@ -67,8 +67,8 @@
   </a>
   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" aria-labelledby="dropdownMenuLink">
     <li class="dropdown-header">
-      <h6>{{ user.nom }} &nbsp; {{ user.prenom }}</h6>
-      <span>{{ user.role }}</span>
+      <h6>{% if user %}{{ user.nom }} &nbsp; {{ user.prenom }}{% else %}Guest{% endif %}</h6>
+      <span>{% if user %}{{ user.role }}{% else %}Guest{% endif %}</span>
     </li>
     <li><hr class="dropdown-divider"></li>
     <li><a class="dropdown-item d-flex align-items-center" href="{{ path('profile') }}"><i class="bi bi-person"></i> My Profile</a></li>
