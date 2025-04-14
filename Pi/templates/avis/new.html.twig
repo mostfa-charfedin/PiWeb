@@ -1,11 +1,97 @@
-<!DOCTYPE html>
+{% extends 'sidebar.html.twig' %}
 
-<title>New Avis</title>
+{% block title %}New Review{% endblock %}
 
-{% block body %}
-    <h1>Create new Avis</h1>
+{% block content %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Give a Review</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('app_programmebienetre_index') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('app_programmebienetre_show', {'idprogramme': programme.idprogramme}) }}">Program</a></li>
+                <li class="breadcrumb-item active">New Review</li>
+            </ol>
+        </nav>
+    </div>
 
-    {{ include('avis/_form.html.twig') }}
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Give your review for "{{ programme.titre }}"</h5>
 
-    <a href="{{ path('app_avis_index') }}">back to list</a>
+                        <div class="pt-4">
+                            {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                            
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label">Rating</label>
+                                <div class="col-sm-10">
+                                    <div class="rating-stars mb-2">
+                                        {{ form_widget(form.rating, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'min': '1',
+                                                'max': '5',
+                                                'placeholder': 'Rating from 1 to 5'
+                                            }
+                                        }) }}
+                                    </div>
+                                    <small class="text-muted">Give a rating from 1 to 5 stars</small>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <label class="col-sm-2 col-form-label">Comment</label>
+                                <div class="col-sm-10">
+                                    {{ form_widget(form.commentaire, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'rows': '5',
+                                            'placeholder': 'Your review of the program...'
+                                        }
+                                    }) }}
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-sm-10 offset-sm-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle me-1"></i>
+                                        Submit
+                                    </button>
+                                    <a href="{{ path('app_programmebienetre_show', {'idprogramme': programme.idprogramme}) }}" class="btn btn-secondary">
+                                        <i class="bi bi-x-circle me-1"></i>
+                                        Cancel
+                                    </a>
+                                </div>
+                            </div>
+
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation d'entrée du formulaire
+            const card = document.querySelector('.card');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
 {% endblock %}

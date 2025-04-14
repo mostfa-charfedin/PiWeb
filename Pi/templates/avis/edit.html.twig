@@ -1,13 +1,59 @@
-<!DOCTYPE html>
+{% extends 'sidebar.html.twig' %}
 
-<title>Edit Avis</title>
+{% block title %}Modifier l'Avis{% endblock %}
 
-{% block body %}
-    <h1>Edit Avis</h1>
+{% block content %}
+<main id="main" class="main">
+    <div class="pagetitle">
+        <h1>Modifier l'Avis</h1>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('user_programmes') }}">Accueil</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('app_avis_index') }}">Avis</a></li>
+                <li class="breadcrumb-item active">Modifier</li>
+            </ol>
+        </nav>
+    </div>
 
-    {{ include('avis/_form.html.twig', {'button_label': 'Update'}) }}
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Modifier votre avis</h5>
 
-    <a href="{{ path('app_avis_index') }}">back to list</a>
+                        <div class="pt-4">
+                            {{ include('avis/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
 
-    {{ include('avis/_delete_form.html.twig') }}
+                            <div class="mt-3">
+                                <a href="{{ path('app_avis_index') }}" class="btn btn-secondary">
+                                    <i class="bi bi-arrow-left me-1"></i>
+                                    Retour à la liste
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animation d'entrée du formulaire
+            const card = document.querySelector('.card');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
 {% endblock %}
