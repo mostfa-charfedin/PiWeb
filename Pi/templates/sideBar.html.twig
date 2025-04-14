@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Onboardify2</title>
+  <title>Onboardify</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -66,18 +66,14 @@
     </span>
   </a>
   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" aria-labelledby="dropdownMenuLink">
-    {% if user %}
-      <li class="dropdown-header">
-        <h6>{{ user.nom }} &nbsp; {{ user.prenom }}</h6>
-        <span>{{ user.roles }}</span>
-      </li>
-      <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item d-flex align-items-center" href="{{ path('profile') }}"><i class="bi bi-person"></i> My Profile</a></li>
-      <li><hr class="dropdown-divider"></li>
-      <li><a class="dropdown-item d-flex align-items-center" href="{{ path('logout') }}"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
-    {% else %}
-      <li><a class="dropdown-item d-flex align-items-center" href="{{ path('login') }}"><i class="bi bi-box-arrow-in-right"></i> Login</a></li>
-    {% endif %}
+    <li class="dropdown-header">
+      <h6>{{ user.nom }} &nbsp; {{ user.prenom }}</h6>
+      <span>{{ user.role }}</span>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item d-flex align-items-center" href="{{ path('profile') }}"><i class="bi bi-person"></i> My Profile</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item d-flex align-items-center" href="{{ path('logout') }}"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
   </ul>
 </li>
       </ul>
@@ -190,7 +186,8 @@
   });
 </script>
 
+
 </body>
         
-</body>
+
 </html>
