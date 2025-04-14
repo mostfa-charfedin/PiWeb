@@ -28,7 +28,7 @@ class ProgrammebienetreController extends AbstractController
         $user = $em->getRepository(User::class)->find($userId);
     
         if (!$user) {
-            throw $this->createNotFoundException('Utilisateur non trouvé');
+            throw $this->createNotFoundException('User Not Found');
         }
     
         // Récupérer les programmes

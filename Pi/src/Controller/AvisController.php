@@ -34,10 +34,23 @@ class AvisController extends AbstractController
             throw $this->createNotFoundException('User not found');
         }
 
-        return $this->render('avis/index.html.twig', [
-            'avis' => $avisRepository->findAll(),
-            'user' => $user
-        ]);
+        // Récupérer tous les avis
+        $avis = $avisRepository->findAll();
+
+        // Si l'utilisateur est admin, afficher la vue admin
+        if ($user->getRole() === 'ADMIN') {
+            return $this->render('avis/admin_index.html.twig', [
+                'avis' => $avis,
+                'user' => $user,
+            ]);
+        } else {
+            // Sinon, afficher uniquement les avis de l'utilisateur
+            $userAvis = $avisRepository->findBy(['user' => $user]);
+            return $this->render('avis/index.html.twig', [
+                'avis' => $userAvis,
+                'user' => $user,
+            ]);
+        }
     }
 
     #[Route('/new/{idprogramme}', name: 'app_avis_new', methods: ['GET', 'POST'])]
