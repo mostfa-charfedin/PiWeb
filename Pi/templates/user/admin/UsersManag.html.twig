@@ -9,10 +9,12 @@
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="">Accueil</a></li>
-                <li class="breadcrumb-item active">Utilisateurs</li>
+                <li class="breadcrumb-item active">Gestion des Utilisateurs</li>
             </ol>
         </nav>
-    </div><section class="section">
+    </div>
+    
+    <section class="section">
         <div class="row">
             <div class="col-lg-12">
                 <div class="card">
@@ -37,9 +39,7 @@
                             <div class="col-md-6">
                                 <div class="input-group">
                                     <input type="text" class="form-control" placeholder="Rechercher..." id="searchInput">
-                                    <button class="btn btn-outline-secondary" type="button" id="searchButton">
-                                        <i class="bi bi-search"></i>
-                                    </button>
+                                 
                                 </div>
                             </div>
                            
@@ -97,7 +97,7 @@
 
                                             </td>
 
-                                            
+&nbsp;                                
                                             <td>
                                                 <div class="btn-group" role="group">
                                                     <button type="button"
@@ -108,7 +108,7 @@
                                                             title="Modifier">
                                                         <i class="bi bi-pencil"></i>
                                                     </button>
-
+&nbsp;
                                                     <button type="button"
                                                             class="btn btn-sm btn-info view-user"
                                                             data-bs-toggle="modal"
@@ -117,12 +117,13 @@
                                                             title="Voir détails">
                                                         <i class="bi bi-eye"></i>
                                                     </button>
-
+&nbsp;
                                                     <form method="post"
       action="{{ path('admin_user_delete', {'id': user.id}) }}"
       onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?');"
       class="d-inline">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+    
     <button type="submit" class="btn btn-sm btn-danger" title="Supprimer">
         <i class="bi bi-trash"></i>
     </button>
@@ -197,67 +198,85 @@
     }
 </style>
 
-{% block javascripts %}
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Search functionality
-        const searchInput = document.getElementById('searchInput');
-        const searchButton = document.getElementById('searchButton');
+document.addEventListener('DOMContentLoaded', function() {
+     // Fonction de recherche dynamique
+const searchInput = document.getElementById('searchInput');
+const rows = document.querySelectorAll('tbody tr');
 
-        searchButton.addEventListener('click', function() {
-            const filter = searchInput.value.toLowerCase();
-            const rows = document.querySelectorAll('tbody tr');
+searchInput.addEventListener('input', function() {
+    const filter = searchInput.value.toLowerCase();
 
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                row.style.display = text.includes(filter) ? '' : 'none';
-            });
-        });
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+});
 
-        // View user details in modal
-        document.querySelectorAll('.view-user').forEach(button => {
-            button.addEventListener('click', function() {
-                const userId = this.getAttribute('data-user-id');
-                fetch(`/admin/user/${userId}/details`, { // URL corrigée
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.text())
-                .then(html => {
-                    document.getElementById('userDetails').innerHTML = html;
-                })
-                .catch(error => {
-                    document.getElementById('userDetails').innerHTML = `
-                        <div class="alert alert-danger">
-                            Une erreur s'est produite lors du chargement des détails.
-                        </div>
-                    `;
-                });
-            });
-        });
 
-        // Edit user in modal
-   document.querySelectorAll('.edit-user-btn').forEach(button => {
-    button.addEventListener('click', function() {
-        const userId = this.getAttribute('data-user-id');
-        fetch(`/admin/user/${userId}/edit-modal`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+    // View user details in modal
+    document.querySelectorAll('.view-user').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            fetch(`/admin/user/${userId}/details`, { // URL corrigée
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
-                return response.json();
             })
-            .then(data => {
-                const container = document.getElementById('edit-user-form-container');
-                if (container) {
-                    container.innerHTML = data.form;
-                    if (window.jQuery && $('#edit-user-modal').length) { // Vérification de jQuery
+            .then(response => response.text())
+            .then(html => {
+                document.getElementById('userDetails').innerHTML = html;
+            })
+            .catch(error => {
+                document.getElementById('userDetails').innerHTML = `
+                    <div class="alert alert-danger">
+                        Une erreur s'est produite lors du chargement des détails.
+                    </div>
+                `;
+            });
+        });
+    });
+
+    // Edit user in modal
+    document.querySelectorAll('.edit-user-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const userId = this.getAttribute('data-user-id');
+            fetch(`/admin/user/${userId}/edit-modal`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('edit-user-form-container');
+                    if (container) {
+                        container.innerHTML = data.form;
+                        // Affiche le modal
                         $('#edit-user-modal').modal('show');
+                        
+                        // Affiche les erreurs si elles existent
+                        if (data.errors) {
+                            for (const [fieldName, messages] of Object.entries(data.errors)) {
+                                const input = document.querySelector(`[name$="[${fieldName}]"]`);
+                                if (input) {
+                                    input.classList.add('is-invalid');
+                                    const errorDiv = document.createElement('div');
+                                    errorDiv.className = 'invalid-feedback';
+                                    errorDiv.innerHTML = messages.join('<br>');
+                                    const parent = input.closest('.form-floating') || input.parentElement;
+                                    parent.appendChild(errorDiv);
+                                }
+                            }
+                        }
+
+                        // Gère la soumission du formulaire
                         document.getElementById('user-edit-form').addEventListener('submit', function(event) {
                             event.preventDefault();
+                            this.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                            this.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+
                             fetch(`/admin/user/${userId}/update`, {
                                 method: 'POST',
                                 body: new FormData(this)
@@ -268,26 +287,35 @@
                                     $('#edit-user-modal').modal('hide');
                                     location.reload();
                                 } else if (data.errors) {
-                                    alert(data.errors);
+                                    for (const [fieldName, messages] of Object.entries(data.errors)) {
+                                        const input = document.querySelector(`[name$="[${fieldName}]"]`);
+                                        if (input) {
+                                            input.classList.add('is-invalid');
+                                            const errorDiv = document.createElement('div');
+                                            errorDiv.className = 'invalid-feedback';
+                                            errorDiv.innerHTML = messages.join('<br>');
+                                            const parent = input.closest('.form-floating') || input.parentElement;
+                                            parent.appendChild(errorDiv);
+                                        }
+                                    }
                                 }
+                            })
+                            .catch(error => {
+                                console.error("Erreur lors de la soumission du formulaire :", error);
+                                alert("Une erreur s'est produite lors de la mise à jour.");
                             });
                         });
-                    } else {
-                        console.error("Modal element with ID 'edit-user-modal' not found or jQuery not loaded.");
-                        alert("Une erreur s'est produite. La modal n'a pas été trouvée ou jQuery n'est pas chargé.");
                     }
-                } else {
-                    console.error("Element with ID 'edit-user-form-container' not found.");
-                    alert("Une erreur s'est produite. L'élément nécessaire pour le formulaire n'a pas été trouvé.");
-                }
-            })
-            .catch(error => {
-                console.error("Error fetching edit form:", error);
-                alert("Une erreur s'est produite lors du chargement du formulaire d'édition.");
-            });
+                })
+                .catch(error => {
+                    console.error("Error fetching edit form:", error);
+                    alert("Une erreur s'est produite lors du chargement du formulaire d'édition.");
+                });
+        });
     });
 });
-    });
 </script>
-{% endblock %}
+
+
+
 {% endblock %}
