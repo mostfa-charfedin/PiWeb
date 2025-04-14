@@ -296,7 +296,7 @@ public function login(
             throw $this->createNotFoundException('User not found');
         }
         if ($user->getRole() !== 'ADMIN') {  
-            $this->addFlash('error', 'Accès réservé aux administrateurs');
+         
             return $this->render('user/admin/404.html.twig');
         }
         
@@ -322,13 +322,12 @@ public function login(
         ]);
     }
 
-
 /**
  * @Route("/admin/user/{id}/edit-modal", name="admin_user_edit_modal", methods={"GET"})
  */
-public function editModal(int $id, EntityManagerInterface $entityManager ,SessionInterface $session): JsonResponse
+public function editModal(int $id, Request $request, EntityManagerInterface $entityManager, SessionInterface $session): JsonResponse
 {
-
+    // Vérification de la session
     if (!$session->get('id')) {
         return $this->render('user/login.html.twig');
     }
@@ -338,58 +337,85 @@ public function editModal(int $id, EntityManagerInterface $entityManager ,Sessio
     if (!$userS) {
         throw $this->createNotFoundException('User not found');
     }
-    if ($userS->getRole() !== 'ADMIN') {  
-        $this->addFlash('error', 'Accès réservé aux administrateurs');
+    if ($userS->getRole() !== 'ADMIN') {
         return $this->render('user/admin/404.html.twig');
     }
-    
 
-    
+    // Recherche de l'utilisateur à éditer
     $user = $entityManager->getRepository(User::class)->find($id);
-    
     if (!$user) {
         return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
     }
 
-    // Create the form with CSRF protection and token ID
+    // Création du formulaire
     $form = $this->createFormBuilder($user, [
         'csrf_protection' => true,
-        'csrf_token_id' => 'user_update',  // Ensure the CSRF token ID is the same as in the update route
+        'csrf_token_id' => 'user_update',
     ])
-        ->add('nom', TextType::class, ['label' => false])
-        ->add('prenom', TextType::class, ['label' => false])
-        ->add('email', EmailType::class, ['label' => false])
-        ->add('numPhone', TextType::class, ['label' => false])
-        ->add('dateNaissance', DateType::class, ['widget' => 'single_text', 'required' => false])
-        ->add('role', ChoiceType::class, [
-            'choices' => UserRole::choices(),
-            'label' => 'Role',
-            'data' => $user->getRole(),
+    ->add('nom', TextType::class, [
+        'label' => false,
+        'constraints' => [
+            new Assert\NotBlank(['message' => 'Le nom ne peut pas être vide.']),
+            new Assert\Length(['min' => 2, 'minMessage' => 'Le nom doit contenir au moins {{ limit }} caractères.']),
+        ],
+    ])
+    ->add('prenom', TextType::class, [
+        'label' => false,
+        'constraints' => [
+            new Assert\NotBlank(['message' => 'Le prénom ne peut pas être vide.']),
+            new Assert\Length(['min' => 2, 'minMessage' => 'Le prénom doit contenir au moins {{ limit }} caractères.']),
+        ],
+    ])
+    ->add('email', EmailType::class, [
+        'label' => false,
+        'constraints' => [
+            new Assert\NotBlank(['message' => 'L\'email ne peut pas être vide.']),
+            new Assert\Email(['message' => 'L\'email {{ value }} n\'est pas valide.']),
+        ],
+    ])
+    ->add('numPhone', TextType::class, [
+        'label' => false,
+        'constraints' => [
+            new Assert\NotBlank(['message' => 'Le numéro de téléphone ne peut pas être vide.']),
+        ],
+    ])
+    ->add('dateNaissance', DateType::class, [
+        'widget' => 'single_text',
+        'required' => false,
+        'constraints' => [
+            new Assert\Date(['message' => 'La date de naissance doit être au format valide.']),
+        ],
+    ])
+    ->add('role', ChoiceType::class, [
+        'choices' => UserRole::choices(),
+        'label' => 'Role',
+        'data' => $user->getRole(),
+    ])
+    ->add('status', ChoiceType::class, [
+        'choices' => UserStatus::choices(),
+        'label' => 'Status',
+        'data' => $user->getStatus(),
+    ])
+    ->getForm();
 
-        ])
-        ->add('status', ChoiceType::class, [
-            'choices' => UserStatus::choices(),
-            'label' => 'Status',
-            'data' => $user->getStatus(),
+    $form->handleRequest($request);
+    $errors = [];
 
-        ])
-        ->getForm();
-
-    // Handle form submission
-    if ($form->isSubmitted() && $form->isValid()) {
-        $data = $form->getData();
-        $user->setStatus($data['status']); 
-        $user->setRole($data['role']); 
-        $entityManager->flush();
+    if ($form->isSubmitted() && !$form->isValid()) {
+        foreach ($form->getErrors(true) as $error) {
+            $errors[$error->getOrigin()->getName()][] = $error->getMessage();
+        }
     }
 
-    // Render the form view for modal
-    $formView = $form->createView();
-
+    // Renvoie le formulaire avec les erreurs
     return new JsonResponse([
-        'form' => $this->renderView('user/admin/_edit_form.html.twig', ['form' => $formView]),
+        'form' => $this->renderView('user/admin/_edit_form.html.twig', ['form' => $form->createView()]),
+        'errors' => $errors,
     ]);
 }
+
+
+
 
 /**
  * @Route("/admin/user/{id}/update", name="admin_user_update", methods={"POST"})
@@ -407,7 +433,7 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
         throw $this->createNotFoundException('User not found');
     }
     if ($userS->getRole() !== 'ADMIN') {  
-        $this->addFlash('error', 'Accès réservé aux administrateurs');
+       
         return $this->render('user/admin/404.html.twig');
     }
 
@@ -417,10 +443,7 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
         throw $this->createNotFoundException('User not found');
     }
 
-    // CSRF Token validation should happen before processing
-   // if (!$this->isCsrfTokenValid('user_update', $request->get('_token'))) {
-    //    return new JsonResponse(['error' => 'Invalid CSRF token'], Response::HTTP_FORBIDDEN);
-    //}
+
 
     $form = $this->createFormBuilder($user, [
         'csrf_protection' => true,
@@ -429,24 +452,24 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     ->add('nom', TextType::class, [
         'label' => false,
         'constraints' => [
-            new Assert\NotBlank(['message' => 'Last name is required']),
-            new Assert\Length([
-                'min' => 2,
-                'max' => 50,
-                'minMessage' => 'Last name must be at least {{ limit }} characters',
-                'maxMessage' => 'Last name cannot be longer than {{ limit }} characters'
-            ])
-        ]
-    ])
-    ->add('prenom', TextType::class, [
-        'label' => false,
-        'constraints' => [
             new Assert\NotBlank(['message' => 'First name is required']),
             new Assert\Length([
                 'min' => 2,
                 'max' => 50,
                 'minMessage' => 'First name must be at least {{ limit }} characters',
                 'maxMessage' => 'First name cannot be longer than {{ limit }} characters'
+            ])
+        ]
+    ])
+    ->add('prenom', TextType::class, [
+        'label' => false,
+        'constraints' => [
+            new Assert\NotBlank(['message' => 'Last name is required']),
+            new Assert\Length([
+                'min' => 2,
+                'max' => 50,
+                'minMessage' => 'Last name must be at least {{ limit }} characters',
+                'maxMessage' => 'Last name cannot be longer than {{ limit }} characters'
             ])
         ]
     ])
@@ -513,9 +536,10 @@ EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
     }
     $this->addFlash('error', 'Error updating profile.');
     return new JsonResponse([
-        'error' => 'Invalid data',
-        'details' => $this->getAllFormErrors($form),
+        'success' => false,
+        'errors' => $this->getAllFormErrors($form),
     ], Response::HTTP_BAD_REQUEST);
+    
 }
 
 
@@ -564,7 +588,7 @@ private function getAllFormErrors(\Symfony\Component\Form\FormInterface $form): 
             throw $this->createNotFoundException('User not found');
         }
         if ($userS->getRole() !== 'ADMIN') {  
-            $this->addFlash('error', 'Accès réservé aux administrateurs');
+          
             return $this->render('user/admin/404.html.twig');
         }
 
