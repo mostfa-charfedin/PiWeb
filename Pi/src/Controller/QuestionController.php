@@ -18,8 +18,17 @@ use Symfony\Component\Routing\Annotation\Route;
 class QuestionController extends AbstractController
 {
     #[Route('/question/new/{quizId}', name: 'question_new')]
-    public function new(int $quizId, Request $request, EntityManagerInterface $em): Response
-    {
+    public function new(
+        int $quizId,
+        Request $request,
+        EntityManagerInterface $em,
+        SessionInterface $session
+    ): Response {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        $user = $em->getRepository(User::class)->find($session->get('id'));
         $quiz = $em->getRepository(Quiz::class)->find($quizId);
 
         if (!$quiz) {
@@ -29,6 +38,7 @@ class QuestionController extends AbstractController
         $question = new Question();
         $question->setQuiz($quiz);
 
+        // Add placeholder responses
         for ($i = 0; $i < 3; $i++) {
             $question->addReponse(new Reponse());
         }
@@ -44,7 +54,10 @@ class QuestionController extends AbstractController
         }
 
         return $this->render('quiz/reponseForm.html.twig', [
-            'form' => $form->createView()
+            'form' => $form->createView(),
+            'user' => $user,
+            'quiz' => $quiz,
+            'question' => $question, // ✅ Fix added here
         ]);
     }
 
@@ -78,11 +91,12 @@ class QuestionController extends AbstractController
             ]);
         }
 
-        return $this->render('integration/question_form.html.twig', [
+        return $this->render('quiz/reponseForm.html.twig', [
             'formQuestion' => $form->createView(),
             'edit_mode' => true,
             'user' => $user,
             'quiz' => $question->getQuiz(),
+            'question' => $question,
         ]);
     }
 
@@ -133,6 +147,7 @@ class QuestionController extends AbstractController
             'reponses' => $question->getReponses(),
             'user' => $user,
             'quiz' => $question->getQuiz(),
+            'question' => $question,
         ]);
     }
 }

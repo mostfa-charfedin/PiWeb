@@ -29,10 +29,9 @@ class ReponseController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-
+        $user = $em->getRepository(User::class)->find($session->get('id'));
         $question = $questionRepository->find($idQuestion);
+
         if (!$question) {
             throw $this->createNotFoundException('Question not found');
         }
@@ -51,53 +50,13 @@ class ReponseController extends AbstractController
         }
 
         return $this->render('quiz/reponseForm.html.twig', [
-            'formReponse' => $form->createView(),
-            'edit_mode' => false,
+            'formReponse' => $form->createView(), // ✅ use 'form'
             'user' => $user,
             'question' => $question,
         ]);
     }
 
-    #[Route('/reponse/{idReponse}/edit', name: 'reponse_edit')]
-    public function editReponse(
-        int $idReponse,
-        Request $request,
-        ReponseRepository $reponseRepository,
-        EntityManagerInterface $em,
-        SessionInterface $session
-    ): Response {
-        if (!$session->get('id')) {
-            return $this->redirectToRoute('login');
-        }
-
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-
-        $reponse = $reponseRepository->find($idReponse);
-        if (!$reponse) {
-            throw $this->createNotFoundException('Reponse not found');
-        }
-
-        $form = $this->createForm(ReponseType::class, $reponse);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
-
-            return $this->redirectToRoute('question_show', [
-                'id' => $reponse->getQuestion()->getIdQuestion(),
-            ]);
-        }
-
-        return $this->render('integration/reponse_form.html.twig', [
-            'formReponse' => $form->createView(),
-            'edit_mode' => true,
-            'user' => $user,
-            'question' => $reponse->getQuestion(),
-        ]);
-    }
-
-    #[Route('/reponse/{idReponse}/delete', name: 'reponse_delete')]
+    #[Route('/reponse/{idReponse}/delete', name: 'reponse_delete', methods: ['POST'])]
     public function deleteReponse(
         int $idReponse,
         ReponseRepository $reponseRepository,
@@ -108,12 +67,11 @@ class ReponseController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
-        $userId = $session->get('id');
-        $user = $em->getRepository(User::class)->find($userId);
-
+        $user = $em->getRepository(User::class)->find($session->get('id'));
         $reponse = $reponseRepository->find($idReponse);
+
         if (!$reponse) {
-            throw $this->createNotFoundException('Reponse not found');
+            throw $this->createNotFoundException('Response not found');
         }
 
         $questionId = $reponse->getQuestion()->getIdQuestion();

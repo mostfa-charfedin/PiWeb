@@ -22,7 +22,8 @@ class Reponse
     /**
      * @ORM\Column(name="Response", type="string", length=255)
      */
-    private $response;
+ 
+private  $response ;
 
   /**
  * @ORM\Column(name="status", type="string", length=10)
@@ -32,6 +33,8 @@ private $status;
      * @ORM\ManyToOne(targetEntity=Question::class, inversedBy="reponses")
      * @ORM\JoinColumn(name="idQuestion", referencedColumnName="idQuestion", nullable=false, onDelete="CASCADE")
      */
+  
+    
     private $question;
 
     public function getIdReponse(): ?int

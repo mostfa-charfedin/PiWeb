@@ -24,6 +24,10 @@ class Question
 
     /**
      * @ORM\Column(name="Question", type="string", length=255, nullable=true)
+     
+     *      max = 80,
+     *      maxMessage = "The question can't be more than {{ limit }} characters"
+     * )
      */
     private $question;
 

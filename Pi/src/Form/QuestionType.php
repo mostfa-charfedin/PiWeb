@@ -19,6 +19,7 @@ class QuestionType extends AbstractType
                 'label' => 'Question',
                 'required' => true,
             ])
+            
             ->add('reponses', CollectionType::class, [
                 'entry_type' => ReponseType::class,
                 'allow_add' => true,
