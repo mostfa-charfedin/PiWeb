@@ -4,9 +4,9 @@
 
 {% block content %}
 <main id="main" class="main">
-  <div class="pagetitle d-flex justify-content-between align-items-center">
+  <div class="pagetitle d-flex justify-content-between align-items-center mb-4">
     <div>
-      <h1>{{ ressource.titre }}</h1>
+      <h1>Ressource Details</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item"><a href="#">Home</a></li>
@@ -15,79 +15,99 @@
         </ol>
       </nav>
     </div>
-    <a href="{{ path('app_ressources_index') }}" class="btn btn-secondary">
-      <i class="bi bi-arrow-left"></i> Back
+    <a href="{{ path('app_ressources_index') }}" class="btn btn-outline-primary rounded-pill px-4 back-btn">
+      <i class="bi bi-arrow-left me-2"></i> Back to List
     </a>
   </div>
 
   <section class="section">
     <div class="row justify-content-center">
       <div class="col-lg-8">
-        <!-- Enhanced Ressource Information Card with Shadow, Gradient, and Hover Effects -->
-        <div class="card shadow-lg mb-4 rounded-3 hover-card">
+        <div class="card evaluation-card">
+          <!-- Resource Title Header -->
+          <div class="card-header text-center py-4">
+            <div class="resource-icon mb-3">
+              <i class="bi bi-journal-text"></i>
+            </div>
+            <h4 class="card-title mb-0">{{ ressource.titre }}</h4>
+          </div>
+
           <div class="card-body">
-            <h5 class="card-title mb-4"><i class="bi bi-file-earmark-text-fill"></i> Ressource Information</h5>
-
-            <!-- ID Section -->
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <p><strong><i class="bi bi-card-list"></i> ID:</strong></p>
+            <!-- Rating Section -->
+            <div class="rating-section text-center">
+              <div class="rating-circle {% if ressource.noteaverage >= 7 %}rating-high{% elseif ressource.noteaverage >= 4 %}rating-medium{% else %}rating-low{% endif %}">
+                <div class="rating-inner">
+                  <span class="rating-number">{{ ressource.noteaverage }}</span>
+                  <span class="rating-max">/10</span>
+                </div>
               </div>
-              <div class="col-md-8">
-                <p>{{ ressource.idresource }}</p>
-              </div>
-            </div>
-
-            <!-- Type Section -->
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <p><strong><i class="bi bi-tags"></i> Type:</strong></p>
-              </div>
-              <div class="col-md-8">
-                <p class="text-primary">{{ ressource.type }}</p>
-              </div>
-            </div>
-
-            <!-- Description Section -->
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <p><strong><i class="bi bi-pencil-square"></i> Description:</strong></p>
-              </div>
-              <div class="col-md-8">
-                <p>{{ ressource.description }}</p>
-              </div>
-            </div>
-
-            <!-- Link Section -->
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <p><strong><i class="bi bi-link-45deg"></i> Lien:</strong></p>
-              </div>
-              <div class="col-md-8">
-                {% if ressource.lien %}
-                  <a href="{{ ressource.lien }}" target="_blank" class="text-decoration-none link-hover">{{ ressource.lien }}</a>
+              <div class="rating-label mt-3">
+                {% if ressource.noteaverage >= 7 %}
+                  <span class="performance-badge success">
+                    <i class="bi bi-star-fill me-2"></i>Excellent Resource
+                  </span>
+                {% elseif ressource.noteaverage >= 4 %}
+                  <span class="performance-badge warning">
+                    <i class="bi bi-star-half me-2"></i>Average Resource
+                  </span>
                 {% else %}
-                  <span class="text-muted">No link provided</span>
+                  <span class="performance-badge danger">
+                    <i class="bi bi-star me-2"></i>Needs Improvement
+                  </span>
                 {% endif %}
               </div>
             </div>
 
-            <!-- Average Rating Section -->
-            <div class="row mb-3">
-              <div class="col-md-4">
-                <p><strong><i class="bi bi-star-fill"></i> Average Rating:</strong></p>
+            <!-- Type Section -->
+            <div class="date-section text-center mt-4">
+              <div class="date-icon">
+                <i class="bi bi-tag-fill"></i>
               </div>
-              <div class="col-md-8">
-                <p>{{ ressource.noteaverage }} / 10</p>
+              <div class="date-content">
+                <div class="date-label">Resource Type</div>
+                <div class="date-value">
+                  {{ ressource.type }}
+                </div>
               </div>
             </div>
 
+            <!-- Description Section -->
+            <div class="date-section text-center mt-4">
+              <div class="date-icon">
+                <i class="bi bi-card-text"></i>
+              </div>
+              <div class="date-content">
+                <div class="date-label">Description</div>
+                <div class="date-value">
+                  {{ ressource.description }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Link Section -->
+            <div class="date-section text-center mt-4">
+              <div class="date-icon">
+                <i class="bi bi-link-45deg"></i>
+              </div>
+              <div class="date-content">
+                <div class="date-label">Resource Link</div>
+                <div class="date-value">
+                  {% if ressource.lien %}
+                    <a href="{{ ressource.lien }}" target="_blank" class="btn btn-primary btn-lg w-100 resource-link-btn">
+                      <i class="bi bi-box-arrow-up-right me-2"></i>Open Resource
+                    </a>
+                  {% else %}
+                    <span class="text-muted">No link provided</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Floating Action Buttons for Edit and Delete -->
+        <!-- Action Buttons -->
         <div class="d-flex justify-content-end gap-3 action-buttons">
-          <a href="{{ path('app_ressources_edit', {'idresource': ressource.idresource}) }}" class="btn btn-warning btn-lg rounded-circle shadow-sm">
+          <a href="{{ path('app_ressources_edit', {'idresource': ressource.idresource}) }}" class="btn btn-warning btn-lg rounded-circle shadow-sm edit-btn">
             <i class="bi bi-pencil"></i>
           </a>
           {{ include('ressources/_delete_form.html.twig') }}
@@ -100,28 +120,243 @@
 
 {% block stylesheets %}
 <style>
-  /* General card styling */
-  .card {
-    border-radius: 10px;
+  .evaluation-card {
     border: none;
-    background: #f9f9f9;
-    transition: transform 0.3s ease-in-out;
+    border-radius: 1.5rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
-  /* Hover effect for the card */
-  .hover-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease-in-out;
+  .evaluation-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
   }
 
-  /* Card title */
+  .card-header {
+    background: linear-gradient(135deg, #6C63FF 0%, #3F3D56 100%);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    padding: 3rem 1rem;
+  }
+
+  .card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    z-index: 0;
+  }
+
+  .resource-icon {
+    font-size: 3.5rem;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  .resource-icon i {
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
   .card-title {
-    font-size: 1.6rem;
+    color: white;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 1.8rem;
+  }
+
+  .rating-section {
+    padding: 3rem 0;
+    position: relative;
+  }
+
+  .rating-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .rating-circle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .rating-high {
+    background: linear-gradient(45deg, #00E676, #00C853);
+  }
+
+  .rating-medium {
+    background: linear-gradient(45deg, #FFD600, #FFAB00);
+  }
+
+  .rating-low {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+  }
+
+  .rating-inner {
+    background: rgba(255, 255, 255, 0.15);
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+  }
+
+  .rating-number {
+    font-size: 4.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .rating-max {
+    font-size: 1.8rem;
+    opacity: 0.9;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .performance-badge {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .performance-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .performance-badge.success {
+    background: linear-gradient(45deg, #00E676, #00C853);
+    color: white;
+  }
+
+  .performance-badge.warning {
+    background: linear-gradient(45deg, #FFD600, #FFAB00);
+    color: white;
+  }
+
+  .performance-badge.danger {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+    color: white;
+  }
+
+  .date-section {
+    padding: 2.5rem;
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(63, 61, 86, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 1.5rem;
+    margin-top: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .date-icon {
+    font-size: 3rem;
+    color: #6C63FF;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .date-label {
+    font-size: 1rem;
+    color: #6C63FF;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
     font-weight: 600;
   }
 
-  /* Action buttons (Floating) */
+  .date-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+
+  .back-btn {
+    background: linear-gradient(45deg, #6C63FF, #3F3D56);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+  }
+
+  .back-btn:hover {
+    background: linear-gradient(45deg, #3F3D56, #6C63FF);
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+  }
+
+  .resource-link-btn {
+    background: linear-gradient(45deg, #6C63FF, #3F3D56);
+    border: none;
+    color: white;
+    padding: 1.2rem;
+    font-weight: 500;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+  }
+
+  .resource-link-btn:hover {
+    background: linear-gradient(45deg, #3F3D56, #6C63FF);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+  }
+
+  .edit-btn {
+    background: linear-gradient(45deg, #FFD600, #FFAB00);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(255, 214, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .edit-btn:hover {
+    background: linear-gradient(45deg, #FFAB00, #FFD600);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(255, 214, 0, 0.4);
+  }
+
   .action-buttons {
     position: fixed;
     bottom: 30px;
@@ -129,59 +364,26 @@
     z-index: 10;
   }
 
-  /* Action button styling */
-  .btn-warning {
-    background: linear-gradient(45deg, #ffbc00, #ff9800);
-    color: #fff;
-    border-radius: 50%;
-    padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-  }
-
-  .btn-warning:hover {
-    background: linear-gradient(45deg, #ff9800, #e68900);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  }
-
-  /* Link hover effect */
-  .link-hover {
-    transition: color 0.3s ease;
-  }
-
-  .link-hover:hover {
-    color: #0056b3;
-  }
-
-  /* Icon Styling */
-  .bi {
-    margin-right: 8px;
-  }
-
-  /* Text and Row Styling */
-  .row p {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 400;
-  }
-
-  .text-primary {
-    font-weight: 500;
-    color: #007bff;
-  }
-
-  /* Make the card and content responsive */
   @media (max-width: 767px) {
-    .card-body {
-      padding: 1rem;
+    .rating-circle {
+      width: 160px;
+      height: 160px;
     }
 
-    .row {
-      margin-bottom: 1rem;
+    .rating-number {
+      font-size: 3.5rem;
     }
 
-    .btn-warning {
-      padding: 12px;
+    .rating-max {
+      font-size: 1.5rem;
+    }
+
+    .date-section {
+      padding: 2rem;
+    }
+
+    .date-value {
+      font-size: 1.4rem;
     }
   }
 </style>

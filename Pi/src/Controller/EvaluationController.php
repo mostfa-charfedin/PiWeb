@@ -62,10 +62,25 @@ final class EvaluationController extends AbstractController
     }
 
     #[Route('/{idevaluation}', name: 'app_evaluation_show', methods: ['GET'])]
-    public function show(Evaluation $evaluation): Response
+    public function show(int $idevaluation, EntityManagerInterface $entityManager): Response
     {
+        $evaluation = $entityManager->getRepository(Evaluation::class)->find($idevaluation);
+
+        if (!$evaluation) {
+            throw $this->createNotFoundException('Evaluation not found');
+        }
+
+        // Get the resource title
+        $resource = $entityManager
+            ->getRepository('App\Entity\Ressources')
+            ->find($evaluation->getIdResource());
+
+        $resourceTitle = $resource ? $resource->getTitre() : 'Unknown Resource';
+
         return $this->render('evaluation/show.html.twig', [
             'evaluation' => $evaluation,
+            'resourceTitle' => $resourceTitle,
+            'user' => $this->getUser(),
         ]);
     }
 

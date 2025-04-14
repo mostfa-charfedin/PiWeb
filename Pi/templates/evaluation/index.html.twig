@@ -11,7 +11,7 @@
         <div class="col-lg-12">
             <div class="card shadow-sm rounded-3 mb-4">
                 <div class="card-header bg-primary bg-opacity-10">
-                    <h5 class="card-title mb-0">
+                    <h5 class="card-title mb-0 text-center">
                         <i class="bi bi-bar-chart-fill text-primary me-2"></i>
                         Resource Performance Statistics
                     </h5>
@@ -45,15 +45,10 @@
         <div class="col-lg-12">
             <div class="card shadow-sm rounded-3 mb-4">
                 <div class="card-header bg-success bg-opacity-10">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">
-                            <i class="bi bi-trophy-fill text-success me-2"></i>
-                            Outstanding Resources
-                        </h5>
-                        <a href="{{ path('app_evaluation_new') }}" class="btn btn-success d-flex align-items-center">
-                            <i class="bi bi-plus-circle me-2"></i>Add New Evaluation
-                        </a>
-                    </div>
+                    <h5 class="card-title mb-0 text-center">
+                        <i class="bi bi-trophy-fill text-success me-2"></i>
+                        Outstanding Resources
+                    </h5>
                 </div>
                 <div class="card-body">
                     <table class="table table-hover">
@@ -61,13 +56,12 @@
                             <tr>
                                 <th>Resource Title</th>
                                 <th>Performance Score</th>
-                                <th>Evaluation Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% set sortedEvaluations = evaluations|sort((a, b) => b.note <=> a.note) %}
-                            {% for evaluation in sortedEvaluations|slice(0, 2) %}
+                            {% for evaluation in sortedEvaluations|slice(0, 4) %}
                                 <tr>
                                     <td>
                                         {% set resourceId = evaluation.idResource %}
@@ -83,21 +77,17 @@
                                             {{ evaluation.note }}/10
                                         </span>
                                     </td>
-                                    <td>{{ evaluation.dateEvaluation ? evaluation.dateEvaluation|date('Y-m-d H:i:s') : 'N/A' }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a href="{{ path('app_evaluation_show', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-info btn-sm">
                                                 <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="{{ path('app_evaluation_edit', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-warning btn-sm">
-                                                <i class="bi bi-pencil"></i>
                                             </a>
                                         </div>
                                     </td>
                                 </tr>
                             {% else %}
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted">
+                                    <td colspan="3" class="text-center text-muted">
                                         <i class="bi bi-info-circle me-2"></i>No evaluations available
                                     </td>
                                 </tr>
@@ -112,7 +102,7 @@
         <div class="col-lg-12">
             <div class="card shadow-sm rounded-3">
                 <div class="card-header bg-danger bg-opacity-10">
-                    <h5 class="card-title mb-0">
+                    <h5 class="card-title mb-0 text-center">
                         <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
                         Resources Needing Improvement
                     </h5>
@@ -123,13 +113,12 @@
                             <tr>
                                 <th>Resource Title</th>
                                 <th>Performance Score</th>
-                                <th>Evaluation Date</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% set sortedEvaluations = evaluations|sort((a, b) => a.note <=> b.note) %}
-                            {% for evaluation in sortedEvaluations|slice(0, 2) %}
+                            {% for evaluation in sortedEvaluations|slice(0, 4) %}
                                 <tr>
                                     <td>
                                         {% set resourceId = evaluation.idResource %}
@@ -145,21 +134,17 @@
                                             {{ evaluation.note }}/10
                                         </span>
                                     </td>
-                                    <td>{{ evaluation.dateEvaluation ? evaluation.dateEvaluation|date('Y-m-d H:i:s') : 'N/A' }}</td>
                                     <td>
                                         <div class="btn-group" role="group">
                                             <a href="{{ path('app_evaluation_show', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-info btn-sm">
                                                 <i class="bi bi-eye"></i>
-                                            </a>
-                                            <a href="{{ path('app_evaluation_edit', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-warning btn-sm">
-                                                <i class="bi bi-pencil"></i>
                                             </a>
                                         </div>
                                     </td>
                                 </tr>
                             {% else %}
                                 <tr>
-                                    <td colspan="4" class="text-center text-muted">
+                                    <td colspan="3" class="text-center text-muted">
                                         <i class="bi bi-info-circle me-2"></i>No evaluations available
                                     </td>
                                 </tr>
