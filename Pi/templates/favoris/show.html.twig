@@ -1,30 +1,61 @@
-<!DOCTYPE html>
+{% extends 'navBar.html.twig' %}
 
-<title>Favoris</title>
+{% block title %}Détails de la Ressource{% endblock %}
 
-{% block body %}
-    <h1>Favoris</h1>
-
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Idfavoris</th>
-                <td>{{ favori.idfavoris }}</td>
-            </tr>
-            <tr>
-                <th>Note</th>
-                <td>{{ favori.note }}</td>
-            </tr>
-            <tr>
-                <th>Titreressource</th>
-                <td>{{ favori.titreressource }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_favoris_index') }}">back to list</a>
-
-    <a href="{{ path('app_favoris_edit', {'idfavoris': favori.idfavoris}) }}">edit</a>
-
-    {{ include('favoris/_delete_form.html.twig') }}
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">Détails de la Ressource</h2>
+                        <a href="{{ path('app_favoris_index') }}" class="btn btn-light">
+                            <i class="bi bi-arrow-left"></i> Retour
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if favori.idresource %}
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <h3 class="text-primary mb-4">{{ favori.idresource.titre }}</h3>
+                                        <h5 class="card-title mb-3">Informations</h5>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <p><strong><i class="bi bi-tag"></i> Type:</strong> {{ favori.idresource.type }}</p>
+                                                <p><strong><i class="bi bi-link-45deg"></i> Lien:</strong> 
+                                                    <a href="{{ favori.idresource.lien }}" target="_blank" class="text-decoration-none">
+                                                        {{ favori.idresource.lien }}
+                                                    </a>
+                                                </p>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <p><strong><i class="bi bi-star"></i> Note moyenne:</strong> 
+                                                    <span class="badge bg-warning text-dark">
+                                                        {{ favori.idresource.noteaverage }}/5
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-4">
+                                            <h5 class="card-title mb-3">Description</h5>
+                                            <p class="text-muted">{{ favori.idresource.description }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Aucune ressource associée à ce favori.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

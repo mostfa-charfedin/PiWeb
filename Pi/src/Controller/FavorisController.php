@@ -30,7 +30,16 @@ final class FavorisController extends AbstractController
 
         $favoris = $entityManager
             ->getRepository(Favoris::class)
-            ->findAll();
+            ->findBy(['id' => $user]);
+
+        // Ensure titreRessource is set for each favori
+        foreach ($favoris as $favori) {
+            if (!$favori->getTitreRessource() && $favori->getIdresource()) {
+                $favori->setTitreRessource($favori->getIdresource()->getTitre());
+                $entityManager->persist($favori);
+            }
+        }
+        $entityManager->flush();
 
         return $this->render('favoris/index.html.twig', [
             'favoris' => $favoris,
@@ -39,13 +48,35 @@ final class FavorisController extends AbstractController
     }
 
     #[Route('/new', name: 'app_favoris_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
         $favori = new Favoris();
+        $favori->setId($user); // Set the user immediately
+        
         $form = $this->createForm(FavorisType::class, $favori);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Get the selected resource and set its title
+            $resource = $favori->getIdresource();
+            if ($resource) {
+                $favori->setTitreRessource($resource->getTitre());
+                $favori->setRessource($resource);
+            } else {
+                $this->addFlash('error', 'Veuillez sélectionner une ressource');
+                return $this->redirectToRoute('app_favoris_new');
+            }
+            
             $entityManager->persist($favori);
             $entityManager->flush();
 
@@ -55,14 +86,26 @@ final class FavorisController extends AbstractController
         return $this->render('favoris/new.html.twig', [
             'favori' => $favori,
             'form' => $form,
+            'user' => $user,
         ]);
     }
 
     #[Route('/{idfavoris}', name: 'app_favoris_show', methods: ['GET'])]
-    public function show(Favoris $favori): Response
+    public function show(Favoris $favori, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
         return $this->render('favoris/show.html.twig', [
             'favori' => $favori,
+            'user' => $user,
         ]);
     }
 
@@ -73,6 +116,13 @@ final class FavorisController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Update the resource title when the resource is changed
+            $resource = $favori->getIdresource();
+            if ($resource) {
+                $favori->setTitreRessource($resource->getTitre());
+                $favori->setRessource($resource);
+            }
+            
             $entityManager->flush();
 
             return $this->redirectToRoute('app_favoris_index', [], Response::HTTP_SEE_OTHER);

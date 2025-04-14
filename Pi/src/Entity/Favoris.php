@@ -29,13 +29,6 @@ class Favoris
     private $note = 'NULL';
 
     /**
-     * @var string|null
-     *
-     * @ORM\Column(name="TitreRessource", type="string", length=255, nullable=true, options={"default"="NULL"})
-     */
-    private $titreressource = 'NULL';
-
-    /**
      * @var \Ressources
      *
      * @ORM\ManyToOne(targetEntity="Ressources")
@@ -58,11 +51,49 @@ class Favoris
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $commentaire = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $titreRessource = null;
 
     #[ORM\ManyToOne]
     private ?Ressources $ressource = null;
+
+    public function getIdfavoris(): ?int
+    {
+        return $this->idfavoris;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    public function setNote(?string $note): self
+    {
+        $this->note = $note;
+        return $this;
+    }
+
+    public function getIdresource(): ?Ressources
+    {
+        return $this->idresource;
+    }
+
+    public function setIdresource(?Ressources $idresource): self
+    {
+        $this->idresource = $idresource;
+        return $this;
+    }
+
+    public function getId(): ?User
+    {
+        return $this->id;
+    }
+
+    public function setId(?User $id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
 
     public function getCommentaire(): ?string
     {
@@ -72,19 +103,19 @@ class Favoris
     public function setCommentaire(?string $commentaire): static
     {
         $this->commentaire = $commentaire;
-
         return $this;
     }
 
+    // Getter for titreRessource
     public function getTitreRessource(): ?string
     {
         return $this->titreRessource;
     }
 
+    // Setter for titreRessource
     public function setTitreRessource(string $titreRessource): static
     {
         $this->titreRessource = $titreRessource;
-
         return $this;
     }
 
@@ -96,9 +127,6 @@ class Favoris
     public function setRessource(?Ressources $ressource): static
     {
         $this->ressource = $ressource;
-
         return $this;
     }
-
-
 }
