@@ -248,7 +248,13 @@ public function login(
     
        $session->set('id', $user->getId());
        $session->set('role', $user->getRole());
-        return $this->redirectToRoute('profile');
+       
+       // Redirect based on user role
+       if ($user->getRole() === 'USER') {
+           return $this->redirectToRoute('app_favoris_index');
+       }
+       
+       return $this->redirectToRoute('profile');
     }
 
     return $this->render('user/login.html.twig', [

@@ -55,5 +55,50 @@ class Favoris
      */
     private $id;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $commentaire = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $titreRessource = null;
+
+    #[ORM\ManyToOne]
+    private ?Ressources $ressource = null;
+
+    public function getCommentaire(): ?string
+    {
+        return $this->commentaire;
+    }
+
+    public function setCommentaire(?string $commentaire): static
+    {
+        $this->commentaire = $commentaire;
+
+        return $this;
+    }
+
+    public function getTitreRessource(): ?string
+    {
+        return $this->titreRessource;
+    }
+
+    public function setTitreRessource(string $titreRessource): static
+    {
+        $this->titreRessource = $titreRessource;
+
+        return $this;
+    }
+
+    public function getRessource(): ?Ressources
+    {
+        return $this->ressource;
+    }
+
+    public function setRessource(?Ressources $ressource): static
+    {
+        $this->ressource = $ressource;
+
+        return $this;
+    }
+
 
 }
