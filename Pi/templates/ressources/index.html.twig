@@ -95,6 +95,9 @@
                           <a href="{{ path('app_ressources_edit', {'idresource': ressource.idresource}) }}" class="btn btn-sm btn-warning">
                             <i class="bi bi-pencil"></i>
                           </a>
+                          <button type="button" class="btn btn-sm btn-success rate-btn" data-bs-toggle="modal" data-bs-target="#rateModal" data-resource-id="{{ ressource.idresource }}" data-current-rating="{{ ressource.noteaverage }}">
+                            <i class="bi bi-star"></i>
+                          </button>
                           <form method="post" action="{{ path('app_ressources_delete', {'idresource': ressource.idresource}) }}" onsubmit="return confirm('Are you sure you want to delete this resource?');" class="d-inline">
                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ressource.idresource) }}">
                             <button type="submit" class="btn btn-sm btn-danger">
@@ -125,17 +128,17 @@
   .alert {
     border-radius: 10px;
     margin-bottom: 1rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
   }
 
   .alert-success {
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
     color: #155724;
   }
 
   .alert-danger {
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
     color: #721c24;
   }
 
@@ -176,11 +179,270 @@
     border-color: #0056b3;
     box-shadow: 0 0 5px rgba(0, 86, 179, 0.5);
   }
+
+  /* Rating Modal Styling */
+  .modal-content {
+    border-radius: 15px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border: none;
+  }
+
+  .modal-header {
+    border-radius: 15px 15px 0 0;
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+  }
+
+  .modal-body {
+    background-color: #f8f9fa;
+  }
+
+  .input-group-text {
+    border: none;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  }
+
+  .form-control:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+
+  .current-rating {
+    font-size: 1.2rem;
+  }
+
+  .badge {
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+    color: #000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-lg {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    border: none;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .btn-outline-secondary:hover {
+    background-color: #e9ecef;
+    transform: translateY(-1px);
+  }
+
+  /* Table Rating Cell Styling */
+  .table td:nth-child(4) {
+    font-weight: 600;
+    color: #0d6efd;
+  }
+
+  /* Rate Button Styling */
+  .rate-btn {
+    background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    border: none;
+    transition: all 0.3s ease;
+  }
+
+  .rate-btn:hover {
+    background: linear-gradient(135deg, #146c43 0%, #0f5132 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Form Text Styling */
+  .form-text {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Input Group Styling */
+  .input-group {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .input-group-text {
+    color: #6c757d;
+    font-weight: 500;
+  }
 </style>
 {% endblock %}
 
 {% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const rateModal = new bootstrap.Modal(document.getElementById('rateModal'));
+    const ratingInput = document.getElementById('ratingInput');
+    const form = document.getElementById('rateForm');
+
+    // Handle rate button clicks
+    document.querySelectorAll('.rate-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const resourceId = this.getAttribute('data-resource-id');
+            const currentRating = parseFloat(this.getAttribute('data-current-rating')) || 0;
+            document.getElementById('resourceId').value = resourceId;
+            ratingInput.value = currentRating;
+            
+            // Update current rating text
+            document.getElementById('currentRatingText').textContent = `Current Rating: ${currentRating.toFixed(1)}`;
+        });
+    });
+
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!form.checkValidity()) {
+            e.stopPropagation();
+            form.classList.add('was-validated');
+            return;
+        }
+
+        const resourceId = document.getElementById('resourceId').value;
+        const rating = parseFloat(ratingInput.value);
+        
+        if (isNaN(rating) || rating < 0 || rating > 10) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <i class="bi bi-exclamation-octagon me-1"></i>
+                Please enter a valid rating between 0 and 10
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.modal-body').insertBefore(alertDiv, form);
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('rating', rating);
+        formData.append('_token', document.querySelector('meta[name="csrf-token"]').content);
+
+        fetch(`/ressources/${resourceId}/rate`, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the rating in the table
+                const rateButton = document.querySelector(`.rate-btn[data-resource-id="${resourceId}"]`);
+                if (rateButton) {
+                    rateButton.setAttribute('data-current-rating', data.newAverage);
+                    const ratingCell = rateButton.closest('tr').querySelector('td:nth-child(4)');
+                    if (ratingCell) {
+                        ratingCell.textContent = data.newAverage.toFixed(1);
+                    }
+                }
+                rateModal.hide();
+                
+                // Show success message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <i class="bi bi-check-circle me-1"></i>
+                    Rating submitted successfully! New average: ${data.newAverage.toFixed(1)}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.querySelector('.pagetitle').after(alertDiv);
+            } else {
+                // Show error message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <i class="bi bi-exclamation-octagon me-1"></i>
+                    ${data.message || 'Error submitting rating'}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.querySelector('.modal-body').insertBefore(alertDiv, form);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <i class="bi bi-exclamation-octagon me-1"></i>
+                Error submitting rating. Please try again.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.querySelector('.modal-body').insertBefore(alertDiv, form);
+        });
+    });
+});
+</script>
 {% endblock %}
 
+<!-- Rating Modal -->
+<div class="modal fade" id="rateModal" tabindex="-1" aria-labelledby="rateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient-primary text-white">
+                <h5 class="modal-title" id="rateModalLabel">
+                    <i class="bi bi-star-fill me-2"></i>Rate this Resource
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="rateForm" class="needs-validation" novalidate>
+                    <input type="hidden" id="resourceId" name="resourceId">
+                    
+                    <div class="text-center mb-4">
+                        <div class="current-rating mb-2">
+                            <span class="badge bg-gradient-warning rounded-pill px-3 py-2">
+                                <i class="bi bi-star-fill me-1"></i>
+                                <span id="currentRatingText">Current Rating: 0.0</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="ratingInput" class="form-label fw-bold text-primary">
+                            <i class="bi bi-123 me-1"></i>Enter Rating (0-10)
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-gradient-light">
+                                <i class="bi bi-star-fill text-warning"></i>
+                            </span>
+                            <input type="number" 
+                                   class="form-control form-control-lg" 
+                                   id="ratingInput" 
+                                   name="rating" 
+                                   min="0" 
+                                   max="10" 
+                                   step="0.1" 
+                                   required
+                                   placeholder="Enter a rating between 0 and 10">
+                            <span class="input-group-text bg-gradient-light">/10</span>
+                        </div>
+                        <div class="form-text text-muted">
+                            <i class="bi bi-info-circle me-1"></i>Please enter a rating between 0 and 10
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg bg-gradient-primary">
+                            <i class="bi bi-check-circle me-2"></i>Submit Rating
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle me-2"></i>Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

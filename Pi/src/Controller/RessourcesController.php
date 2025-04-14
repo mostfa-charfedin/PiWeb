@@ -169,4 +169,39 @@ class RessourcesController extends AbstractController
 
         return $this->redirectToRoute('app_ressources_index');
     }
+
+    #[Route('/{idresource}/rate', name: 'app_ressources_rate', methods: ['POST'])]
+    public function rate(Request $request, Ressources $ressource, EntityManagerInterface $em, SessionInterface $session): Response
+    {
+        if (!$session->get('id')) {
+            return $this->json(['success' => false, 'message' => 'Not authenticated']);
+        }
+
+        $rating = $request->request->get('rating');
+        if ($rating === null || !is_numeric($rating) || $rating < 0 || $rating > 10) {
+            return $this->json(['success' => false, 'message' => 'Invalid rating value']);
+        }
+
+        // Create new evaluation
+        $evaluation = new Evaluation();
+        $evaluation->setNote((int)$rating);
+        $evaluation->setDateEvaluation(new \DateTime());
+        $evaluation->setRessource($ressource);
+        $evaluation->setUser($em->getRepository(User::class)->find($session->get('id')));
+
+        // Calculate new average
+        $evaluations = $ressource->getEvaluations();
+        $totalRatings = count($evaluations) + 1;
+        $sumRatings = array_sum(array_map(fn($e) => $e->getNote(), $evaluations->toArray())) + $rating;
+        $newAverage = $sumRatings / $totalRatings;
+
+        // Update resource average
+        $ressource->setNoteaverage($newAverage);
+
+        // Save changes
+        $em->persist($evaluation);
+        $em->flush();
+
+        return $this->json(['success' => true, 'newAverage' => $newAverage]);
+    }
 }
