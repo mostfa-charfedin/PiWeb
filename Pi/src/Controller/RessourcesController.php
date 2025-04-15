@@ -161,6 +161,14 @@ class RessourcesController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
+        $user = $em->getRepository(User::class)->find($session->get('id'));
+        
+        // Ensure the resource belongs to the current user
+        if ($ressource->getId() !== $user) {
+            $this->addFlash('error', 'You do not have permission to delete this resource.');
+            return $this->redirectToRoute('app_ressources_index');
+        }
+
         if ($this->isCsrfTokenValid('delete'.$ressource->getIdresource(), $request->getPayload()->getString('_token'))) {
             // First, delete all related favorites
             $favorites = $em->getRepository('App\Entity\Favoris')->findBy(['idresource' => $ressource]);
@@ -181,34 +189,55 @@ class RessourcesController extends AbstractController
     public function rate(Request $request, Ressources $ressource, EntityManagerInterface $em, SessionInterface $session): Response
     {
         if (!$session->get('id')) {
-            return $this->json(['success' => false, 'message' => 'Not authenticated']);
+            return $this->json(['success' => false, 'message' => 'You must be logged in to rate a resource.']);
         }
 
         $rating = $request->request->get('rating');
-        if ($rating === null || !is_numeric($rating) || $rating < 0 || $rating > 10) {
-            return $this->json(['success' => false, 'message' => 'Invalid rating value']);
+        if ($rating === null) {
+            return $this->json(['success' => false, 'message' => 'Rating value is required.']);
+        }
+        if (!is_numeric($rating)) {
+            return $this->json(['success' => false, 'message' => 'Rating must be a number.']);
+        }
+        if ($rating < 0 || $rating > 10) {
+            return $this->json(['success' => false, 'message' => 'Rating must be between 0 and 10.']);
         }
 
-        // Create new evaluation
-        $evaluation = new Evaluation();
-        $evaluation->setNote((int)$rating);
-        $evaluation->setDateEvaluation(new \DateTime());
-        $evaluation->setRessource($ressource);
-        $evaluation->setUser($em->getRepository(User::class)->find($session->get('id')));
+        try {
+            $user = $em->getRepository(User::class)->find($session->get('id'));
 
-        // Calculate new average
-        $evaluations = $ressource->getEvaluations();
-        $totalRatings = count($evaluations) + 1;
-        $sumRatings = array_sum(array_map(fn($e) => $e->getNote(), $evaluations->toArray())) + $rating;
-        $newAverage = $sumRatings / $totalRatings;
+            // Create new evaluation
+            $evaluation = new Evaluation();
+            $evaluation->setNote((int)round($rating));
+            $evaluation->setDateEvaluation(new \DateTime());
+            $evaluation->setRessource($ressource);
+            $evaluation->setUser($user);
+            $evaluation->setId($user->getId());
+            $evaluation->setIdResource($ressource->getIdresource());
 
-        // Update resource average
-        $ressource->setNoteaverage($newAverage);
+            // Calculate new average
+            $evaluations = $ressource->getEvaluations();
+            $totalRatings = count($evaluations) + 1;
+            $sumRatings = array_sum(array_map(fn($e) => $e->getNote(), $evaluations->toArray())) + $evaluation->getNote();
+            $newAverage = $sumRatings / $totalRatings;
 
-        // Save changes
-        $em->persist($evaluation);
-        $em->flush();
+            // Update resource average
+            $ressource->setNoteaverage($newAverage);
 
-        return $this->json(['success' => true, 'newAverage' => $newAverage]);
+            // Save changes
+            $em->persist($evaluation);
+            $em->flush();
+
+            return $this->json([
+                'success' => true, 
+                'message' => 'Rating submitted successfully!',
+                'newAverage' => $newAverage
+            ]);
+        } catch (\Exception $e) {
+            return $this->json([
+                'success' => false, 
+                'message' => 'An error occurred while saving your rating. Please try again.'
+            ]);
+        }
     }
 }

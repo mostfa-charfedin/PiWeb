@@ -350,21 +350,33 @@ document.addEventListener('DOMContentLoaded', function() {
                 const alertDiv = document.createElement('div');
                 alertDiv.className = 'alert alert-success alert-dismissible fade show';
                 alertDiv.innerHTML = `
-                    <i class="bi bi-check-circle me-1"></i>
-                    Rating submitted successfully! New average: ${data.newAverage.toFixed(1)}
+                    <i class="bi bi-check-circle me-2"></i>
+                    ${data.message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 `;
                 document.querySelector('.pagetitle').after(alertDiv);
+
+                // Auto-dismiss the alert after 5 seconds
+                setTimeout(() => {
+                    alertDiv.classList.remove('show');
+                    setTimeout(() => alertDiv.remove(), 150);
+                }, 5000);
             } else {
                 // Show error message
                 const alertDiv = document.createElement('div');
                 alertDiv.className = 'alert alert-danger alert-dismissible fade show';
                 alertDiv.innerHTML = `
-                    <i class="bi bi-exclamation-octagon me-1"></i>
-                    ${data.message || 'Error submitting rating'}
+                    <i class="bi bi-exclamation-octagon me-2"></i>
+                    ${data.message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 `;
                 document.querySelector('.modal-body').insertBefore(alertDiv, form);
+
+                // Auto-dismiss the alert after 5 seconds
+                setTimeout(() => {
+                    alertDiv.classList.remove('show');
+                    setTimeout(() => alertDiv.remove(), 150);
+                }, 5000);
             }
         })
         .catch(error => {
@@ -372,11 +384,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const alertDiv = document.createElement('div');
             alertDiv.className = 'alert alert-danger alert-dismissible fade show';
             alertDiv.innerHTML = `
-                <i class="bi bi-exclamation-octagon me-1"></i>
-                Error submitting rating. Please try again.
+                <i class="bi bi-exclamation-octagon me-2"></i>
+                An unexpected error occurred. Please try again later.
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             `;
             document.querySelector('.modal-body').insertBefore(alertDiv, form);
+
+            // Auto-dismiss the alert after 5 seconds
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+                setTimeout(() => alertDiv.remove(), 150);
+            }, 5000);
         });
     });
 });
