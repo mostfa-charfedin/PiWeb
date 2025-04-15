@@ -1,5 +1,13 @@
-{# templates/integration/adminprojet.html.twig #}
-  {% extends 'sideBar.html.twig' %}
+{% extends 'sideBar.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .text-danger p {
+            margin-bottom: 0;
+        }
+    </style>
+{% endblock %}
 
 {% block title %}{% if edit_mode %}Edit Project{% else %}Create a Project{% endif %}{% endblock %}
 
@@ -10,7 +18,7 @@
       <h1>{% if edit_mode %}Edit Project{% else %}Create a Project{% endif %}</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a >Home</a></li>
+          <li class="breadcrumb-item"><a>Home</a></li>
           <li class="breadcrumb-item"><a href="{{ path('projet_list') }}">Projects</a></li>
           <li class="breadcrumb-item active">{% if edit_mode %}Edit{% else %}New{% endif %}</li>
         </ol>
@@ -19,7 +27,7 @@
     <a href="{{ path('projet_list') }}" class="btn btn-secondary">
       <i class="bi bi-arrow-left"></i> Back to the list
     </a>
-  </div><!-- End Page Title -->
+  </div>
 
   <section class="section">
     <div class="row justify-content-center">
@@ -35,20 +43,51 @@
 
               <div class="col-12">
                 {{ form_label(formProjet.titre, 'Title', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(formProjet.titre, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(formProjet.titre) }}
+                {{ form_widget(formProjet.titre, {
+                  'attr': {
+                    'class': 'form-control' ~ (formProjet.titre.vars.errors|length > 0 ? ' is-invalid' : '')
+                  }
+                }) }}
+                {% if formProjet.titre.vars.errors|length %}
+                  <div class="text-danger mt-1">
+                    {% for error in formProjet.titre.vars.errors %}
+                      <p>{{ error.message }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
 
               <div class="col-12">
                 {{ form_label(formProjet.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(formProjet.description, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
-                {{ form_errors(formProjet.description) }}
+                {{ form_widget(formProjet.description, {
+                  'attr': {
+                    'class': 'form-control' ~ (formProjet.description.vars.errors|length > 0 ? ' is-invalid' : ''),
+                    'rows': '5'
+                  }
+                }) }}
+                {% if formProjet.description.vars.errors|length %}
+                  <div class="text-danger mt-1">
+                    {% for error in formProjet.description.vars.errors %}
+                      <p>{{ error.message }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
 
               <div class="col-12">
                 {{ form_label(formProjet.iduser, 'Project Manager', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(formProjet.iduser, {'attr': {'class': 'form-control'}}) }}
-                {{ form_errors(formProjet.iduser) }}
+                {{ form_widget(formProjet.iduser, {
+                  'attr': {
+                    'class': 'form-control' ~ (formProjet.iduser.vars.errors|length > 0 ? ' is-invalid' : '')
+                  }
+                }) }}
+                {% if formProjet.iduser.vars.errors|length %}
+                  <div class="text-danger mt-1">
+                    {% for error in formProjet.iduser.vars.errors %}
+                      <p>{{ error.message }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
 
               <div class="col-12 mt-3">
