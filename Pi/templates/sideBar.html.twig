@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title>Onboardify2</title>
+  <title>Onboardify</title>
   <meta content="" name="description">
   <meta content="" name="keywords">
 
@@ -44,26 +44,27 @@
 
     <nav class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
-        <li class="nav-item dropdown pe-3">
-          <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" id="dropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            {% if user.imageUrl %}
-              <img src="{{ asset(user.imageUrl) }}" alt="Profile Image" width="40" height="40" class="rounded-circle">
-            {% else %}
-              <img src="{{ asset('assets/imgP/logo2.png') }}" alt="Default Profile" width="40" height="40" class="rounded-circle">
-            {% endif %}
-            <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.nom }} {{ user.prenom }}</span>
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" aria-labelledby="dropdownMenuLink">
-            <li class="dropdown-header">
-              <h6>{{ user.nom }} &nbsp; {{ user.prenom }}</h6>
-              <span>{{ user.roles }}</span>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item d-flex align-items-center" href="{{ path('profile') }}"><i class="bi bi-person"></i> My Profile</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item d-flex align-items-center" href="{{ path('logout') }}"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
-          </ul>
-        </li>
+
+       <li class="nav-item dropdown pe-3">
+  <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" id="dropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    {% if user.imageUrl %}
+      <img src="{{ asset(user.imageUrl) }}" alt="Profile Image" width="40" height="40" class="rounded-circle">
+    {% else %}
+      <img src="{{ asset('assets/imgP/logo2.png') }}" alt="Default Profile" width="40" height="40" class="rounded-circle">
+    {% endif %}
+    <span class="d-none d-md-block dropdown-toggle ps-2">{{ user.nom }} {{ user.prenom }}</span>
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile" aria-labelledby="dropdownMenuLink">
+    <li class="dropdown-header">
+      <h6>{{ user.nom }} &nbsp; {{ user.prenom }}</h6>
+      <span>{{ user.role }}</span>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item d-flex align-items-center" href="{{ path('profile') }}"><i class="bi bi-person"></i> My Profile</a></li>
+    <li><hr class="dropdown-divider"></li>
+    <li><a class="dropdown-item d-flex align-items-center" href="{{ path('logout') }}"><i class="bi bi-box-arrow-right"></i> Sign Out</a></li>
+  </ul>
+</li>
       </ul>
     </nav>
   </header>
@@ -87,10 +88,15 @@
         </a>
         <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
-            <a href="{{ path('projet_list') }}">
-              <i class="bi bi-circle"></i><span>Projets</span>
-            </a>
-          </li>
+      <a href="{{ path('projet_list') }}">
+        <i class="bi bi-circle"></i><span>Projets</span>
+      </a>
+    </li>
+     <li>
+      <a href="{{ path('app_programmebienetre_index') }}">
+        <i class="bi bi-circle"></i><span>Programmebienetre</span>
+      </a>
+    </li>
         </ul>
       </li><!-- End Tables Nav -->
 
@@ -158,5 +164,8 @@
     });
   </script>
 
+
 </body>
+        
+
 </html>

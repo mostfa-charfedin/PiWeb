@@ -1,0 +1,108 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}Program Details{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1>Program Details</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_programmebienetre_index') }}">Home</a></li>
+        <li class="breadcrumb-item">Programs</li>
+        <li class="breadcrumb-item active">Program Details</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Program Information</h5>
+
+            <div class="row mb-3">
+              <div class="col-sm-3">
+                <h6 class="mb-0">Title</h6>
+              </div>
+              <div class="col-sm-9 text-secondary">
+                {{ programmebienetre.titre }}
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-sm-3">
+                <h6 class="mb-0">Type</h6>
+              </div>
+              <div class="col-sm-9 text-secondary">
+                <span class="badge bg-primary">{{ programmebienetre.type }}</span>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-sm-3">
+                <h6 class="mb-0">Description</h6>
+              </div>
+              <div class="col-sm-9 text-secondary">
+                {{ programmebienetre.description }}
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-sm-3">
+                <h6 class="mb-0">Program Manager</h6>
+              </div>
+              <div class="col-sm-9 text-secondary">
+                {{ programmebienetre.iduser.nom }} {{ programmebienetre.iduser.prenom }}
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-sm-3">
+                <h6 class="mb-0">Program Date</h6>
+              </div>
+              <div class="col-sm-9 text-secondary">
+                {{ programmebienetre.dateProgramme|date('Y-m-d') }}
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12">
+                <a href="{{ path('app_programmebienetre_edit', {'idprogramme': programmebienetre.idprogramme}) }}" class="btn btn-primary">
+                  <i class="bi bi-pencil"></i> Edit Program
+                </a>
+                <a href="{{ path('app_programmebienetre_index') }}" class="btn btn-secondary">
+                  <i class="bi bi-arrow-left"></i> Back to List
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add smooth fade-in animation for card
+            const card = document.querySelector('.card');
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 100);
+        });
+    </script>
+{% endblock %}

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -44,6 +45,47 @@ class Publication
      * })
      */
     private $iduser;
+
+    public function getIdpublication(): ?int
+    {
+        return $this->idpublication;
+    }
+
+    public function getContenu(): ?string
+    {
+        return $this->contenu;
+    }
+
+    public function setContenu(?string $contenu): static
+    {
+        $this->contenu = $contenu;
+
+        return $this;
+    }
+
+    public function getDate(): ?\DateTimeInterface
+    {
+        return $this->date;
+    }
+
+    public function setDate(\DateTimeInterface $date): static
+    {
+        $this->date = $date;
+
+        return $this;
+    }
+
+    public function getIduser(): ?User
+    {
+        return $this->iduser;
+    }
+
+    public function setIduser(?User $iduser): static
+    {
+        $this->iduser = $iduser;
+
+        return $this;
+    }
 
 
 }

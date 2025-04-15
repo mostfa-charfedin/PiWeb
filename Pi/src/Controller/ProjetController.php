@@ -272,6 +272,38 @@ public function deleteTache(
 
     return $this->redirectToRoute('projet_show', ['idProjet' => $projetId]);
 }
+#[Route('/mes-projets', name: 'user_projet_list')]
+public function userProjetList(
+    ProjetRepository $projetRepository,
+    TacheRepository $tacheRepository,
+    SessionInterface $session,
+    EntityManagerInterface $em
+): Response {
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
+    }
+
+    $userId = $session->get('id');
+    $user = $em->getRepository(User::class)->find($userId);
+
+    // Fetch all tasks for the connected user
+    $userTasks = $tacheRepository->findBy(['iduser' => $user]);
+
+    // Get unique projects from these tasks
+    $projects = [];
+    foreach ($userTasks as $task) {
+        $project = $task->getIdprojet();
+        if ($project && !in_array($project, $projects, true)) {
+            $projects[] = $project;
+        }
+    }
+
+    return $this->render('integration/userlist.html.twig', [
+        'projets' => $projects,
+        'user' => $user,
+    ]);
+}
+
 
     
 }

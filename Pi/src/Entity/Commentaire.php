@@ -62,5 +62,70 @@ class Commentaire
      */
     private $iduser;
 
+    public function getIdcommentaire(): ?int
+    {
+        return $this->idcommentaire;
+    }
+
+    public function getTitre(): ?string
+    {
+        return $this->titre;
+    }
+
+    public function setTitre(?string $titre): static
+    {
+        $this->titre = $titre;
+
+        return $this;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(?string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    public function getImagepath(): ?string
+    {
+        return $this->imagepath;
+    }
+
+    public function setImagepath(string $imagepath): static
+    {
+        $this->imagepath = $imagepath;
+
+        return $this;
+    }
+
+    public function getIdpublication(): ?Publication
+    {
+        return $this->idpublication;
+    }
+
+    public function setIdpublication(?Publication $idpublication): static
+    {
+        $this->idpublication = $idpublication;
+
+        return $this;
+    }
+
+    public function getIduser(): ?User
+    {
+        return $this->iduser;
+    }
+
+    public function setIduser(?User $iduser): static
+    {
+        $this->iduser = $iduser;
+
+        return $this;
+    }
+
 
 }

@@ -55,5 +55,58 @@ class Favoris
      */
     private $id;
 
+    public function getIdfavoris(): ?int
+    {
+        return $this->idfavoris;
+    }
+
+    public function getNote(): ?string
+    {
+        return $this->note;
+    }
+
+    public function setNote(?string $note): static
+    {
+        $this->note = $note;
+
+        return $this;
+    }
+
+    public function getTitreressource(): ?string
+    {
+        return $this->titreressource;
+    }
+
+    public function setTitreressource(?string $titreressource): static
+    {
+        $this->titreressource = $titreressource;
+
+        return $this;
+    }
+
+    public function getIdresource(): ?Ressources
+    {
+        return $this->idresource;
+    }
+
+    public function setIdresource(?Ressources $idresource): static
+    {
+        $this->idresource = $idresource;
+
+        return $this;
+    }
+
+    public function getId(): ?User
+    {
+        return $this->id;
+    }
+
+    public function setId(?User $id): static
+    {
+        $this->id = $id;
+
+        return $this;
+    }
+
 
 }

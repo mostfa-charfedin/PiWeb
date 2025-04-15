@@ -1,25 +1,38 @@
-<html lang="en">
+<!DOCTYPE html>
+<html lang="fr">
+
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  
-{% block title %}Réinitialisez votre mot de passe{% endblock %}
 
+  <title>Réinitialisation du mot de passe | Onboardify</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
   <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
-  <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
   <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/css/style.css') }}" rel="stylesheet">
 </head>
 
 <body>
+
   <main>
     <div class="container">
       <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
         <div class="container">
           <div class="row justify-content-center">
             <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-              
-              <div class="d-flex justify-content-center py-4">
+
+            <div class="d-flex justify-content-center py-4">
                 <a href="" class="logo d-flex align-items-center w-auto">
                   <img src="{{ asset('assets/imgP/logo2.png') }}" alt="">
                   <span class="d-none d-lg-block">Onboardify</span>
@@ -29,28 +42,56 @@
               <div class="card mb-3">
                 <div class="card-body">
                   <div class="pt-4 pb-2">
-                    <h5 class="card-title text-center pb-0 fs-4">Reset your password and</h5>
-              
+                    <h5 class="card-title text-center pb-0 fs-4">Réinitialiser votre mot de passe</h5>
+                    <p class="text-center small">Entrez votre nouveau mot de passe</p>
                   </div>
 
+                  {% for flash_error in app.flashes('reset_password_error') %}
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                      {{ flash_error }}
+                      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                  {% endfor %}
 
+               
+                  {{ form_start(resetForm, {'attr': {'class': 'row g-3 needs-validation', 'novalidate': 'novalidate'}}) }}
+                  
+                  <!-- CHAMP UNIQUE (PLAINPASSWORD DIRECT) -->
+                  <div class="col-12">
+                    <label for="{{ resetForm.plainPassword.vars.id }}" class="form-label">Nouveau mot de passe</label>
+                    <div class="input-group has-validation">
+                      <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                      {{ form_widget(resetForm.plainPassword, {
+                        'attr': {
+                          'class': 'form-control',
+                          'placeholder': 'Entrez votre nouveau mot de passe'
+                        }
+                      }) }}
+                      <div class="invalid-feedback">Veuillez entrer un mot de passe valide.</div>
+                    </div>
+                    {{ form_errors(resetForm.plainPassword) }}
+                  </div>
 
-    <h1>reset your password</h1>
+                  <div class="col-12">
+                    <button class="btn btn-primary w-100" type="submit">
+                      <i class="bi bi-arrow-repeat me-2"></i>Réinitialiser
+                    </button>
+                  </div>
 
-    {{ form_start(resetForm) }}
-        {{ form_row(resetForm.plainPassword) }}
-        <button class="btn btn-primary">reset password</button>
-    {{ form_end(resetForm) }}
+                  <div class="col-12 text-center">
+                    <p class="small mb-0">
+                      <a href="{{ path('login') }}"><i class="bi bi-arrow-left me-1"></i>Retour à la connexion</a>
+                    </p>
+                  </div>
 
-
-
-
+                  {{ form_end(resetForm) }}
 
                 </div>
               </div>
 
-          
-
+              <div class="credits text-center mt-3">
+                <p class="small">© {{ "now"|date("Y") }} Onboardify. Tous droits réservés</p>
+              </div>
             </div>
           </div>
         </div>
@@ -58,7 +99,9 @@
     </div>
   </main>
 
+  <!-- Vendor JS Files -->
   <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/main.js') }}"></script>
+
 </body>
 </html>

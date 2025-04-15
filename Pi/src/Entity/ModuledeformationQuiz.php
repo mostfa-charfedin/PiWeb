@@ -46,5 +46,41 @@ class ModuledeformationQuiz
      */
     private $idmodule;
 
+    public function getIdquiz(): ?Quiz
+    {
+        return $this->idquiz;
+    }
+
+    public function setIdquiz(?Quiz $idquiz): static
+    {
+        $this->idquiz = $idquiz;
+
+        return $this;
+    }
+
+    public function getIduser(): ?User
+    {
+        return $this->iduser;
+    }
+
+    public function setIduser(?User $iduser): static
+    {
+        $this->iduser = $iduser;
+
+        return $this;
+    }
+
+    public function getIdmodule(): ?Moduledeformation
+    {
+        return $this->idmodule;
+    }
+
+    public function setIdmodule(?Moduledeformation $idmodule): static
+    {
+        $this->idmodule = $idmodule;
+
+        return $this;
+    }
+
 
 }
