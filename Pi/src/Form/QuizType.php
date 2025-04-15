@@ -31,8 +31,10 @@ class QuizType extends AbstractType
             ->add('datecreation', DateTimeType::class, [
                 'label' => 'Creation Date',
                 'widget' => 'single_text',
+                'data' => new \DateTime(), // default to today
+                'html5' => true,
                 'constraints' => [
-                    new Callback([$this, 'validateDateNotInFuture']),
+                    new Callback([$this, 'validateOnlyToday']),
                 ],
             ]);
     }
@@ -44,12 +46,19 @@ class QuizType extends AbstractType
         ]);
     }
 
-    public function validateDateNotInFuture($date, ExecutionContextInterface $context): void
+    public function validateOnlyToday($date, ExecutionContextInterface $context): void
     {
-        if ($date instanceof \DateTimeInterface && $date > new \DateTime()) {
-            $context->buildViolation('The creation date cannot be in the future.')
-                ->atPath('datecreation')
-                ->addViolation();
+        if ($date instanceof \DateTimeInterface) {
+            $today = new \DateTime();
+            $today->setTime(0, 0, 0);
+            $input = clone $date;
+            $input->setTime(0, 0, 0);
+
+            if ($input != $today) {
+                $context->buildViolation('Only today\'s date is allowed.')
+                    ->atPath('datecreation')
+                    ->addViolation();
+            }
         }
     }
 }

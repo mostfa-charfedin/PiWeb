@@ -35,7 +35,13 @@
 
               <div class="mb-4">
                 {{ form_label(formQuiz.datecreation) }}
-                {{ form_widget(formQuiz.datecreation, {'attr': {'class': 'form-control'}}) }}
+                {{ form_widget(formQuiz.datecreation, {
+                  'attr': {
+                    'class': 'form-control',
+                    'min': "now"|date("Y-m-d"),
+                    'max': "now"|date("Y-m-d")
+                  }
+                }) }}
                 <div class="text-danger small mt-1">
                   {{ form_errors(formQuiz.datecreation) }}
                 </div>
