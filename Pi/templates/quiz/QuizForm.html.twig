@@ -1,0 +1,66 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block title %}
+  {{ edit_mode ? 'Edit Quiz' : 'Create New Quiz' }}
+{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1>{{ edit_mode ? 'Edit Quiz' : 'Create New Quiz' }}</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Home</a></li>
+        <li class="breadcrumb-item active">{{ edit_mode ? 'Edit Quiz' : 'New Quiz' }}</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section">
+    <div class="row">
+      <div class="col-lg-8 offset-lg-2">
+        <div class="card shadow-sm rounded-3">
+          <div class="card-body p-4">
+            <h5 class="card-title mb-4">{{ edit_mode ? 'Edit the quiz' : 'Fill the form to create a quiz' }}</h5>
+
+            {{ form_start(formQuiz) }}
+
+              <div class="mb-3">
+                {{ form_label(formQuiz.nom) }}
+                {{ form_widget(formQuiz.nom, {'attr': {'class': 'form-control'}}) }}
+                <div class="text-danger small mt-1">
+                  {{ form_errors(formQuiz.nom) }}
+                </div>
+              </div>
+
+              <div class="mb-4">
+                {{ form_label(formQuiz.datecreation) }}
+                {{ form_widget(formQuiz.datecreation, {
+                  'attr': {
+                    'class': 'form-control',
+                    'min': "now"|date("Y-m-d"),
+                    'max': "now"|date("Y-m-d")
+                  }
+                }) }}
+                <div class="text-danger small mt-1">
+                  {{ form_errors(formQuiz.datecreation) }}
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between">
+                <a href="{{ path('app_home') }}" class="btn btn-outline-secondary">
+                  <i class="bi bi-arrow-left"></i> Go Back to List
+                </a>
+                <button type="submit" class="btn btn-primary">
+                  {{ edit_mode ? 'Update Quiz' : 'Create Quiz' }}
+                </button>
+              </div>
+
+            {{ form_end(formQuiz) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

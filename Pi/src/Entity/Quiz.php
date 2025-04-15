@@ -6,59 +6,41 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+//use Doctrine\Common\Collections\ArrayCollection;
+//use Doctrine\Common\Collections\Collection;
+use App\Entity\Question;
 
 /**
- * Quiz
- *
+ * @ORM\Entity(repositoryClass="App\Repository\QuizRepository")
  * @ORM\Table(name="quiz")
- * @ORM\Entity
  */
 class Quiz
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="idQuiz", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Column(name="idQuiz", type="integer")
      */
     private $idquiz;
 
     /**
-     * @var string|null
-     *
-     * @ORM\Column(name="nom", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="nom", type="string", length=255, nullable=true)
      */
-    private $nom = 'NULL';
+    private $nom;
 
     /**
-     * @var \DateTime|null
-     *
-     * @ORM\Column(name="dateCreation", type="date", nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="dateCreation", type="datetime", nullable=true)
      */
-    private $datecreation = 'NULL';
+    private $datecreation;
 
     /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="User", inversedBy="idquiz")
-     * @ORM\JoinTable(name="score",
-     *   joinColumns={
-     *     @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz")
-     *   },
-     *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="idUser", referencedColumnName="id")
-     *   }
-     * )
+     * @ORM\OneToMany(targetEntity=Question::class, mappedBy="quiz", orphanRemoval=true, cascade={"persist", "remove"})
      */
-    private $iduser = array();
+    private $questions;
 
-    /**
-     * Constructor
-     */
     public function __construct()
     {
-        $this->iduser = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->questions = new ArrayCollection();
     }
 
     public function getIdquiz(): ?int
@@ -68,13 +50,12 @@ class Quiz
 
     public function getNom(): ?string
     {
-        return $this->nom;
+        return $this->nom ?? '';
     }
 
-    public function setNom(?string $nom): static
+    public function setNom(?string $nom): self
     {
         $this->nom = $nom;
-
         return $this;
     }
 
@@ -83,35 +64,38 @@ class Quiz
         return $this->datecreation;
     }
 
-    public function setDatecreation(?\DateTimeInterface $datecreation): static
+    public function setDatecreation(?\DateTimeInterface $datecreation): self
     {
         $this->datecreation = $datecreation;
-
         return $this;
     }
 
     /**
-     * @return Collection<int, User>
+     * @return Collection|Question[]
      */
-    public function getIduser(): Collection
+    public function getQuestions(): Collection
     {
-        return $this->iduser;
+        return $this->questions;
     }
 
-    public function addIduser(User $iduser): static
+    public function addQuestion(Question $question): self
     {
-        if (!$this->iduser->contains($iduser)) {
-            $this->iduser->add($iduser);
+        if (!$this->questions->contains($question)) {
+            $this->questions[] = $question;
+            $question->setQuiz($this);
         }
 
         return $this;
     }
 
-    public function removeIduser(User $iduser): static
+    public function removeQuestion(Question $question): self
     {
-        $this->iduser->removeElement($iduser);
+        if ($this->questions->removeElement($question)) {
+            if ($question->getQuiz() === $this) {
+                $question->setQuiz(null);
+            }
+        }
 
         return $this;
     }
-
 }
