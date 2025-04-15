@@ -1,8 +1,13 @@
-{% extends 'sideBar.html.twig' %}
+{% extends 'navbar.html.twig' %}
 
 {% block title %}Ressources{% endblock %}
 
 {% block content %}
+{% if not app.user %}
+    <script>
+        window.location.href = "{{ path('app_login') }}";
+    </script>
+{% else %}
 <main id="main" class="main">
   <div class="pagetitle d-flex justify-content-between align-items-center">
     <div>
@@ -258,4 +263,5 @@
   }
 </style>
 {% endblock %}
+{% endif %}
 {% endblock %}

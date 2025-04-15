@@ -162,6 +162,13 @@ class RessourcesController extends AbstractController
         }
 
         if ($this->isCsrfTokenValid('delete'.$ressource->getIdresource(), $request->getPayload()->getString('_token'))) {
+            // First, delete all related favorites
+            $favorites = $em->getRepository('App\Entity\Favoris')->findBy(['idresource' => $ressource]);
+            foreach ($favorites as $favorite) {
+                $em->remove($favorite);
+            }
+            
+            // Then delete the resource
             $em->remove($ressource);
             $em->flush();
             $this->addFlash('success', 'Resource deleted successfully!');

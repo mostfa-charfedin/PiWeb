@@ -76,7 +76,6 @@
                     <th>Title</th>
                     <th>Type</th>
                     <th>Description</th>
-                    <th>Rating</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -86,7 +85,6 @@
                       <td>{{ ressource.titre }}</td>
                       <td>{{ ressource.type }}</td>
                       <td>{{ ressource.description }}</td>
-                      <td>{{ ressource.noteaverage }}</td>
                       <td>
                         <div class="btn-group" role="group">
                           <a href="{{ path('app_ressources_show', {'idresource': ressource.idresource}) }}" class="btn btn-sm btn-info">
@@ -109,7 +107,7 @@
                     </tr>
                   {% else %}
                     <tr>
-                      <td colspan="5" class="text-center">No resources found</td>
+                      <td colspan="4" class="text-center">No resources found</td>
                     </tr>
                   {% endfor %}
                 </tbody>

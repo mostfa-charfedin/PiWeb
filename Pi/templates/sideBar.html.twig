@@ -99,22 +99,30 @@
         <ul id="tables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           
           <li>
-      <a href="{{ path('projet_list') }}">
-        <i class="bi bi-circle"></i><span>Projets</span>
-      </a>
-    </li>
-      <li>
-      <a href="{{ path('app_ressources_index') }}">
-        <i class="bi bi-circle"></i><span>ressources</span>
-      </a>
-    </li>
+            <a href="{{ path('projet_list') }}">
+              <i class="bi bi-circle"></i><span>Projets</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ path('app_ressources_index') }}">
+              <i class="bi bi-circle"></i><span>Ressources</span>
+            </a>
+          </li>
+          {% if user and user.role != 'ADMIN' %}
+          <li>
+            <a href="{{ path('app_favoris_index') }}">
+              <i class="bi bi-circle"></i><span>Favoris</span>
+            </a>
+          </li>
+          {% endif %}
         
         </ul>
       </li><!-- End Tables Nav -->  
 
+      {% if user and user.role == 'ADMIN' %}
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#Fedi-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-layout-text-window-reverse"></i><span>Fedi</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-bar-chart-line"></i><span>Charts</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="Fedi-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           
@@ -125,9 +133,8 @@
             </a>
           </li>
         </ul>
-      </li><!-- End Fedi Nav --> 
-
-
+      </li><!-- End Charts Nav --> 
+      {% endif %}
 
       <li class="nav-item">
         <a class="nav-link" href="{{ path('profile') }}">

@@ -28,6 +28,12 @@ final class EvaluationController extends AbstractController
             throw $this->createNotFoundException('User not found');
         }
 
+        // Check if user is admin
+        if ($user->getRole() !== 'ADMIN') {
+            $this->addFlash('error', 'Access denied. This section is for administrators only.');
+            return $this->redirectToRoute('profile');
+        }
+
         $evaluations = $entityManager
             ->getRepository(Evaluation::class)
             ->findAll();
@@ -54,8 +60,24 @@ final class EvaluationController extends AbstractController
     }
 
     #[Route('/new', name: 'app_evaluation_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        // Check if user is admin
+        if ($user->getRole() !== 'ADMIN') {
+            $this->addFlash('error', 'Access denied. This section is for administrators only.');
+            return $this->redirectToRoute('profile');
+        }
+
         $evaluation = new Evaluation();
         $form = $this->createForm(EvaluationType::class, $evaluation);
         $form->handleRequest($request);
@@ -86,6 +108,12 @@ final class EvaluationController extends AbstractController
             throw $this->createNotFoundException('User not found');
         }
 
+        // Check if user is admin
+        if ($user->getRole() !== 'ADMIN') {
+            $this->addFlash('error', 'Access denied. This section is for administrators only.');
+            return $this->redirectToRoute('profile');
+        }
+
         $evaluation = $entityManager->getRepository(Evaluation::class)->find($idevaluation);
 
         if (!$evaluation) {
@@ -107,8 +135,24 @@ final class EvaluationController extends AbstractController
     }
 
     #[Route('/{idevaluation}/edit', name: 'app_evaluation_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, Evaluation $evaluation, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Evaluation $evaluation, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        // Check if user is admin
+        if ($user->getRole() !== 'ADMIN') {
+            $this->addFlash('error', 'Access denied. This section is for administrators only.');
+            return $this->redirectToRoute('profile');
+        }
+
         $form = $this->createForm(EvaluationType::class, $evaluation);
         $form->handleRequest($request);
 
@@ -137,39 +181,14 @@ final class EvaluationController extends AbstractController
             throw $this->createNotFoundException('User not found');
         }
 
-        try {
-            // Récupérer la ressource associée via la relation
-            $resource = $evaluation->getRessource();
-            
-            if ($resource) {
-                // Supprimer la relation bidirectionnelle
-                $resource->removeEvaluation($evaluation);
-                $evaluation->setRessource(null);
-                
-                // Récupérer toutes les évaluations de la ressource
-                $evaluations = $resource->getEvaluations();
-                
-                // Calculer la nouvelle moyenne sans l'évaluation à supprimer
-                $totalRatings = count($evaluations) - 1;
-                $sumRatings = array_sum(array_map(fn($e) => $e->getNote(), $evaluations->toArray())) - $evaluation->getNote();
-                
-                // Mettre à jour la note moyenne de la ressource
-                if ($totalRatings > 0) {
-                    $newAverage = $sumRatings / $totalRatings;
-                    $resource->setNoteaverage($newAverage);
-                } else {
-                    $resource->setNoteaverage(0);
-                }
-            }
-
-            // Supprimer l'évaluation
-            $entityManager->remove($evaluation);
-            $entityManager->flush();
-
-            $this->addFlash('success', 'L\'évaluation a été supprimée avec succès.');
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Une erreur est survenue lors de la suppression de l\'évaluation.');
+        // Check if user is admin
+        if ($user->getRole() !== 'ADMIN') {
+            $this->addFlash('error', 'Access denied. This section is for administrators only.');
+            return $this->redirectToRoute('profile');
         }
+
+        $entityManager->remove($evaluation);
+        $entityManager->flush();
 
         return $this->redirectToRoute('app_evaluation_index', [], Response::HTTP_SEE_OTHER);
     }
