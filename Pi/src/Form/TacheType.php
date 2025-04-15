@@ -12,6 +12,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class TacheType extends AbstractType
 {
@@ -27,40 +28,59 @@ class TacheType extends AbstractType
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Title',
+                'required' => true,
                 'attr' => [
                     'placeholder' => 'Enter task title',
-                    'class' => 'form-control'
+                    'class' => 'form-control',
                 ],
-                'required' => true,
+                'constraints' => [
+                    new Assert\NotBlank(['message' => 'The title cannot be blank.']),
+                    new Assert\Length([
+                        'min' => 5,
+                        'minMessage' => 'The title must be at least {{ limit }} characters.',
+                    ]),
+                ],
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
+                'required' => true,
                 'attr' => [
                     'rows' => 4,
                     'placeholder' => 'Enter task description',
-                    'class' => 'form-control'
+                    'class' => 'form-control',
                 ],
-                'required' => true,
+                'constraints' => [
+                    new Assert\NotBlank(['message' => 'The description cannot be blank.']),
+                    new Assert\Length([
+                        'min' => 30,
+                        'minMessage' => 'The description must be at least {{ limit }} characters.',
+                    ]),
+                ],
             ])
             ->add('date', IntegerType::class, [
                 'label' => 'Duration (weeks)',
-                'attr' => [
-                    'placeholder' => 'Enter duration in weeks',
-                    'class' => 'form-control',
-                    'min' => 1
-                ],
                 'required' => false,
+                'attr' => [
+                    'placeholder' => 'Enter duration in weeks (1-6)',
+                    'class' => 'form-control',
+                    'min' => 1,
+                    'max' => 6,
+                ],
+                'constraints' => [
+                    new Assert\Range([
+                        'min' => 1,
+                        'max' => 6,
+                        'notInRangeMessage' => 'The duration must be between {{ min }} and {{ max }} weeks.',
+                    ]),
+                ],
             ])
             ->add('iduser', EntityType::class, [
                 'class' => User::class,
-                'choice_label' => function (User $user) {
-                    return sprintf('%s %s (ID: %d)', 
-                        $user->getNom(), 
-                        $user->getPrenom(),
-                        $user->getId()
-                    );
-                },
                 'label' => 'Assign To',
+                'required' => true,
+                'choice_label' => function (User $user) {
+                    return sprintf('%s %s (ID: %d)', $user->getNom(), $user->getPrenom(), $user->getId());
+                },
                 'query_builder' => function (EntityRepository $er) {
                     return $er->createQueryBuilder('u')
                         ->where('u.role IN (:roles)')
@@ -68,9 +88,8 @@ class TacheType extends AbstractType
                         ->orderBy('u.nom', 'ASC');
                 },
                 'attr' => [
-                    'class' => 'user-select',
+                    'class' => 'd-none', // styled via JS/UI table
                 ],
-                'required' => true,
                 'placeholder' => 'Search or select user...',
             ]);
     }
