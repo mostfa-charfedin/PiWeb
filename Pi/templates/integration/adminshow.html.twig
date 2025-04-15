@@ -32,9 +32,14 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5>Tasks</h5>
-          <a href="{{ path('tache_new', {'idProjet': projet.idProjet}) }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add Task
-          </a>
+          <div>
+            <a href="{{ path('projet_stats', {'idProjet': projet.idProjet}) }}" class="btn btn-info me-2">
+              <i class="bi bi-bar-chart"></i> Show Statistics
+            </a>
+            <a href="{{ path('tache_new', {'idProjet': projet.idProjet}) }}" class="btn btn-primary">
+              <i class="bi bi-plus-circle"></i> Add Task
+            </a>
+          </div>
         </div>
 
         {% for tache in taches %}

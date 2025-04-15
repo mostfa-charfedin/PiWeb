@@ -1,0 +1,370 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Project Statistics: {{ projet.titre }}</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('projet_list') }}">Projects</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('projet_show', {'idProjet': projet.idProjet}) }}">{{ projet.titre }}</a></li>
+            <li class="breadcrumb-item active">Statistics</li>
+        </ol>
+    </nav>  
+     <a href="{{ path('projet_show', {'idProjet': projet.idProjet}) }}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+</div>
+
+
+
+<section class="section">
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        {% set earlyCount = chartData|filter(task => task.isEarly)|length %}
+        {% set onTimeCount = chartData|filter(task => task.status == 'done' and not task.isEarly and not task.isOverdue)|length %}
+        {% set overdueCount = chartData|filter(task => task.status == 'done' and task.isOverdue)|length %}
+        {% set totalCount = chartData|length %}
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Early Completions</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">{{ earlyCount }}</h2>
+                        <span class="badge bg-success rounded-pill">{{ totalCount > 0 ? (earlyCount / totalCount * 100)|round(1) : 0 }}%</span>
+                    </div>
+                    <small class="text-muted">Tasks finished before deadline</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">On Time</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">{{ onTimeCount }}</h2>
+                        <span class="badge bg-primary rounded-pill">{{ totalCount > 0 ? (onTimeCount / totalCount * 100)|round(1) : 0 }}%</span>
+                    </div>
+                    <small class="text-muted">Completed as planned</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Overdue</h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="mb-0">{{ overdueCount }}</h2>
+                        <span class="badge bg-danger rounded-pill">{{ totalCount > 0 ? (overdueCount / totalCount * 100)|round(1) : 0 }}%</span>
+                    </div>
+                    <small class="text-muted">Missed deadlines</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Task Timeline</h5>
+                    <div id="timelineChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Completion Performance</h5>
+                    <div id="performanceChart"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Status Distribution</h5>
+                    <div id="statusChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const chartData = {{ chartData|json_encode|raw }};
+    const now = new Date();
+
+    // Prepare timeline data
+    const timelineData = chartData
+        .filter(item => item.start && item.end)
+        .map(item => {
+            const startDate = new Date(item.start);
+            const endDate = new Date(item.end);
+            const completedDate = item.completedAt ? new Date(item.completedAt) : null;
+            
+            return {
+                x: item.task,
+                y: [
+                    startDate.getTime(),
+                    item.status === 'done' && completedDate ? completedDate.getTime() : endDate.getTime()
+                ],
+                fillColor: getStatusColor(item),
+                realEnd: endDate.getTime(),
+                status: item.status,
+                isEarly: item.isEarly,
+                isOverdue: item.isOverdue,
+                completedAt: completedDate ? completedDate.getTime() : null
+            };
+        });
+
+    // Function to determine color based on status
+    function getStatusColor(item) {
+        if (item.status === 'done') {
+            if (item.isEarly) return '#10B981';  // green
+            if (item.isOverdue) return '#EF4444'; // red
+            return '#3B82F6'; // blue
+        }
+        // For incomplete tasks
+        const endDate = new Date(item.end);
+        return now > endDate ? '#F87171' : '#F59E0B'; // red-ish for overdue, amber for pending
+    }
+
+    // Timeline Chart
+    const timelineOptions = {
+        series: [{
+            name: 'Tasks',
+            data: timelineData
+        }],
+        chart: {
+            type: 'rangeBar',
+            height: 400,
+            toolbar: {
+                show: true
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: true,
+                distributed: true,
+                barHeight: '80%',
+                dataLabels: {
+                    hideOverflowingLabels: false
+                }
+            }
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function(val, opts) {
+                const start = new Date(val[0]);
+                const end = new Date(val[1]);
+                const diffDays = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                return diffDays + 'd';
+            },
+            style: {
+                colors: ['#f3f4f5', '#fff']
+            }
+        },
+        xaxis: {
+            type: 'datetime',
+            min: Math.min(...timelineData.map(d => d.y[0])) - 86400000 * 3, // 3 days buffer
+            max: Math.max(...timelineData.map(d => d.realEnd)) + 86400000 * 3 // 3 days buffer
+        },
+        yaxis: {
+            show: true
+        },
+        grid: {
+            row: {
+                colors: ['#f3f4f5', '#fff'],
+                opacity: 1
+            }
+        },
+        tooltip: {
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+                const data = w.config.series[seriesIndex].data[dataPointIndex];
+                const start = new Date(data.y[0]);
+                const end = new Date(data.y[1]);
+                const deadline = new Date(data.realEnd);
+                const completed = data.completedAt ? new Date(data.completedAt) : null;
+
+                const getStatusLabel = () => {
+                    if (data.status === 'done') {
+                        if (data.isEarly) return 'Completed Early';
+                        if (data.isOverdue) return 'Completed Late';
+                        return 'Completed On Time';
+                    }
+                    return now > deadline ? 'Overdue' : 'Pending';
+                };
+
+                const getBadgeClass = () => {
+                    if (data.status === 'done') {
+                        if (data.isEarly) return 'success';
+                        if (data.isOverdue) return 'danger';
+                        return 'primary';
+                    }
+                    return now > deadline ? 'danger' : 'warning';
+                };
+
+                let html = `<div class="apexcharts-tooltip-title">${data.x}</div>`;
+                html += `<div class="apexcharts-tooltip-series-group">`;
+                html += `<span class="status-badge badge bg-${getBadgeClass()}">${getStatusLabel()}</span>`;
+                html += `<div><strong>Start:</strong> ${start.toLocaleDateString()}</div>`;
+                html += `<div><strong>Deadline:</strong> ${deadline.toLocaleDateString()}</div>`;
+
+                if (completed) {
+                    html += `<div><strong>Completed:</strong> ${completed.toLocaleDateString()}</div>`;
+                    const diffDays = Math.round((deadline - completed) / 86400000);
+                    if (data.isEarly) {
+                        html += `<div class="text-success">✓ ${Math.abs(diffDays)} days early</div>`;
+                    } else if (diffDays < 0) {
+                        html += `<div class="text-danger">Delayed by ${Math.abs(diffDays)} days</div>`;
+                    } else {
+                        html += `<div class="text-primary">Completed on time</div>`;
+                    }
+                } else if (now > deadline) {
+                    const daysLate = Math.round((now - deadline) / 86400000);
+                    html += `<div class="text-danger">Overdue by ${daysLate} days</div>`;
+                } else {
+                    const daysLeft = Math.round((deadline - now) / 86400000);
+                    html += `<div class="text-warning">${daysLeft} days remaining</div>`;
+                }
+
+                html += `</div>`;
+                return html;
+            }
+        }
+    };
+
+    const timelineChart = new ApexCharts(document.querySelector("#timelineChart"), timelineOptions);
+    timelineChart.render();
+
+    // Performance Chart
+    const completedTasks = chartData.filter(t => t.status === 'done');
+    const perfData = [
+        completedTasks.filter(t => t.isEarly).length,
+        completedTasks.filter(t => !t.isEarly && !t.isOverdue).length,
+        completedTasks.filter(t => t.isOverdue).length
+    ];
+    new ApexCharts(document.querySelector("#performanceChart"), {
+        series: [{ name: 'Tasks', data: perfData }],
+        chart: { type: 'bar', height: 350 },
+        colors: ['#10B981', '#3B82F6', '#EF4444'],
+        plotOptions: {
+            bar: { 
+                distributed: true, 
+                borderRadius: 4,
+                dataLabels: {
+                    position: 'top'
+                }
+            }
+        },
+        xaxis: { 
+            categories: ['Early', 'On Time', 'Late'],
+            labels: {
+                style: {
+                    fontSize: '12px'
+                }
+            }
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function(val) {
+                return val + (completedTasks.length > 0 ? ` (${Math.round(val / completedTasks.length * 100)}%)` : '');
+            },
+            offsetY: -20,
+            style: {
+                fontSize: '12px',
+                colors: ["#304758"]
+            }
+        }
+    }).render();
+
+    // Status Distribution Chart
+    const statusCounts = {
+        'To Do': chartData.filter(t => t.status === 'to do').length,
+        'In Progress': chartData.filter(t => t.status === 'in progress').length,
+        'Completed Early': chartData.filter(t => t.status === 'done' && t.isEarly).length,
+        'Completed On Time': chartData.filter(t => t.status === 'done' && !t.isEarly && !t.isOverdue).length,
+        'Completed Late': chartData.filter(t => t.status === 'done' && t.isOverdue).length
+    };
+
+    new ApexCharts(document.querySelector("#statusChart"), {
+        series: Object.values(statusCounts),
+        labels: Object.keys(statusCounts),
+        chart: { 
+            type: 'donut', 
+            height: 350,
+            animations: {
+                enabled: true
+            }
+        },
+        colors: ['#F59E0B', '#6366F1', '#10B981', '#3B82F6', '#EF4444'],
+        plotOptions: {
+            pie: {
+                donut: {
+                    labels: {
+                        show: true,
+                        total: { 
+                            show: true, 
+                            label: 'Total Tasks', 
+                            color: '#6B7280',
+                            formatter: function() {
+                                return chartData.length.toString();
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        legend: {
+            position: 'right',
+            fontSize: '14px'
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    }).render();
+});
+</script>
+
+<style>
+.apexcharts-tooltip {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+.apexcharts-tooltip-title {
+    font-weight: bold;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+.apexcharts-tooltip-series-group {
+    padding: 3px 0;
+}
+.status-badge {
+    display: inline-block;
+    margin-bottom: 5px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+}
+</style>
+{% endblock %}
