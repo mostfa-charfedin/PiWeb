@@ -1,0 +1,11 @@
+<h2>Hello {{ user.nom }},</h2>
+
+<p>A new quiz titled <strong>"{{ quiz.nom }}"</strong> has just been added!</p>
+
+<p>Click the button below to take the quiz:</p>
+
+<a href="{{ url('user_quiz_start', {'id': quiz.idquiz}) }}" style="padding:10px 15px;background-color:#3498db;color:#fff;text-decoration:none;border-radius:5px;">
+  Take the Quiz
+</a>
+
+<p>Good luck!</p>
