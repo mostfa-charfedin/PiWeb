@@ -1,0 +1,157 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}Take Quiz{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <style>
+    .quiz-container {
+      max-width: 800px;
+      margin: auto;
+      padding-top: 100px; /* space for fixed progress bar */
+    }
+
+    .fixed-progress {
+      position: fixed;
+      top: 70px; /* adjust if your navBar is taller */
+      left: 0;
+      width: 100%;
+      background: #f8f9fa;
+      z-index: 1000;
+      padding: 15px 30px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+
+    .progress {
+      height: 28px;
+      background-color: #dee2e6;
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      color: white;
+      font-weight: bold;
+      line-height: 28px;
+      text-align: center;
+      white-space: nowrap;
+      background-image: linear-gradient(to right, #f39c12, #2ecc71);
+      transition: width 0.4s ease-in-out;
+      border-radius: 20px;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .question-card {
+      border-radius: 1rem;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .question-card:hover {
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .question-title {
+      font-weight: 600;
+      color: #2c3e50;
+    }
+
+    .form-check-label {
+      font-size: 0.95rem;
+    }
+
+    .submit-btn {
+      background-color: #3498db;
+      color: #fff;
+      font-weight: 500;
+      border-radius: 0.5rem;
+    }
+
+    .submit-btn:hover {
+      background-color: #2980b9;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+
+  <div class="pagetitle">
+    <h1>{{ quiz.nom }}</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Home</a></li>
+        <li class="breadcrumb-item active">Take Quiz</li>
+      </ol>
+    </nav>
+  </div>
+
+  {# Stylish fixed progress bar #}
+  <div class="fixed-progress">
+    <div class="progress">
+      <div id="progress-bar" class="progress-bar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        0%
+      </div>
+    </div>
+  </div>
+
+  <section class="section quiz-container">
+    {% if questions is not empty %}
+      <form method="post" action="{{ path('user_quiz_submit', { id: quiz.idQuiz }) }}">
+        {% for question in questions %}
+          <div class="card question-card mb-4 shadow-sm">
+            <div class="card-body">
+              <h5 class="question-title mb-3">{{ loop.index }}. {{ question.question }}</h5>
+
+              {% for reponse in question.reponses %}
+                <div class="form-check mb-2">
+                  <input
+                    class="form-check-input quiz-answer"
+                    type="radio"
+                    name="question_{{ question.idQuestion }}"
+                    id="reponse_{{ reponse.idReponse }}"
+                    value="{{ reponse.idReponse }}"
+                    required
+                  >
+                  <label class="form-check-label" for="reponse_{{ reponse.idReponse }}">
+                    {{ reponse.response }}
+                  </label>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endfor %}
+
+        <div class="text-center mt-4">
+          <button type="submit" class="btn submit-btn px-5">
+            ✅ Submit Quiz
+          </button>
+        </div>
+      </form>
+    {% else %}
+      <div class="alert alert-info text-center">
+        No questions available for this quiz.
+      </div>
+    {% endif %}
+  </section>
+</main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const totalQuestions = document.querySelectorAll('.question-card').length;
+    const progressBar = document.getElementById('progress-bar');
+    const answeredQuestions = new Set();
+
+    document.querySelectorAll('.quiz-answer').forEach(input => {
+      input.addEventListener('change', function () {
+        answeredQuestions.add(this.name);
+
+        const progress = Math.round((answeredQuestions.size / totalQuestions) * 100);
+        progressBar.style.width = progress + '%';
+        progressBar.setAttribute('aria-valuenow', progress);
+        progressBar.textContent = progress + '%';
+      });
+    });
+  });
+</script>
+{% endblock %}

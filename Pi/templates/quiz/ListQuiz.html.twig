@@ -1,4 +1,3 @@
-{# templates/quiz/ListQuiz.html.twig #}
 {% extends 'sideBar.html.twig' %}
 
 {% block title %}Quiz List{% endblock %}
@@ -27,8 +26,15 @@
           <div class="card-body">
             <h5 class="card-title">All Quizzes</h5>
 
+            <!-- Search Bar -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <input type="text" id="quizSearchInput" class="form-control" placeholder="Search quizzes...">
+              </div>
+            </div>
+
             <div class="table-responsive">
-              <table class="table table-striped align-middle">
+              <table class="table table-striped align-middle" id="quizTable">
                 <thead>
                   <tr>
                     <th scope="col">#</th>
@@ -71,4 +77,20 @@
     </div>
   </section>
 </main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('quizSearchInput');
+    const rows = document.querySelectorAll('#quizTable tbody tr');
+
+    searchInput.addEventListener('input', function () {
+      const filter = searchInput.value.toLowerCase();
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+      });
+    });
+  });
+</script>
 {% endblock %}

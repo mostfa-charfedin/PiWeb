@@ -26,13 +26,15 @@
                 {{ form_label(form.question) }}
                 {{ form_widget(form.question, {
                   'attr': {
-                    'class': 'form-control',
+                    'class': 'form-control' ~ (form_errors(form.question) ? ' is-invalid' : ''),
                     'placeholder': 'Enter your question (max 80 characters)'
                   }
                 }) }}
-                <div class="text-danger small mt-1">
-                  {{ form_errors(form.question) }}
-                </div>
+                {% if form_errors(form.question) %}
+                  <div class="invalid-feedback d-block">
+                    {{ form_errors(form.question) }}
+                  </div>
+                {% endif %}
               </div>
             {% endif %}
 
@@ -45,20 +47,28 @@
                     {{ form_label(reponseField.response) }}
                     {{ form_widget(reponseField.response, {
                       'attr': {
-                        'class': 'form-control',
+                        'class': 'form-control' ~ (form_errors(reponseField.response) ? ' is-invalid' : ''),
                         'placeholder': 'Enter response (max 80 characters)'
                       }
                     }) }}
-                    <div class="text-danger small mt-1">
-                      {{ form_errors(reponseField.response) }}
-                    </div>
+                    {% if form_errors(reponseField.response) %}
+                      <div class="invalid-feedback d-block">
+                        {{ form_errors(reponseField.response) }}
+                      </div>
+                    {% endif %}
                   </div>
                   <div class="form-check">
-                    {{ form_widget(reponseField.status, {'attr': {'class': 'form-check-input'}}) }}
+                    {{ form_widget(reponseField.status, {
+                      'attr': {
+                        'class': 'form-check-input' ~ (form_errors(reponseField.status) ? ' is-invalid' : '')
+                      }
+                    }) }}
                     {{ form_label(reponseField.status, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                    <div class="text-danger small mt-1">
-                      {{ form_errors(reponseField.status) }}
-                    </div>
+                    {% if form_errors(reponseField.status) %}
+                      <div class="invalid-feedback d-block">
+                        {{ form_errors(reponseField.status) }}
+                      </div>
+                    {% endif %}
                   </div>
                 </div>
               {% endfor %}
@@ -69,20 +79,28 @@
                 {{ form_label(form.response) }}
                 {{ form_widget(form.response, {
                   'attr': {
-                    'class': 'form-control',
+                    'class': 'form-control' ~ (form_errors(form.response) ? ' is-invalid' : ''),
                     'placeholder': 'Enter response (max 80 characters)'
                   }
                 }) }}
-                <div class="text-danger small mt-1">
-                  {{ form_errors(form.response) }}
-                </div>
+                {% if form_errors(form.response) %}
+                  <div class="invalid-feedback d-block">
+                    {{ form_errors(form.response) }}
+                  </div>
+                {% endif %}
               </div>
               <div class="form-check">
-                {{ form_widget(form.status, {'attr': {'class': 'form-check-input'}}) }}
+                {{ form_widget(form.status, {
+                  'attr': {
+                    'class': 'form-check-input' ~ (form_errors(form.status) ? ' is-invalid' : '')
+                  }
+                }) }}
                 {{ form_label(form.status, null, {'label_attr': {'class': 'form-check-label'}}) }}
-                <div class="text-danger small mt-1">
-                  {{ form_errors(form.status) }}
-                </div>
+                {% if form_errors(form.status) %}
+                  <div class="invalid-feedback d-block">
+                    {{ form_errors(form.status) }}
+                  </div>
+                {% endif %}
               </div>
             {% endif %}
 

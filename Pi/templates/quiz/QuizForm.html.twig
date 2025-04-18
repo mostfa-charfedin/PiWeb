@@ -27,8 +27,12 @@
 
               <div class="mb-3">
                 {{ form_label(formQuiz.nom) }}
-                {{ form_widget(formQuiz.nom, {'attr': {'class': 'form-control'}}) }}
-                <div class="text-danger small mt-1">
+                {{ form_widget(formQuiz.nom, {
+                  'attr': {
+                    'class': 'form-control' ~ (formQuiz.nom.vars.errors|length > 0 ? ' is-invalid' : '')
+                  }
+                }) }}
+                <div class="invalid-feedback d-block">
                   {{ form_errors(formQuiz.nom) }}
                 </div>
               </div>
@@ -37,12 +41,12 @@
                 {{ form_label(formQuiz.datecreation) }}
                 {{ form_widget(formQuiz.datecreation, {
                   'attr': {
-                    'class': 'form-control',
+                    'class': 'form-control' ~ (formQuiz.datecreation.vars.errors|length > 0 ? ' is-invalid' : ''),
                     'min': "now"|date("Y-m-d"),
                     'max': "now"|date("Y-m-d")
                   }
                 }) }}
-                <div class="text-danger small mt-1">
+                <div class="invalid-feedback d-block">
                   {{ form_errors(formQuiz.datecreation) }}
                 </div>
               </div>
