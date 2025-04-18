@@ -2,55 +2,88 @@
 
 {% block title %}New Post{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+        .drag-drop-area.invalid {
+            border-color: #dc3545;
+        }
+        .category-container.invalid {
+            outline: 1px solid #dc3545;
+            border-radius: 8px;
+            padding: 5px;
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
-    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'id': 'post-form', 'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
     <div class="background-image" style="position: relative; height: 100vh; background-image: url('{{ asset('images/img.png') }}'); background-size: cover; background-position: center;">
         <div class="w3-content" style="display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px;">
             <div style="max-width: 800px; width: 100%; padding: 20px; background-color: rgba(249, 249, 249, 0.8); border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px);">
                 <h1 style="text-align: center; color: #333;">Create New Post</h1>
 
-                <div class="form-group">
-                    {{ form_row(form.title, { 'attr': {'class': 'form-control', 'placeholder': 'Enter post title...'} }) }}
-                </div>
-
-                <div class="form-group" style="margin-bottom: 30px;">
-                    {{ form_row(form.contenu, { 'attr': {'class': 'form-control', 'placeholder': 'Enter post content...'} }) }}
-                </div>
-
-                <div class="form-group">
-                    <div class="drag-drop-area" id="drag-drop-area" style="border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer; margin-bottom: 20px; background-color: #fff; border-radius: 8px;">
-                        <p>Drag and drop an image here or click to select a file.</p>
-                        <img src="" alt="Preview" class="preview-image" id="preview-image" style="display: none; max-width: 100%; max-height: 200px; border-radius: 8px;">
-                        {{ form_widget(form.imageFile, { 'id': 'image-file-input', 'attr': {'style': 'display: none;'} }) }}
-                        {{ form_errors(form.imageFile) }} {# Display image-specific errors #}
+                <div class="form-group" style="margin-bottom: 20px;">
+                    {{ form_label(form.title, 'Title', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.title, {'attr': {
+                        'class': 'form-control' ~ (form.title.vars.errors|length ? ' is-invalid' : ''),
+                        'placeholder': 'Enter post title...',
+                        'required': 'required'
+                    }}) }}
+                    <div class="error-message">
+                        {{ form_errors(form.title) }}
                     </div>
                 </div>
 
-                <div class="category-container" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 20px;">
-                    {% for category in form.categories %}
-                        <div class="category-button" data-category-id="{{ category.vars.id }}" style="padding: 10px 15px; border: 1px solid #007bff; border-radius: 20px; cursor: pointer; background-color: #f0f8ff; color: #007bff; font-weight: bold; text-align: center;">
-                            {{ form_widget(category, { 'attr': {'style': 'display: none;'} }) }}
-                            {{ form_label(category, null, { 'label_attr': {'style': 'cursor: pointer;'} }) }}
-                        </div>
-                    {% endfor %}
-                    {{ form_errors(form.categories) }} {# Display category errors #}
+                <div class="form-group" style="margin-bottom: 20px;">
+                    {{ form_label(form.contenu, 'Content', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.contenu, {'attr': {
+                        'class': 'form-control' ~ (form.contenu.vars.errors|length ? ' is-invalid' : ''),
+                        'placeholder': 'Enter post content...',
+                        'rows': '5',
+                        'required': 'required'
+                    }}) }}
+                    <div class="error-message">
+                        {{ form_errors(form.contenu) }}
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    {{ form_label(form.imageFile, 'Image (JPG, PNG, max 2MB)', {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="drag-drop-area {{ form.imageFile.vars.errors|length ? 'invalid' : '' }}" id="drag-drop-area" style="border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer; background-color: #fff; border-radius: 8px;">
+                        <p>Drag and drop an image here or click to select a file.</p>
+                        <img src="" alt="Preview" class="preview-image" id="preview-image" style="display: none; max-width: 100%; max-height: 200px; border-radius: 8px;">
+                        {{ form_widget(form.imageFile, {'id': 'image-file-input', 'attr': {'style': 'display: none;'}}) }}
+                    </div>
+                    <div class="error-message">
+                        {{ form_errors(form.imageFile) }}
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 20px;">
+                    {{ form_label(form.categories, 'Categories (select at least one)', {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="category-container {{ form.categories.vars.errors|length ? 'invalid' : '' }}" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                        {% for category in form.categories %}
+                            <div class="category-button" data-category-id="{{ category.vars.id }}" style="padding: 10px 15px; border: 1px solid #007bff; border-radius: 20px; cursor: pointer; background-color: #f0f8ff; color: #007bff; font-weight: bold; text-align: center;">
+                                {{ form_widget(category, {'attr': {'style': 'display: none;'}}) }}
+                                {{ form_label(category, null, {'label_attr': {'style': 'cursor: pointer; margin: 0;'}}) }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="error-message">
+                        {{ form_errors(form.categories) }}
+                    </div>
                 </div>
 
                 <button type="submit" style="display: block; width: 100%; padding: 10px; background-color: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">Publish</button>
-
-                {% if form.vars.errors|length > 0 %}
-                    <div class="alert alert-danger">
-                        <ul>
-                            {% for error in form.vars.errors %}
-                                <li>{{ error.message }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endif %}
-
-                {% for flashMessage in app.flashes('error') %}
-                    <div class="alert alert-danger">{{ flashMessage }}</div>
-                {% endfor %}
 
                 <a href="{{ path('app_poste_my_posts') }}" class="back-link" style="display: block; text-align: center; margin-top: 20px; color: #007bff; text-decoration: none;">Back to list</a>
             </div>
@@ -58,62 +91,145 @@
     </div>
     {{ form_end(form) }}
 
+    <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
+
     {% block javascripts %}
         <script>
-            document.querySelectorAll('.category-button').forEach(button => {
-                button.addEventListener('click', function() {
-                    const checkbox = this.querySelector('input[type="checkbox"]');
-                    checkbox.checked = !checkbox.checked;
-                    this.style.backgroundColor = checkbox.checked ? '#007bff' : '#f0f8ff';
-                    this.style.color = checkbox.checked ? '#fff' : '#007bff';
-                });
-            });
+            document.addEventListener('DOMContentLoaded', () => {
+                // Notification system
+                function showNotification(message, type = 'success') {
+                    const notification = document.createElement('div');
+                    notification.className = `notification ${type}`;
+                    notification.innerHTML = message;
+                    notification.style.cssText = `
+                        padding: 15px 25px;
+                        border-radius: 8px;
+                        color: white;
+                        font-weight: bold;
+                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                        margin-bottom: 10px;
+                        opacity: 0;
+                        transition: opacity 0.5s ease;
+                        background-color: ${type === 'success' ? '#28a745' : '#dc3545'};
+                    `;
 
-            const dragDropArea = document.getElementById('drag-drop-area');
-            const fileInput = document.getElementById('image-file-input');
-            const previewImage = document.getElementById('preview-image');
+                    document.getElementById('notification-container').appendChild(notification);
 
-            dragDropArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dragDropArea.style.borderColor = '#007bff';
-            });
+                    setTimeout(() => {
+                        notification.style.opacity = '1';
+                    }, 100);
 
-            dragDropArea.addEventListener('dragleave', () => {
-                dragDropArea.style.borderColor = '#ccc';
-            });
-
-            dragDropArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                dragDropArea.style.borderColor = '#ccc';
-                const file = e.dataTransfer.files[0];
-                handleFile(file);
-            });
-
-            dragDropArea.addEventListener('click', () => {
-                fileInput.click();
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                handleFile(file);
-            });
-
-            function handleFile(file) {
-                if (file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        previewImage.src = e.target.result;
-                        previewImage.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                    fileInput.files = new DataTransfer().files; // Clear previous files
-                    const dataTransfer = new DataTransfer();
-                    dataTransfer.items.add(file);
-                    fileInput.files = dataTransfer.files; // Ensure file is set
-                } else {
-                    alert('Please select a valid image file (JPG or PNG).');
+                    setTimeout(() => {
+                        notification.style.opacity = '0';
+                        setTimeout(() => notification.remove(), 500);
+                    }, 3000);
                 }
-            }
+
+                // Show flash messages as notifications
+                {% for message in app.flashes('success') %}
+                showNotification('{{ message }}', 'success');
+                {% endfor %}
+                {% for message in app.flashes('error') %}
+                showNotification('{{ message }}', 'error');
+                {% endfor %}
+
+                // Category button toggle
+                document.querySelectorAll('.category-button').forEach(button => {
+                    const checkbox = button.querySelector('input[type="checkbox"]');
+                    if (checkbox.checked) {
+                        button.style.backgroundColor = '#007bff';
+                        button.style.color = '#fff';
+                    }
+                    button.addEventListener('click', () => {
+                        checkbox.checked = !checkbox.checked;
+                        button.style.backgroundColor = checkbox.checked ? '#007bff' : '#f0f8ff';
+                        button.style.color = checkbox.checked ? '#fff' : '#007bff';
+                    });
+                });
+
+                // Drag-and-drop image handling
+                const dragDropArea = document.getElementById('drag-drop-area');
+                const fileInput = document.getElementById('image-file-input');
+                const previewImage = document.getElementById('preview-image');
+
+                dragDropArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dragDropArea.style.borderColor = '#007bff';
+                });
+
+                dragDropArea.addEventListener('dragleave', () => {
+                    dragDropArea.style.borderColor = dragDropArea.classList.contains('invalid') ? '#dc3545' : '#ccc';
+                });
+
+                dragDropArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dragDropArea.style.borderColor = dragDropArea.classList.contains('invalid') ? '#dc3545' : '#ccc';
+                    const file = e.dataTransfer.files[0];
+                    handleFile(file);
+                });
+
+                dragDropArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    handleFile(file);
+                });
+
+                function handleFile(file) {
+                    if (file && file.type.startsWith('image/')) {
+                        const validTypes = ['image/jpeg', 'image/png'];
+                        if (!validTypes.includes(file.type)) {
+                            showNotification('Please select a valid image file (JPG or PNG).', 'error');
+                            return;
+                        }
+
+                        if (file.size > 2 * 1024 * 1024) {
+                            showNotification('Image size must be less than 2MB.', 'error');
+                            return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            previewImage.src = e.target.result;
+                            previewImage.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        fileInput.files = dataTransfer.files;
+                    } else {
+                        showNotification('Please select a valid image file (JPG or PNG).', 'error');
+                    }
+                }
+
+                // Form validation
+                const form = document.getElementById('post-form');
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        // Check categories
+                        const categoryChecked = document.querySelectorAll('.category-button input[type="checkbox"]:checked').length > 0;
+                        const categoryContainer = document.querySelector('.category-container');
+                        if (!categoryChecked) {
+                            categoryContainer.classList.add('invalid');
+                            const errorDiv = categoryContainer.nextElementSibling;
+                            if (!errorDiv.querySelector('.invalid-feedback')) {
+                                errorDiv.innerHTML = '<div class="invalid-feedback" style="color: #dc3545; font-size: 0.875em; margin-top: 0.25rem;">Please select at least one category</div>';
+                            }
+                        } else {
+                            categoryContainer.classList.remove('invalid');
+                            const errorDiv = categoryContainer.nextElementSibling;
+                            errorDiv.innerHTML = '';
+                        }
+                    }
+
+                    form.classList.add('was-validated');
+                }, false);
+            });
         </script>
     {% endblock %}
 {% endblock %}

@@ -84,20 +84,23 @@ final class ComplaintController extends AbstractController
         $form = $this->createForm(ComplaintType::class, $complaint);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $complaint->setUser($user);
-            $complaint->setCreatedAt(new \DateTime());
-            $complaint->setStatus(null); // Default status is pending
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                $complaint->setUser($user);
+                $complaint->setCreatedAt(new \DateTime());
+                $complaint->setStatus(null); // Default status is pending
 
-            $entityManager->persist($complaint);
-            $entityManager->flush();
+                $entityManager->persist($complaint);
+                $entityManager->flush();
 
-            $this->addFlash('success', 'Your complaint has been submitted successfully!');
-            return $this->redirectToRoute('app_complaint_my_complaints', [], Response::HTTP_SEE_OTHER);
+                $this->addFlash('success', 'Your complaint has been submitted successfully!');
+                return $this->redirectToRoute('app_complaint_my_complaints');
+            } else {
+                $this->addFlash('error', 'Please correct the errors in the form.');
+            }
         }
 
         return $this->render('complaint/new.html.twig', [
-            'complaint' => $complaint,
             'form' => $form->createView(),
             'user' => $user,
         ]);

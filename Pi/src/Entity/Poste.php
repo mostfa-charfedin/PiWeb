@@ -32,8 +32,8 @@ class Poste
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\ManyToMany(targetEntity: Category::class, inversedBy: 'postes')]
-    private Collection $categories;
+    #[ORM\Column(type: Types::JSON)]
+    private array $categories = []; // Store categories as JSON array
 
     #[ORM\OneToMany(mappedBy: 'poste', targetEntity: Comment::class, orphanRemoval: true)]
     private Collection $comments;
@@ -43,7 +43,6 @@ class Poste
 
     public function __construct()
     {
-        $this->categories = new ArrayCollection();
         $this->comments = new ArrayCollection();
         $this->likes = new ArrayCollection();
     }
@@ -108,22 +107,28 @@ class Poste
         return $this;
     }
 
-    public function getCategories(): Collection
+    public function getCategories(): array
     {
         return $this->categories;
     }
 
-    public function addCategory(Category $category): static
+    public function setCategories(array $categories): static
     {
-        if (!$this->categories->contains($category)) {
-            $this->categories->add($category);
+        $this->categories = $categories;
+        return $this;
+    }
+
+    public function addCategory(string $category): static
+    {
+        if (!in_array($category, $this->categories)) {
+            $this->categories[] = $category;
         }
         return $this;
     }
 
-    public function removeCategory(Category $category): static
+    public function removeCategory(string $category): static
     {
-        $this->categories->removeElement($category);
+        $this->categories = array_filter($this->categories, fn($cat) => $cat !== $category);
         return $this;
     }
 

@@ -5,19 +5,24 @@
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('css/post.css') }}">
     <style>
-        /* Existing styles remain unchanged, adding notification styles */
-        .notification {
+        /* Notification styles matching your design */
+        #notification-container {
             position: fixed;
             top: 20px;
             right: 20px;
+            z-index: 1000;
+        }
+        .notification {
             padding: 15px 25px;
             border-radius: 8px;
             color: white;
             font-weight: bold;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+            margin-bottom: 10px;
             opacity: 0;
             transition: opacity 0.5s ease;
+            animation: fadeIn 0.5s, fadeOut 0.5s 4.5s;
+            animation-fill-mode: forwards;
         }
         .notification.success {
             background-color: #28a745;
@@ -25,8 +30,36 @@
         .notification.error {
             background-color: #dc3545;
         }
-        .notification.show {
-            opacity: 1;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-20px); }
+        }
+
+        /* Existing post styles */
+        .tour-box {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .tour-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .tour-box-image img {
+            height: 200px;
+            object-fit: cover;
+            width: 100%;
+        }
+        .btn-like, .btn-comment, .btn-modifier, .btn-supprimer {
+            margin-right: 5px;
+        }
+        .modal-dialog {
+            max-width: 600px;
         }
         /* Style for toxic comments */
         #modal-comments-list li.toxic {
@@ -43,17 +76,33 @@
             display: block;
             margin-top: 10px;
         }
-        /* Rest of your existing styles remain unchanged */
+        /* Ensure images in comments have a consistent size */
+        #modal-comments-list .rounded-circle {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+        }
     </style>
 {% endblock %}
 
 {% block content %}
+    <!-- Notification Container -->
+    <div id="notification-container">
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="notification {{ type }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+
     <section>
         <div class="container">
             <div class="row">
                 {% for poste in postes %}
                     <div class="col-lg-6 col-md-6">
-                        <article class="tour-box list-style" data-poste-id="{{ poste.id }}" data-contenu-complet="{{ poste.contenu }}">
+                        <article class="tour-box list-style" data-poste-id="{{ poste.id }}" data-contenu-complet="{{ poste.contenu|e('html_attr') }}">
                             <div class="tour-box-image">
                                 {% if poste.image %}
                                     <img src="{{ asset('Uploads/uploadposte/' ~ poste.image) }}" alt="{{ poste.title }}" class="img-fluid">
@@ -70,7 +119,7 @@
                                 </div>
                                 <div class="categories">
                                     {% for category in poste.categories %}
-                                        <span class="badge bg-primary">{{ category.tag }}</span>
+                                        <span class="badge bg-primary">{{ category }}</span>
                                     {% endfor %}
                                 </div>
                                 <div class="d-flex">
@@ -127,23 +176,40 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const currentUserId = {{ user ? user.id|json_encode|raw : 'null' }};
 
-            // Function to show notification
-            function showNotification(message, type) {
+            // Function to show notification (identical to your design)
+            function showNotification(message, type = 'success') {
                 const notification = document.createElement("div");
-                notification.classList.add("notification", type);
-                notification.textContent = message;
-                document.body.appendChild(notification);
-                setTimeout(() => notification.classList.add("show"), 100);
+                notification.className = `notification ${type}`;
+                notification.innerHTML = message;
+                document.getElementById("notification-container").appendChild(notification);
+
+                // Trigger the animation
                 setTimeout(() => {
-                    notification.classList.remove("show");
-                    setTimeout(() => notification.remove(), 500);
-                }, 3000);
+                    const notifications = document.querySelectorAll('.notification');
+                    notifications.forEach(n => {
+                        if (n !== notification) {
+                            n.style.opacity = '0';
+                            setTimeout(() => n.remove(), 500);
+                        }
+                    });
+                }, 100);
             }
+
+            // Show existing flash messages
+            {% for type, messages in app.flashes %}
+            {% for message in messages %}
+            showNotification('{{ message }}', '{{ type }}');
+            {% endfor %}
+            {% endfor %}
 
             // Function to check toxicity
             async function checkToxicity(commentText) {
@@ -318,6 +384,7 @@
                 });
             }
 
+            // Open modal when clicking on post
             document.querySelectorAll(".tour-box").forEach(box => {
                 box.addEventListener("click", function (e) {
                     if (e.target.closest('.btn-like') || e.target.closest('.btn-modifier') || e.target.closest('.btn-supprimer')) return;
@@ -331,6 +398,7 @@
                 });
             });
 
+            // Handle comment submission
             document.getElementById("comment-form").addEventListener("submit", async function (event) {
                 event.preventDefault();
                 const postId = document.getElementById("modal-post-id").value;
@@ -365,6 +433,7 @@
                     });
             });
 
+            // Handle like button
             document.querySelectorAll(".btn-like").forEach(button => {
                 button.addEventListener("click", function (event) {
                     event.stopPropagation();
@@ -408,6 +477,7 @@
                 });
             });
 
+            // Handle delete post
             document.querySelectorAll(".delete-form").forEach(form => {
                 form.addEventListener("submit", function (event) {
                     event.preventDefault();
@@ -433,8 +503,4 @@
             });
         });
     </script>
-{% endblock %}
-
-{% block javascripts %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

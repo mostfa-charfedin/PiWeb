@@ -8,7 +8,6 @@ use App\Entity\Comment;
 use App\Form\PosteType;
 use App\Repository\PosteRepository;
 use App\Repository\LikeRepository;
-use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +16,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use GuzzleHttp\Client; // Ajout de l'importation pour Guzzle
+use GuzzleHttp\Client;
 
 #[Route('/poste')]
 final class PosteController extends AbstractController
@@ -158,12 +157,12 @@ final class PosteController extends AbstractController
         ]);
     }
 
+    // Dans PosteController.php
     #[Route('/new', name: 'app_poste_new', methods: ['GET', 'POST'])]
     public function new(
         Request $request,
         EntityManagerInterface $entityManager,
         SluggerInterface $slugger,
-        CategoryRepository $categoryRepository,
         SessionInterface $session
     ): Response {
         $userId = $session->get('id');
@@ -178,52 +177,40 @@ final class PosteController extends AbstractController
         }
 
         $poste = new Poste();
+        $poste->setUser($user); // ⚠️ Ajoutez cette ligne cruciale
+
         $form = $this->createForm(PosteType::class, $poste);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            if ($form->isValid()) {
-                $imageFile = $form->get('imageFile')->getData();
-                if ($imageFile) {
-                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    $safeFilename = $slugger->slug($originalFilename);
-                    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Gestion de l'image
+            $imageFile = $form->get('imageFile')->getData();
+            if ($imageFile) {
+                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
 
-                    try {
-                        $imageFile->move(
-                            $this->getParameter('upload_directory'),
-                            $newFilename
-                        );
-                        $poste->setImage($newFilename);
-                    } catch (\Exception $e) {
-                        $this->addFlash('error', 'Erreur lors de l\'upload de l\'image : ' . $e->getMessage());
-                        return $this->render('poste/new.html.twig', [
-                            'poste' => $poste,
-                            'form' => $form->createView(),
-                            'categories' => $categoryRepository->findAll(),
-                        ]);
-                    }
+                try {
+                    $imageFile->move(
+                        $this->getParameter('upload_directory'),
+                        $newFilename
+                    );
+                    $poste->setImage($newFilename);
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Error while uploading image');
                 }
-
-                $selectedCategories = $form->get('categories')->getData();
-                foreach ($selectedCategories as $category) {
-                    $poste->addCategory($category);
-                }
-
-                $poste->setUser($user);
-                $entityManager->persist($poste);
-                $entityManager->flush();
-
-                return $this->redirectToRoute('app_poste_my_posts', [], Response::HTTP_SEE_OTHER);
-            } else {
-                $this->addFlash('error', 'Formulaire invalide. Vérifiez les champs.');
             }
+
+            $entityManager->persist($poste);
+            $entityManager->flush();
+
+            $this->addFlash('success', 'Post created successfully!');
+            return $this->redirectToRoute('app_poste_my_posts');
         }
 
         return $this->render('poste/new.html.twig', [
             'poste' => $poste,
             'form' => $form->createView(),
-            'categories' => $categoryRepository->findAll(),
         ]);
     }
 
@@ -240,7 +227,6 @@ final class PosteController extends AbstractController
         Request $request,
         Poste $poste,
         EntityManagerInterface $entityManager,
-        CategoryRepository $categoryRepository,
         SessionInterface $session,
         SluggerInterface $slugger
     ): Response {
@@ -257,43 +243,55 @@ final class PosteController extends AbstractController
         $form = $this->createForm(PosteType::class, $poste);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $imageFile = $form->get('imageFile')->getData();
-            if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
+        if ($form->isSubmitted()) {
+            if ($form->isValid()) {
+                // Gestion de l'image
+                $imageFile = $form->get('imageFile')->getData();
+                if ($imageFile) {
+                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
 
-                try {
-                    $imageFile->move(
-                        $this->getParameter('upload_directory'),
-                        $newFilename
-                    );
-                    if ($poste->getImage()) {
-                        $oldImagePath = $this->getParameter('upload_directory').'/'.$poste->getImage();
-                        if (file_exists($oldImagePath)) {
-                            unlink($oldImagePath);
+                    try {
+                        // Supprimer l'ancienne image si elle existe
+                        if ($poste->getImage()) {
+                            $oldImagePath = $this->getParameter('upload_directory').'/'.$poste->getImage();
+                            if (file_exists($oldImagePath)) {
+                                unlink($oldImagePath);
+                            }
                         }
+
+                        // Déplacer la nouvelle image
+                        $imageFile->move(
+                            $this->getParameter('upload_directory'),
+                            $newFilename
+                        );
+                        $poste->setImage($newFilename);
+                    } catch (\Exception $e) {
+                        $this->addFlash('error', 'Error while uploading image: '.$e->getMessage());
+                        return $this->redirectToRoute('app_poste_edit', ['id' => $poste->getId()]);
                     }
-                    $poste->setImage($newFilename);
-                } catch (\Exception $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image');
                 }
+
+                // Mise à jour des catégories
+                $selectedCategories = $form->get('categories')->getData();
+                $poste->setCategories($selectedCategories);
+
+                // Sauvegarde
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Post updated successfully!');
+                return $this->redirectToRoute('app_poste_my_posts', [], Response::HTTP_SEE_OTHER);
+            } else {
+                $this->addFlash('error', 'Please correct the errors in the form.');
             }
-
-            $entityManager->flush();
-            return $this->redirectToRoute('app_poste_my_posts', [], Response::HTTP_SEE_OTHER);
         }
-
-        $selectedCategories = $poste->getCategories();
 
         return $this->render('poste/edit.html.twig', [
             'poste' => $poste,
             'form' => $form->createView(),
-            'selectedCategories' => $selectedCategories,
         ]);
     }
-
     #[Route('/{id}', name: 'app_poste_delete', methods: ['POST'])]
     public function delete(Request $request, Poste $poste, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
@@ -424,15 +422,11 @@ final class PosteController extends AbstractController
                 'json' => [
                     'inputs' => $commentText,
                 ],
-                'timeout' => 10, // Timeout pour éviter les blocages
+                'timeout' => 10,
             ]);
 
             $result = json_decode($response->getBody()->getContents(), true);
 
-            // Log pour debug (optionnel)
-            // error_log('Hugging Face Response: ' . print_r($result, true));
-
-            // Extraction du score de toxicité
             $toxicityScore = 0.0;
             if (is_array($result) && !empty($result)) {
                 foreach ($result[0] as $item) {
@@ -444,7 +438,7 @@ final class PosteController extends AbstractController
             }
 
             return new JsonResponse([
-                'isToxic' => $toxicityScore >= 0.8, // Seuil à 0.8 comme dans votre code Java
+                'isToxic' => $toxicityScore >= 0.8,
                 'score' => $toxicityScore,
             ]);
         } catch (\GuzzleHttp\Exception\RequestException $e) {
@@ -454,6 +448,7 @@ final class PosteController extends AbstractController
             return new JsonResponse(['error' => 'Unexpected error: ' . $e->getMessage()], 500);
         }
     }
+
     #[Route('/comment/report/{id}', name: 'comment_report', methods: ['POST'])]
     public function reportComment(int $id, EntityManagerInterface $entityManager, SessionInterface $session): JsonResponse
     {

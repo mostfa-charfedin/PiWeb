@@ -2,9 +2,12 @@
 
 namespace App\Entity;
 
+use App\Entity\Poste;
+use App\Entity\Comment;
+use App\Entity\Like;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
@@ -23,6 +26,7 @@ class User
     private ?string $prenom = null;
 
     #[ORM\Column(length: 255, unique: true, nullable: true)]
+    #[Assert\Email]
     private ?string $email = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -34,27 +38,24 @@ class User
     #[ORM\Column(type: 'date', nullable: true)]
     private ?\DateTimeInterface $datenaissance = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(length: 255, nullable: true, options: ['default' => 'USER'])]
     private ?string $role = 'USER';
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $image_url = null;
+    private ?string $imageUrl = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?int $numPhone = null;
 
-    #[ORM\Column(length: 20, options: ['default' => 'ACTIVE'], nullable: true)]
+    #[ORM\Column(length: 20, nullable: true, options: ['default' => 'ACTIVE'])]
     private ?string $status = 'ACTIVE';
 
-    /** @var Collection<int, Poste> */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Poste::class)]
     private Collection $postes;
 
-    /** @var Collection<int, Comment> */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Comment::class)]
     private Collection $comments;
 
-    /** @var Collection<int, Like> */
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Like::class)]
     private Collection $likes;
 
@@ -64,8 +65,6 @@ class User
         $this->comments = new ArrayCollection();
         $this->likes = new ArrayCollection();
     }
-
-    // --- Getters & Setters ---
 
     public function getId(): ?int { return $this->id; }
 
@@ -90,28 +89,29 @@ class User
     public function getRole(): ?string { return $this->role; }
     public function setRole(?string $role): self { $this->role = $role; return $this; }
 
-    public function getImageUrl(): ?string { return $this->image_url; }
-    public function setImageUrl(?string $image_url): self { $this->image_url = $image_url; return $this; }
+    public function getImageUrl(): ?string { return $this->imageUrl; }
+    public function setImageUrl(?string $imageUrl): self { $this->imageUrl = $imageUrl; return $this; }
 
     public function getNumPhone(): ?int { return $this->numPhone; }
-    public function setNumPhone(int $numPhone): self { $this->numPhone = $numPhone; return $this; }
+    public function setNumPhone(?int $numPhone): self { $this->numPhone = $numPhone; return $this; }
 
     public function getStatus(): ?string { return $this->status; }
     public function setStatus(?string $status): self { $this->status = $status; return $this; }
 
-    public function getRoles(): string
+    public function getRoles(): array
     {
         $roles = $this->role ? [$this->role] : [];
-        $roles = array_map(fn($r) => strtoupper($r), $roles);
-        $roles = array_map(fn($r) => str_starts_with($r, 'ROLE_') ? $r : 'ROLE_' . $r, $roles);
-        return implode(',', array_unique($roles));
+        return array_map(fn($r) => str_starts_with($r, 'ROLE_') ? strtoupper($r) : 'ROLE_' . strtoupper($r), $roles);
     }
 
-    // --- Relations: Postes ---
+    public function getFullName(): string
+    {
+        return trim(($this->prenom ?? '') . ' ' . ($this->nom ?? ''));
+    }
 
+    // Relations avec Postes
     public function getPostes(): Collection { return $this->postes; }
-
-    public function addPoste(Poste $poste): static
+    public function addPoste(Poste $poste): self
     {
         if (!$this->postes->contains($poste)) {
             $this->postes->add($poste);
@@ -119,8 +119,7 @@ class User
         }
         return $this;
     }
-
-    public function removePoste(Poste $poste): static
+    public function removePoste(Poste $poste): self
     {
         if ($this->postes->removeElement($poste) && $poste->getUser() === $this) {
             $poste->setUser(null);
@@ -128,11 +127,9 @@ class User
         return $this;
     }
 
-    // --- Relations: Comments ---
-
+    // Relations avec Comments
     public function getComments(): Collection { return $this->comments; }
-
-    public function addComment(Comment $comment): static
+    public function addComment(Comment $comment): self
     {
         if (!$this->comments->contains($comment)) {
             $this->comments->add($comment);
@@ -140,8 +137,7 @@ class User
         }
         return $this;
     }
-
-    public function removeComment(Comment $comment): static
+    public function removeComment(Comment $comment): self
     {
         if ($this->comments->removeElement($comment) && $comment->getUser() === $this) {
             $comment->setUser(null);
@@ -149,11 +145,9 @@ class User
         return $this;
     }
 
-    // --- Relations: Likes ---
-
+    // Relations avec Likes
     public function getLikes(): Collection { return $this->likes; }
-
-    public function addLike(Like $like): static
+    public function addLike(Like $like): self
     {
         if (!$this->likes->contains($like)) {
             $this->likes->add($like);
@@ -161,17 +155,11 @@ class User
         }
         return $this;
     }
-
-    public function removeLike(Like $like): static
+    public function removeLike(Like $like): self
     {
         if ($this->likes->removeElement($like) && $like->getUser() === $this) {
             $like->setUser(null);
         }
         return $this;
-    }
-    // In App\Entity\User.php
-    public function getFullName(): string
-    {
-        return trim($this->getPrenom() . ' ' . $this->getNom());
     }
 }

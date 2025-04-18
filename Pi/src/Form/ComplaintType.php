@@ -1,14 +1,14 @@
 <?php
-
 namespace App\Form;
 
 use App\Entity\Complaint;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
 class ComplaintType extends AbstractType
 {
@@ -16,37 +16,33 @@ class ComplaintType extends AbstractType
     {
         $builder
             ->add('subject', TextType::class, [
-                'label' => 'Subject',
-                'attr' => ['class' => 'form-control']
+                'constraints' => [
+                    new NotBlank(['message' => 'Le sujet est obligatoire']),
+                    new Length([
+                        'max' => 150,
+                        'maxMessage' => 'Le sujet ne doit pas dépasser {{ limit }} caractères'
+                    ])
+                ],
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Sujet de la réclamation'
+                ]
             ])
             ->add('content', TextareaType::class, [
-                'label' => 'Details',
-                'attr' => ['class' => 'form-control', 'rows' => 5]
-            ]);
-
-        if ($options['is_admin']) {
-            $this->addAdminFields($builder);
-        }
-    }
-
-    private function addAdminFields(FormBuilderInterface $builder): void
-    {
-        $builder
-            ->add('status', ChoiceType::class, [
-                'label' => 'Status',
-                'choices' => [
-                    'Pending' => null,
-                    'Resolved' => true,
-                    'Rejected' => false,
+                'constraints' => [
+                    new NotBlank(['message' => 'La description est obligatoire']),
+                    new Length([
+                        'min' => 20,
+                        'max' => 2000,
+                        'minMessage' => 'La description doit contenir au moins {{ limit }} caractères',
+                        'maxMessage' => 'La description ne doit pas dépasser {{ limit }} caractères'
+                    ])
                 ],
-                'attr' => ['class' => 'form-select'],
-                'required' => false,
-                'placeholder' => 'Select status...',
-            ])
-            ->add('response', TextareaType::class, [
-                'label' => 'Admin Response',
-                'attr' => ['class' => 'form-control', 'rows' => 3],
-                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Décrivez votre réclamation en détail...',
+                    'rows' => 8
+                ]
             ]);
     }
 
@@ -54,7 +50,6 @@ class ComplaintType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Complaint::class,
-            'is_admin' => false,
         ]);
     }
 }
