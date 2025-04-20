@@ -50,6 +50,9 @@ class User
     #[ORM\Column(length: 20, nullable: true, options: ['default' => 'ACTIVE'])]
     private ?string $status = 'ACTIVE';
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private ?bool $genre = false;
+
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Poste::class)]
     private Collection $postes;
 
@@ -97,6 +100,9 @@ class User
 
     public function getStatus(): ?string { return $this->status; }
     public function setStatus(?string $status): self { $this->status = $status; return $this; }
+
+    public function getGenre(): ?bool { return $this->genre; }
+    public function setGenre(?bool $genre): self { $this->genre = $genre; return $this; }
 
     public function getRoles(): array
     {

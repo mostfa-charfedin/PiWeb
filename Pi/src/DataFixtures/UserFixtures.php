@@ -19,6 +19,7 @@ class UserFixtures extends Fixture
         $admin->setNumPhone(99999999);
         $admin->setDatenaissance(new \DateTime('1990-01-01'));
         $admin->setRole('ADMIN'); // Génère ROLE_ADMIN
+        $admin->setGenre(true);
         $admin->setPassword('admin123'); // Mot de passe en clair
 
         $manager->persist($admin);
@@ -32,6 +33,7 @@ class UserFixtures extends Fixture
         $user->setNumPhone(88888888);
         $user->setDatenaissance(new \DateTime('2000-01-01'));
         $user->setRole('USER'); // Génère ROLE_USER
+        $user->setGenre(false);
         $user->setPassword('user123'); // Mot de passe en clair
 
         $manager->persist($user);

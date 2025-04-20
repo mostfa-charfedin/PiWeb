@@ -134,44 +134,49 @@ class UserController extends AbstractController
             'formB' => $form->createView(),
         ]);
     }
-        
 
 
-  /**
- * @Route("/login", name="login", methods={"GET", "POST"})
- */
-public function login(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
-{
-    $error = $request->getSession()->get('login_error');
-    
-    $user = new User();
-    $form = $this->createForm(LoginformType::class, $user);
-    $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
+    /**
+     * @Route("/login", name="login", methods={"GET", "POST"})
+     */
+    public function login(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        $error = $request->getSession()->get('login_error');
 
-        // Fetch user by email
-        $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
-        
-        // If user doesn't exist or password is incorrect, show error
-        if (!$user || $user->getPassword() !== $form->get('password')->getData()) {
-            $this->addFlash('error', 'Invalid email or password.');
-            return $this->redirectToRoute('login');  // Optional: keep the user on the login page after an error
+        $user = new User();
+        $form = $this->createForm(LoginformType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Fetch user by email
+            $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
+
+            // If user doesn't exist or password is incorrect, show error
+            if (!$user || $user->getPassword() !== $form->get('password')->getData()) {
+                $this->addFlash('error', 'Invalid email or password.');
+                return $this->redirectToRoute('login');  // Optional: keep the user on the login page after an error
+            }
+
+            // Store user info in session
+            $session->set('id', $user->getId());
+            $session->set('role', $user->getRoles());
+
+            // Redirection basée sur user.genre
+            if ($user->getGenre() === false) {
+                // Rediriger vers la page publique utilisant navbar.html.twig
+                return $this->redirectToRoute('public_page');
+            } else {
+                // Rediriger vers la page de profil utilisant sidebar.html.twig
+                return $this->redirectToRoute('profile');
+            }
         }
 
-        // Store user info in session
-        $session->set('id', $user->getId());
-        $session->set('role', $user->getRoles());
-        return $this->redirectToRoute('profile');
-
+        return $this->render('user/login.html.twig', [
+            'form' => $form->createView(),
+            'error' => $error,
+        ]);
     }
-
-    return $this->render('user/login.html.twig', [
-        'form' => $form->createView(),
-        'error' => $error,
-    ]);
-}
-
     /**
      * @Route("/logout", name="logout")
      */
@@ -312,5 +317,13 @@ public function login(Request $request, SessionInterface $session, EntityManager
 
         return $this->redirectToRoute('GestionUsers');
     }
-  
+    #[Route('/public', name: 'public_page')]
+    public function publicPage(SessionInterface $session): Response
+    {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        return $this->render('navbar.html.twig');
+    }
 }
