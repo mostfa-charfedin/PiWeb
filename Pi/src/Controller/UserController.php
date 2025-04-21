@@ -33,14 +33,14 @@ class UserController extends AbstractController
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
-    
+
         $userId = $session->get('id');
         $user = $entityManager->getRepository(User::class)->find($userId);
-    
+
         if (!$user) {
             throw $this->createNotFoundException('User not found');
         }
-    
+
         $form = $this->createFormBuilder($user)
             ->add('nom', TextType::class, ['label' => false])
             ->add('prenom', TextType::class, ['label' => false])
@@ -53,35 +53,35 @@ class UserController extends AbstractController
                 'required' => false,
             ])
             ->getForm();
-    
+
         $form->handleRequest($request);
-    
+
         if ($form->isSubmitted()) {
             $errors = $validator->validate($user);
 
             $imageFile = $form->get('image_url')->getData();
             $imageErrors = [];
-    
+
             if ($imageFile) {
                 $imageErrors = $validator->validate($imageFile, [
                     new Assert\Image(['mimeTypes' => ['image/jpeg', 'image/png']]),
                     new Assert\File(['maxSize' => '5M', 'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPEG/PNG).']),
                 ]);
-    
+
                 foreach ($imageErrors as $error) {
                     $form->get('image_url')->addError(new FormError($error->getMessage()));
                 }
-             
+
             }
-    
+
             // Empêcher la soumission en cas d'erreurs
             if (count($errors) === 0 && count($imageErrors) === 0 && $form->isValid()) {
                 if ($imageFile) {
                     $newFilename = uniqid() . '.' . $imageFile->guessExtension();
                     $imageFile->move($this->getParameter('kernel.project_dir') . '/public/images', $newFilename);
                     $user->setImageUrl('images/' . $newFilename);
-                
-    
+
+
                 $entityManager->persist($user);
                 $entityManager->flush();
                 return $this->redirectToRoute('profile');
@@ -91,22 +91,22 @@ class UserController extends AbstractController
             }
             }
         }
-    
+
         return $this->render('user/profile.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
-         
+
         ]);
     }
-    
-    
 
 
 
 
 
-    
-        
+
+
+
+
     #[Route('/inscrit', name: 'inscrit')]
     public function ajouter(Request $request, EntityManagerInterface $entityManager)
     {
@@ -115,19 +115,19 @@ class UserController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-           
+
             $entityManager->persist($user);
             $entityManager->flush();
 
             return $this->redirectToRoute('login');
         }
         else {
-      
+
             $errors = [];
             foreach ($form->getErrors(true) as $error) {
                 $errors[] = $error->getMessage();
             }
-            
+
         }
 
         return $this->render('user/inscrit.html.twig', [
@@ -184,8 +184,8 @@ class UserController extends AbstractController
     {
         // Détruire la session manuellement (facultatif)
         $session = $request->getSession();
-        $session->invalidate();  
-        $session->clear();       
+        $session->invalidate();
+        $session->clear();
 
         // Une fois la session détruite, tu peux rediriger l'utilisateur
         return $this->redirectToRoute('login');
@@ -214,7 +214,7 @@ class UserController extends AbstractController
         Request $request
     ): Response {
         $query = $userRepository->createQueryBuilder('u')->getQuery();
-        
+
         $pagination = $paginator->paginate(
             $query,
             $request->query->getInt('page', 1),
@@ -226,7 +226,7 @@ class UserController extends AbstractController
         ]);
     }
 
-    
+
 
     #[Route('admin/user/{id}/details', name: 'admin_user_details', methods: ['GET'])]
     public function details(User $user): Response
@@ -235,7 +235,7 @@ class UserController extends AbstractController
             'user' => $user,
         ]);
     }
-    
+
    /**
      * @Route("/admin/user/{id}/edit-modal", name="admin_user_edit_modal", methods={"GET"})
      */
@@ -317,13 +317,5 @@ class UserController extends AbstractController
 
         return $this->redirectToRoute('GestionUsers');
     }
-    #[Route('/public', name: 'public_page')]
-    public function publicPage(SessionInterface $session): Response
-    {
-        if (!$session->get('id')) {
-            return $this->redirectToRoute('login');
-        }
 
-        return $this->render('navbar.html.twig');
-    }
 }
