@@ -1,23 +1,24 @@
 .complaint-card {
-    border-radius: 8px;
+    border-radius: 12px;
     margin-bottom: 20px;
     overflow: hidden;
     transition: all 0.3s ease;
 }
 
 .complaint-card:hover {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
 }
 
 .status-badge {
-    padding: 5px 10px;
+    padding: 6px 12px;
     border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: transform 0.2s ease;
 }
 
 .bg-pending {
-    background-color: #ffc107;
+    background-color: #ffca2c;
     color: #212529;
 }
 
@@ -33,25 +34,31 @@
 
 .card-title {
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    font-family: 'Segoe UI', sans-serif;
+    color: #2c3e50;
 }
 
 .card-text {
     color: #6c757d;
-    margin-bottom: 1rem;
+    font-family: 'Segoe UI', sans-serif;
+    line-height: 1.5;
 }
 
 .btn-action {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    transition: background 0.3s ease, transform 0.2s ease;
 }
 
 .modal-content {
-    border-radius: 10px;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .modal-header {
     border-bottom: 1px solid #dee2e6;
+    background: #f8f9fa;
 }
 
 .modal-footer {
@@ -64,4 +71,5 @@
 
 .text-muted {
     color: #6c757d !important;
+    font-family: 'Segoe UI', sans-serif;
 }

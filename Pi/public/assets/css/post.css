@@ -1,115 +1,209 @@
-
-
+/* Conteneur principal */
 .container {
-    max-width: 800px; /* Centered container */
+    max-width: 1200px;
     margin: auto;
+    padding: 0 1rem;
 }
 
+/* Carte */
 .tour-box {
-    background: #ffffff; /* White card background */
-    border-radius: 12px; /* Rounded corners */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    margin-bottom: 20px; /* Spacing between cards */
-    overflow: hidden; /* Clean overflow */
-    transition: transform 0.2s; /* Animation for hover */
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
 }
 
 .tour-box:hover {
-    transform: translateY(-3px); /* Lift effect on hover */
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.tour-box-image {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
 }
 
 .tour-box-image img {
-    width: 100%; /* Full width */
-    height: 180px; /* Fixed height */
-    object-fit: cover; /* Cover image */
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .inner-box {
-    padding: 15px; /* Padding inside the card */
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .entry-title {
-    font-size: 18px; /* Title size */
-    font-weight: bold; /* Bold title */
-    color: #333; /* Dark title color */
-    margin: 10px 0; /* Margin around title */
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0.5rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .entry-content {
-    font-size: 14px; /* Content size */
-    color: #555; /* Slightly lighter color */
-    margin-bottom: 15px; /* Bottom margin */
-    line-height: 1.5; /* Line height for readability */
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1rem;
+    flex-grow: 1;
+    line-height: 1.5;
 }
 
-/* Button Styles */
+/* Catégories */
+.categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.categories .badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+}
+
+.categories .more-indicator {
+    font-size: 0.8rem;
+    color: #007bff;
+    align-self: center;
+}
+
+/* Styles des boutons */
 .btn {
     cursor: pointer;
-    border: none; /* No border */
-    border-radius: 20px; /* Rounded buttons */
-    padding: 8px 12px; /* Button padding */
-    font-size: 14px; /* Font size */
-    transition: background 0.3s, transform 0.2s; /* Transition for hover */
-    display: inline-flex; /* Flex for icon alignment */
-    align-items: center; /* Center vertically */
+    border: none;
+    border-radius: 20px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
 }
 
 .btn-like {
-    background: #1877f2; /* Facebook blue */
-    color: white; /* White text */
+    background: transparent;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
-.btn-like:hover {
-    background: #155dbb; /* Darker blue on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
+.btn-like i {
+    font-size: 1.2rem;
+    transition: color 0.3s ease;
+}
+
+.btn-like.liked i {
+    color: #dc3545;
+}
+
+.btn-like:not(.liked) i {
+    color: #6c757d;
+}
+
+.btn-like:hover i {
+    color: #c82333;
 }
 
 .btn-comment {
-    background: #e9ecef; /* Light gray for comments */
-    color: #333; /* Dark text */
+    background: #e9ecef;
+    color: #333;
 }
 
 .btn-comment:hover {
-    background: #d3d3d3; /* Darker gray on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
+    background: #d3d3d3;
+    transform: scale(1.05);
 }
 
 .btn-modifier {
-    background: #007bff; /* Bootstrap primary color */
-    color: white; /* White text */
+    background: #007bff;
+    color: white;
 }
 
 .btn-modifier:hover {
-    background: #0056b3; /* Darker on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
+    background: #0056b3;
+    transform: scale(1.05);
 }
 
 .btn-supprimer {
-    background: #dc3545; /* Bootstrap danger color */
-    color: white; /* White text */
+    background: #dc3545;
+    color: white;
 }
 
 .btn-supprimer:hover {
-    background: #c82333; /* Darker red on hover */
-    transform: scale(1.05); /* Slightly enlarge on hover */
+    background: #c82333;
+    transform: scale(1.05);
+}
+
+.report-btn {
+    background: #ffc107;
+    color: #333;
+}
+
+.report-btn:hover {
+    background: #e0a800;
+    transform: scale(1.05);
 }
 
 .d-flex {
-    display: flex; /* Flexbox for button alignment */
-    justify-content: space-between; /* Space between buttons */
-    align-items: center; /* Center vertically */
-    margin-top: 10px; /* Margin above buttons */
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 0.5rem;
+    gap: 0.5rem;
 }
 
 .discount-flick {
-    background: #ff4d4d; /* Discount badge */
-    color: white; /* White text */
-    font-size: 12px; /* Smaller font */
-    font-weight: bold; /* Bold */
-    padding: 5px 8px; /* Padding */
-    border-radius: 12px; /* Rounded badge */
-    display: inline-block; /* Inline block */
-    position: absolute; /* Positioned in the card */
-    top: 10px; /* Top position */
-    left: 10px; /* Left position */
+    background: #ff4d4d;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 0.3rem 0.5rem;
+    border-radius: 12px;
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+}
+
+/* Media Queries pour responsivité */
+@media (max-width: 768px) {
+    .container {
+        max-width: 100%;
+    }
+    .tour-box {
+        min-height: 350px;
+    }
+    .tour-box-image {
+        height: 150px;
+    }
+    .entry-title {
+        font-size: 1.1rem;
+    }
+    .entry-content {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .tour-box {
+        min-height: 300px;
+    }
+    .tour-box-image {
+        height: 120px;
+    }
+    .btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
 }

@@ -4,99 +4,169 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875em;
-            margin-top: 0.25rem;
+        .background-image {
+            position: relative;
+            height: 100vh;
+            background-image: url('{{ asset('images/img.png') }}');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .complaint-form-container {
+            max-width: 800px;
+            width: 100%;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.9));
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-title {
+            text-align: center;
+            color: #2c3e50;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 600;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .form-label {
+            font-size: 1rem;
+            color: #34495e;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #dfe6e9;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            font-size: 1rem;
+        }
+        .form-control:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+            background-color: #fff;
+            outline: none;
+        }
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
         }
         .form-control.is-invalid {
             border-color: #dc3545;
+        }
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+        .char-counter {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .btn-submit {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #28a745, #218838);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, background 0.3s ease;
+            font-weight: 500;
+        }
+        .btn-submit:hover {
+            background: linear-gradient(90deg, #218838, #1e7e34);
+            transform: translateY(-2px);
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        .back-link:hover {
+            color: #0056b3;
+            text-decoration: underline;
         }
     </style>
 {% endblock %}
 
 {% block content %}
     {{ form_start(form, {'attr': {'id': 'complaint-form', 'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
-    <div class="background-image" style="position: relative; height: 100vh; background-image: url('{{ asset('images/img.png') }}'); background-size: cover; background-position: center;">
-        <div class="w3-content" style="display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px;">
-            <div style="max-width: 800px; width: 100%; padding: 20px; background-color: rgba(249, 249, 249, 0.8); border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px);">
-                <h1 style="text-align: center; color: #333;">Create New Complaint</h1>
+    <div class="background-image">
+        <div class="complaint-form-container">
+            <h1 class="form-title">Create New Complaint</h1>
 
-                <div class="form-group" style="margin-bottom: 20px;">
-                    {{ form_label(form.subject, 'Subject', {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.subject, {'attr': {
-                        'class': 'form-control' ~ (form.subject.vars.errors|length ? ' is-invalid' : ''),
-                        'placeholder': 'Enter complaint subject...',
-                        'required': 'required'
-                    }}) }}
-                    <div class="error-message">
-                        {{ form_errors(form.subject) }}
-                    </div>
-                    <div class="char-counter" style="font-size: 0.8rem; color: #6c757d; text-align: right;">
-                        <span id="subject-counter">0</span>/150 characters
-                    </div>
+            <div class="form-group">
+                {{ form_label(form.subject, 'Subject', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.subject, {'attr': {
+                    'class': 'form-control' ~ (form.subject.vars.errors|length ? ' is-invalid' : ''),
+                    'placeholder': 'Enter complaint subject...',
+                    'required': 'required',
+                    'maxlength': '150'
+                }}) }}
+                <div class="error-message">
+                    {{ form_errors(form.subject) }}
                 </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    {{ form_label(form.content, 'Content', {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.content, {'attr': {
-                        'class': 'form-control' ~ (form.content.vars.errors|length ? ' is-invalid' : ''),
-                        'placeholder': 'Describe your complaint in detail...',
-                        'rows': '5',
-                        'required': 'required'
-                    }}) }}
-                    <div class="error-message">
-                        {{ form_errors(form.content) }}
-                    </div>
-                    <div class="char-counter" style="font-size: 0.8rem; color: #6c757d; text-align: right;">
-                        <span id="content-counter">0</span>/2000 characters
-                    </div>
+                <div class="char-counter">
+                    <span id="subject-counter">0</span>/150 characters
                 </div>
-
-                <button type="submit" style="display: block; width: 100%; padding: 10px; background-color: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">Submit Complaint</button>
-
-                <a href="{{ path('app_complaint_my_complaints') }}" class="back-link" style="display: block; text-align: center; margin-top: 20px; color: #007bff; text-decoration: none;">Back to list</a>
             </div>
+
+            <div class="form-group">
+                {{ form_label(form.content, 'Content', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.content, {'attr': {
+                    'class': 'form-control' ~ (form.content.vars.errors|length ? ' is-invalid' : ''),
+                    'placeholder': 'Describe your complaint in detail...',
+                    'rows': '5',
+                    'required': 'required',
+                    'maxlength': '2000'
+                }}) }}
+                <div class="error-message">
+                    {{ form_errors(form.content) }}
+                </div>
+                <div class="char-counter">
+                    <span id="content-counter">0</span>/2000 characters
+                </div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-paper-plane"></i> Submit Complaint
+            </button>
+
+            <a href="{{ path('app_complaint_my_complaints') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to list
+            </a>
         </div>
     </div>
     {{ form_end(form) }}
 
-    <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
-
     {% block javascripts %}
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                // Notification system
-                function showNotification(message, type = 'success') {
-                    const notification = document.createElement('div');
-                    notification.className = `notification ${type}`;
-                    notification.innerHTML = message;
-                    notification.style.cssText = `
-                        padding: 15px 25px;
-                        border-radius: 8px;
-                        color: white;
-                        font-weight: bold;
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                        margin-bottom: 10px;
-                        opacity: 0;
-                        transition: opacity 0.5s ease;
-                        background-color: ${type === 'success' ? '#28a745' : '#dc3545'};
-                    `;
-
-                    document.getElementById('notification-container').appendChild(notification);
-
-                    setTimeout(() => {
-                        notification.style.opacity = '1';
-                    }, 100);
-
-                    setTimeout(() => {
-                        notification.style.opacity = '0';
-                        setTimeout(() => notification.remove(), 500);
-                    }, 3000);
-                }
-
-                // Show flash messages as notifications
+                // Show flash messages
                 {% for message in app.flashes('success') %}
                 showNotification('{{ message }}', 'success');
                 {% endfor %}

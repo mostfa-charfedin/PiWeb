@@ -5,110 +5,210 @@
 {% block stylesheets %}
     {{ parent() }}
     <link rel="stylesheet" href="{{ asset('css/complaint.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Notification styles matching posts */
-        #notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 0 1rem;
         }
-        .notification {
-            padding: 15px 25px;
-            border-radius: 8px;
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .section-header h1 {
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 2.2rem;
+        }
+        .btn-new-complaint {
+            background: linear-gradient(90deg, #007bff, #0056b3);
             color: white;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 10px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            animation: fadeIn 0.5s, fadeOut 0.5s 4.5s;
-            animation-fill-mode: forwards;
-        }
-        .notification.success {
-            background-color: #28a745;
-        }
-        .notification.error {
-            background-color: #dc3545;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
-        }
-
-        /* Existing complaint styles */
-        .complaint-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-left: 4px solid;
-            margin-bottom: 20px;
+            border: none;
             border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease, background 0.3s ease;
+        }
+        .btn-new-complaint:hover {
+            background: linear-gradient(90deg, #0056b3, #003d82);
+            transform: translateY(-2px);
+        }
+        .complaint-card {
+            background: linear-gradient(145deg, #ffffff, #f7f9fc);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
             overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            border-left: 4px solid;
         }
         .complaint-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
         }
         .status-pending {
-            border-left-color: orange;
+            border-left-color: #ffca2c;
         }
         .status-resolved {
-            border-left-color: green;
+            border-left-color: #28a745;
         }
         .status-rejected {
-            border-left-color: red;
+            border-left-color: #dc3545;
+        }
+        .card-body {
+            padding: 1.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-text {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+            line-height: 1.5;
+        }
+        .badge-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: transform 0.2s ease;
+        }
+        .badge-pending {
+            background-color: #ffca2c;
+            color: #212529;
+        }
+        .badge-resolved {
+            background-color: #28a745;
+            color: white;
+        }
+        .badge-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+        .badge-status:hover {
+            transform: scale(1.05);
+        }
+        .text-muted {
+            font-size: 0.85rem;
+            color: #6c757d;
         }
         .btn-action {
-            margin-right: 5px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+        .btn-view {
+            background: #e9ecef;
+            color: #333;
+            border: none;
+        }
+        .btn-view:hover {
+            background: #d3d3d3;
+            transform: scale(1.05);
+        }
+        .btn-edit {
+            background: #007bff;
+            color: white;
+            border: none;
+        }
+        .btn-edit:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+        }
+        .btn-delete:hover {
+            background: #c82333;
+            transform: scale(1.05);
         }
         .modal-dialog {
             max-width: 600px;
         }
-        .complaint-image {
-            height: 200px;
-            object-fit: cover;
-            width: 100%;
+        .modal-content {
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-        .badge-status {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+        .modal-header {
+            border-bottom: 1px solid #dee2e6;
+            background: #f8f9fa;
         }
-        .badge-pending {
-            background-color: orange;
-            color: white;
+        .modal-title {
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 600;
+            color: #2c3e50;
         }
-        .badge-resolved {
-            background-color: green;
-            color: white;
+        .modal-body {
+            padding: 1.5rem;
         }
-        .badge-rejected {
-            background-color: red;
-            color: white;
+        .modal-complaint-subject {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+        .modal-complaint-content {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .modal-footer {
+            border-top: 1px solid #dee2e6;
+        }
+
+        /* Media Queries pour responsivité */
+        @media (max-width: 768px) {
+            .complaint-card {
+                min-height: 280px;
+            }
+            .card-title {
+                font-size: 1.1rem;
+            }
+            .card-text {
+                font-size: 0.85rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .complaint-card {
+                min-height: 260px;
+            }
+            .btn-action {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
         }
     </style>
 {% endblock %}
 
 {% block content %}
-    <!-- Notification Container -->
-    <div id="notification-container">
-        {% for type, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="notification {{ type }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endfor %}
-    </div>
-
     <section>
         <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="section-header">
                 <h1>My Complaints</h1>
-                <a href="{{ path('app_complaint_new') }}" class="btn btn-primary">
+                <a href="{{ path('app_complaint_new') }}" class="btn btn-new-complaint">
                     <i class="fas fa-plus"></i> New Complaint
                 </a>
             </div>
@@ -116,20 +216,29 @@
             <div class="row">
                 {% for complaint in complaints %}
                     <div class="col-lg-6 col-md-6">
-                        <div class="card complaint-card status-{{ complaint.getStatusText()|lower }}">
+                        <div class="complaint-card status-{{ complaint.getStatusText()|lower }}"
+                             data-complaint-id="{{ complaint.id }}"
+                             data-complaint-subject="{{ complaint.subject|e('html_attr') }}"
+                             data-complaint-content="{{ complaint.content|e('html_attr') }}"
+                             data-complaint-status="{{ complaint.getStatusText() }}"
+                             data-complaint-response="{{ complaint.response|e('html_attr') }}"
+                             data-complaint-created="{{ complaint.createdAt|date('Y-m-d H:i') }}"
+                                {% if complaint.respondedBy %}
+                            data-complaint-responder="{{ complaint.respondedBy.prenom }} {{ complaint.respondedBy.nom }}"
+                                {% endif %}>
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <h3 class="card-title">{{ complaint.subject }}</h3>
-                                    <span class="badge badge-{{ complaint.getStatusText()|lower }}">
+                                    <span class="badge-status badge-{{ complaint.getStatusText()|lower }}">
                                         {{ complaint.getStatusText() }}
                                     </span>
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="card-text">
                                     <p>{{ complaint.content|length > 100 ? complaint.content|slice(0, 100) ~ '...' : complaint.content }}</p>
                                 </div>
 
-                                <div class="text-muted small mb-3">
+                                <div class="text-muted mb-3">
                                     Submitted on {{ complaint.createdAt|date('Y-m-d H:i') }}
                                     {% if complaint.respondedBy %}
                                         <br>Response by: {{ complaint.respondedBy.prenom }} {{ complaint.respondedBy.nom }}
@@ -137,30 +246,19 @@
                                 </div>
 
                                 <div class="d-flex">
-                                    <button class="btn btn-outline-primary btn-sm view-complaint"
-                                            data-bs-toggle="modal"
-                                            data-bs-target="#complaintModal"
-                                            data-complaint-id="{{ complaint.id }}"
-                                            data-complaint-subject="{{ complaint.subject }}"
-                                            data-complaint-content="{{ complaint.content }}"
-                                            data-complaint-status="{{ complaint.getStatusText() }}"
-                                            data-complaint-response="{{ complaint.response }}"
-                                            data-complaint-created="{{ complaint.createdAt|date('Y-m-d H:i') }}"
-                                            {% if complaint.respondedBy %}
-                                        data-complaint-responder="{{ complaint.respondedBy.prenom }} {{ complaint.respondedBy.nom }}"
-                                            {% endif %}>
+                                    <button class="btn btn-action btn-view">
                                         <i class="fas fa-eye"></i> View Details
                                     </button>
 
                                     <div class="ms-auto">
                                         <a href="{{ path('app_complaint_edit', {id: complaint.id}) }}"
-                                           class="btn btn-outline-secondary btn-sm btn-action">
+                                           class="btn btn-action btn-edit">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
                                         <form method="POST" action="{{ path('app_complaint_delete', {id: complaint.id}) }}"
                                               class="d-inline delete-form" data-id="{{ complaint.id }}">
                                             <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ complaint.id) }}">
-                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <button type="submit" class="btn btn-action btn-delete">
                                                 <i class="fas fa-trash"></i> Delete
                                             </button>
                                         </form>
@@ -187,20 +285,20 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <h4 id="modal-complaint-subject" class="mb-3"></h4>
+                    <h4 id="modal-complaint-subject" class="modal-complaint-subject"></h4>
                     <div class="d-flex justify-content-between mb-3">
-                        <span class="badge" id="modal-complaint-status"></span>
+                        <span class="badge-status" id="modal-complaint-status"></span>
                         <small class="text-muted" id="modal-complaint-date"></small>
                     </div>
 
                     <div class="mb-4">
                         <h5>Details:</h5>
-                        <p id="modal-complaint-content" class="p-3 bg-light rounded"></p>
+                        <p id="modal-complaint-content" class="modal-complaint-content"></p>
                     </div>
 
                     <div id="response-section" class="mb-3">
                         <h5>Admin Response:</h5>
-                        <p id="modal-complaint-response" class="p-3 bg-light rounded"></p>
+                        <p id="modal-complaint-response" class="modal-complaint-content"></p>
                         <small class="text-muted" id="modal-complaint-responder"></small>
                     </div>
                 </div>
@@ -217,36 +315,33 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // Auto-hide notifications after 5 seconds
-            setTimeout(() => {
-                const notifications = document.querySelectorAll('.notification');
-                notifications.forEach(notification => {
-                    notification.style.opacity = '0';
-                    setTimeout(() => notification.remove(), 500);
-                });
-            }, 5000);
+            // Show flash messages
+            {% for type, messages in app.flashes %}
+            {% for message in messages %}
+            showNotification('{{ message }}', '{{ type }}');
+            {% endfor %}
+            {% endfor %}
 
             // Complaint Modal Handling
-            const complaintModal = document.getElementById('complaintModal');
-            if (complaintModal) {
-                complaintModal.addEventListener('show.bs.modal', function(event) {
-                    const button = event.relatedTarget;
-                    const modalTitle = complaintModal.querySelector('.modal-title');
-                    const modalSubject = complaintModal.querySelector('#modal-complaint-subject');
-                    const modalContent = complaintModal.querySelector('#modal-complaint-content');
-                    const modalStatus = complaintModal.querySelector('#modal-complaint-status');
-                    const modalDate = complaintModal.querySelector('#modal-complaint-date');
-                    const modalResponse = complaintModal.querySelector('#modal-complaint-response');
-                    const modalResponder = complaintModal.querySelector('#modal-complaint-responder');
-                    const responseSection = complaintModal.querySelector('#response-section');
+            document.querySelectorAll(".complaint-card").forEach(card => {
+                card.addEventListener("click", function (e) {
+                    if (e.target.closest('.btn-action')) return;
+                    const modalTitle = document.querySelector('#complaintModalLabel');
+                    const modalSubject = document.querySelector('#modal-complaint-subject');
+                    const modalContent = document.querySelector('#modal-complaint-content');
+                    const modalStatus = document.querySelector('#modal-complaint-status');
+                    const modalDate = document.querySelector('#modal-complaint-date');
+                    const modalResponse = document.querySelector('#modal-complaint-response');
+                    const modalResponder = document.querySelector('#modal-complaint-responder');
+                    const responseSection = document.querySelector('#response-section');
 
                     // Extract info from data-* attributes
-                    const subject = button.getAttribute('data-complaint-subject');
-                    const content = button.getAttribute('data-complaint-content');
-                    const status = button.getAttribute('data-complaint-status');
-                    const response = button.getAttribute('data-complaint-response');
-                    const date = button.getAttribute('data-complaint-created');
-                    const responder = button.getAttribute('data-complaint-responder');
+                    const subject = this.getAttribute('data-complaint-subject');
+                    const content = this.getAttribute('data-complaint-content');
+                    const status = this.getAttribute('data-complaint-status');
+                    const response = this.getAttribute('data-complaint-response');
+                    const date = this.getAttribute('data-complaint-created');
+                    const responder = this.getAttribute('data-complaint-responder');
 
                     // Update modal content
                     modalTitle.textContent = 'Complaint Details';
@@ -257,11 +352,11 @@
 
                     // Set status color
                     if (status === 'Pending') {
-                        modalStatus.className = 'badge badge-pending';
+                        modalStatus.className = 'badge-status badge-pending';
                     } else if (status === 'Resolved') {
-                        modalStatus.className = 'badge badge-resolved';
+                        modalStatus.className = 'badge-status badge-resolved';
                     } else {
-                        modalStatus.className = 'badge badge-rejected';
+                        modalStatus.className = 'badge-status badge-rejected';
                     }
 
                     // Handle response section
@@ -274,15 +369,33 @@
                     } else {
                         responseSection.style.display = 'none';
                     }
+
+                    const complaintModal = new bootstrap.Modal(document.getElementById('complaintModal'));
+                    complaintModal.show();
                 });
-            }
+            });
 
             // Delete confirmation
             document.querySelectorAll(".delete-form").forEach(form => {
                 form.addEventListener("submit", function(event) {
                     event.preventDefault();
                     if (confirm("Are you sure you want to delete this complaint?")) {
-                        this.submit();
+                        fetch(this.action, {
+                            method: "POST",
+                            body: new FormData(this),
+                        })
+                            .then(response => {
+                                if (response.ok) {
+                                    showNotification("Complaint deleted successfully!", "success");
+                                    window.location.reload();
+                                } else {
+                                    showNotification("Failed to delete complaint!", "error");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error deleting complaint:", error);
+                                showNotification("Error deleting complaint!", "error");
+                            });
                     }
                 });
             });

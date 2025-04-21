@@ -5,127 +5,252 @@
 {% block stylesheets %}
     {{ parent() }}
     <style>
-        .error-message {
-            color: #dc3545;
-            font-size: 0.875em;
-            margin-top: 0.25rem;
+        /* Conteneur principal */
+        .background-image {
+            position: relative;
+            min-height: 100vh;
+            background-image: url('{{ asset('images/img.png') }}');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
         }
+
+        /* Conteneur du formulaire */
+        .form-container {
+            max-width: 90%;
+            width: 100%;
+            max-width: 700px; /* Réduit pour éviter un contenu trop large */
+            padding: 1.5rem;
+            background-color: rgba(249, 249, 249, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(12px);
+        }
+
+        /* Style des champs de formulaire */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: border-color 0.3s ease;
+        }
+
         .form-control.is-invalid {
             border-color: #dc3545;
         }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Zone de drag-and-drop */
+        .drag-drop-area {
+            border: 2px dashed #ccc;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            background-color: #fff;
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+        }
+
         .drag-drop-area.invalid {
             border-color: #dc3545;
         }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        /* Boutons de catégorie */
+        .category-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: flex-start;
+            padding: 0.5rem;
+        }
+
         .category-container.invalid {
             outline: 1px solid #dc3545;
             border-radius: 8px;
-            padding: 5px;
+        }
+
+        .category-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #007bff;
+            border-radius: 20px;
+            cursor: pointer;
+            background-color: #f0f8ff;
+            color: #007bff;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .category-button:hover,
+        .category-button.active {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* Bouton de soumission */
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Lien de retour */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #0056b3;
+        }
+
+        /* Media Queries pour la responsivité */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-control {
+                padding: 0.5rem;
+            }
+
+            .submit-btn {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .category-button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .form-container {
+                max-width: 100%;
+                padding: 0.75rem;
+            }
+
+            .drag-drop-area {
+                padding: 1rem;
+            }
+
+            .category-container {
+                gap: 0.5rem;
+            }
         }
     </style>
 {% endblock %}
 
 {% block content %}
     {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'id': 'post-form', 'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
-    <div class="background-image" style="position: relative; height: 100vh; background-image: url('{{ asset('images/img.png') }}'); background-size: cover; background-position: center;">
-        <div class="w3-content" style="display: flex; justify-content: center; align-items: center; height: 100%; padding: 20px;">
-            <div style="max-width: 800px; width: 100%; padding: 20px; background-color: rgba(249, 249, 249, 0.8); border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px);">
-                <h1 style="text-align: center; color: #333;">Create New Post</h1>
+    <div class="background-image">
+        <div class="form-container">
+            <h1 style="text-align: center; color: #333; margin-bottom: 1.5rem;">Create New Post</h1>
 
-                <div class="form-group" style="margin-bottom: 20px;">
-                    {{ form_label(form.title, 'Title', {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.title, {'attr': {
-                        'class': 'form-control' ~ (form.title.vars.errors|length ? ' is-invalid' : ''),
-                        'placeholder': 'Enter post title...',
-                        'required': 'required'
-                    }}) }}
-                    <div class="error-message">
-                        {{ form_errors(form.title) }}
-                    </div>
+            <div class="form-group">
+                {{ form_label(form.title, 'Title', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.title, {'attr': {
+                    'class': 'form-control' ~ (form.title.vars.errors|length ? ' is-invalid' : ''),
+                    'placeholder': 'Enter post title...',
+                    'required': 'required'
+                }}) }}
+                <div class="error-message">
+                    {{ form_errors(form.title) }}
                 </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    {{ form_label(form.contenu, 'Content', {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.contenu, {'attr': {
-                        'class': 'form-control' ~ (form.contenu.vars.errors|length ? ' is-invalid' : ''),
-                        'placeholder': 'Enter post content...',
-                        'rows': '5',
-                        'required': 'required'
-                    }}) }}
-                    <div class="error-message">
-                        {{ form_errors(form.contenu) }}
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    {{ form_label(form.imageFile, 'Image (JPG, PNG, max 2MB)', {'label_attr': {'class': 'form-label'}}) }}
-                    <div class="drag-drop-area {{ form.imageFile.vars.errors|length ? 'invalid' : '' }}" id="drag-drop-area" style="border: 2px dashed #ccc; padding: 20px; text-align: center; cursor: pointer; background-color: #fff; border-radius: 8px;">
-                        <p>Drag and drop an image here or click to select a file.</p>
-                        <img src="" alt="Preview" class="preview-image" id="preview-image" style="display: none; max-width: 100%; max-height: 200px; border-radius: 8px;">
-                        {{ form_widget(form.imageFile, {'id': 'image-file-input', 'attr': {'style': 'display: none;'}}) }}
-                    </div>
-                    <div class="error-message">
-                        {{ form_errors(form.imageFile) }}
-                    </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    {{ form_label(form.categories, 'Categories (select at least one)', {'label_attr': {'class': 'form-label'}}) }}
-                    <div class="category-container {{ form.categories.vars.errors|length ? 'invalid' : '' }}" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
-                        {% for category in form.categories %}
-                            <div class="category-button" data-category-id="{{ category.vars.id }}" style="padding: 10px 15px; border: 1px solid #007bff; border-radius: 20px; cursor: pointer; background-color: #f0f8ff; color: #007bff; font-weight: bold; text-align: center;">
-                                {{ form_widget(category, {'attr': {'style': 'display: none;'}}) }}
-                                {{ form_label(category, null, {'label_attr': {'style': 'cursor: pointer; margin: 0;'}}) }}
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <div class="error-message">
-                        {{ form_errors(form.categories) }}
-                    </div>
-                </div>
-
-                <button type="submit" style="display: block; width: 100%; padding: 10px; background-color: #28a745; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">Publish</button>
-
-                <a href="{{ path('app_poste_my_posts') }}" class="back-link" style="display: block; text-align: center; margin-top: 20px; color: #007bff; text-decoration: none;">Back to list</a>
             </div>
+
+            <div class="form-group">
+                {{ form_label(form.contenu, 'Content', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.contenu, {'attr': {
+                    'class': 'form-control' ~ (form.contenu.vars.errors|length ? ' is-invalid' : ''),
+                    'placeholder': 'Enter post content...',
+                    'rows': '5',
+                    'required': 'required'
+                }}) }}
+                <div class="error-message">
+                    {{ form_errors(form.contenu) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.imageFile, 'Image (JPG, PNG, max 2MB)', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="drag-drop-area {{ form.imageFile.vars.errors|length ? 'invalid' : '' }}" id="drag-drop-area">
+                    <p>Drag and drop an image here or click to select a file.</p>
+                    <img src="" alt="Preview" class="preview-image" id="preview-image" style="display: none;">
+                    {{ form_widget(form.imageFile, {'id': 'image-file-input', 'attr': {'style': 'display: none;'}}) }}
+                </div>
+                <div class="error-message">
+                    {{ form_errors(form.imageFile) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.categories, 'Categories (select at least one)', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="category-container {{ form.categories.vars.errors|length ? 'invalid' : '' }}">
+                    {% for category in form.categories %}
+                        <div class="category-button {{ category.vars.checked ? 'active' : '' }}" data-category-id="{{ category.vars.id }}">
+                            {{ form_widget(category, {'attr': {'style': 'display: none;'}}) }}
+                            {{ form_label(category, null, {'label_attr': {'style': 'cursor: pointer; margin: 0;'}}) }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="error-message">
+                    {{ form_errors(form.categories) }}
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Publish</button>
+
+            <a href="{{ path('app_poste_my_posts') }}" class="back-link">Back to list</a>
         </div>
     </div>
     {{ form_end(form) }}
 
-    <div id="notification-container" style="position: fixed; top: 20px; right: 20px; z-index: 1000;"></div>
-
     {% block javascripts %}
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                // Notification system
-                function showNotification(message, type = 'success') {
-                    const notification = document.createElement('div');
-                    notification.className = `notification ${type}`;
-                    notification.innerHTML = message;
-                    notification.style.cssText = `
-                        padding: 15px 25px;
-                        border-radius: 8px;
-                        color: white;
-                        font-weight: bold;
-                        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-                        margin-bottom: 10px;
-                        opacity: 0;
-                        transition: opacity 0.5s ease;
-                        background-color: ${type === 'success' ? '#28a745' : '#dc3545'};
-                    `;
-
-                    document.getElementById('notification-container').appendChild(notification);
-
-                    setTimeout(() => {
-                        notification.style.opacity = '1';
-                    }, 100);
-
-                    setTimeout(() => {
-                        notification.style.opacity = '0';
-                        setTimeout(() => notification.remove(), 500);
-                    }, 3000);
-                }
-
-                // Show flash messages as notifications
                 {% for message in app.flashes('success') %}
                 showNotification('{{ message }}', 'success');
                 {% endfor %}
@@ -133,21 +258,16 @@
                 showNotification('{{ message }}', 'error');
                 {% endfor %}
 
-                // Category button toggle
+                // Gestion des boutons de catégorie
                 document.querySelectorAll('.category-button').forEach(button => {
                     const checkbox = button.querySelector('input[type="checkbox"]');
-                    if (checkbox.checked) {
-                        button.style.backgroundColor = '#007bff';
-                        button.style.color = '#fff';
-                    }
                     button.addEventListener('click', () => {
                         checkbox.checked = !checkbox.checked;
-                        button.style.backgroundColor = checkbox.checked ? '#007bff' : '#f0f8ff';
-                        button.style.color = checkbox.checked ? '#fff' : '#007bff';
+                        button.classList.toggle('active', checkbox.checked);
                     });
                 });
 
-                // Drag-and-drop image handling
+                // Gestion du drag-and-drop
                 const dragDropArea = document.getElementById('drag-drop-area');
                 const fileInput = document.getElementById('image-file-input');
                 const previewImage = document.getElementById('preview-image');
@@ -204,14 +324,13 @@
                     }
                 }
 
-                // Form validation
+                // Validation du formulaire
                 const form = document.getElementById('post-form');
                 form.addEventListener('submit', function(event) {
                     if (!form.checkValidity()) {
                         event.preventDefault();
                         event.stopPropagation();
 
-                        // Check categories
                         const categoryChecked = document.querySelectorAll('.category-button input[type="checkbox"]:checked').length > 0;
                         const categoryContainer = document.querySelector('.category-container');
                         if (!categoryChecked) {
