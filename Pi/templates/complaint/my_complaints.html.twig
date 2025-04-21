@@ -322,56 +322,69 @@
             {% endfor %}
             {% endfor %}
 
-            // Complaint Modal Handling
+            // Function to show complaint modal
+            function showComplaintModal(card) {
+                const modalTitle = document.querySelector('#complaintModalLabel');
+                const modalSubject = document.querySelector('#modal-complaint-subject');
+                const modalContent = document.querySelector('#modal-complaint-content');
+                const modalStatus = document.querySelector('#modal-complaint-status');
+                const modalDate = document.querySelector('#modal-complaint-date');
+                const modalResponse = document.querySelector('#modal-complaint-response');
+                const modalResponder = document.querySelector('#modal-complaint-responder');
+                const responseSection = document.querySelector('#response-section');
+
+                // Extract info from data-* attributes
+                const subject = card.getAttribute('data-complaint-subject');
+                const content = card.getAttribute('data-complaint-content');
+                const status = card.getAttribute('data-complaint-status');
+                const response = card.getAttribute('data-complaint-response');
+                const date = card.getAttribute('data-complaint-created');
+                const responder = card.getAttribute('data-complaint-responder');
+
+                // Update modal content
+                modalTitle.textContent = 'Complaint Details';
+                modalSubject.textContent = subject;
+                modalContent.textContent = content;
+                modalStatus.textContent = status;
+                modalDate.textContent = 'Submitted on: ' + date;
+
+                // Set status color
+                if (status === 'Pending') {
+                    modalStatus.className = 'badge-status badge-pending';
+                } else if (status === 'Resolved') {
+                    modalStatus.className = 'badge-status badge-resolved';
+                } else {
+                    modalStatus.className = 'badge-status badge-rejected';
+                }
+
+                // Handle response section
+                if (response && response.trim() !== '') {
+                    modalResponse.textContent = response;
+                    if (responder) {
+                        modalResponder.textContent = 'Response by: ' + responder;
+                    }
+                    responseSection.style.display = 'block';
+                } else {
+                    responseSection.style.display = 'none';
+                }
+
+                const complaintModal = new bootstrap.Modal(document.getElementById('complaintModal'));
+                complaintModal.show();
+            }
+
+            // Complaint Modal Handling for card click
             document.querySelectorAll(".complaint-card").forEach(card => {
                 card.addEventListener("click", function (e) {
                     if (e.target.closest('.btn-action')) return;
-                    const modalTitle = document.querySelector('#complaintModalLabel');
-                    const modalSubject = document.querySelector('#modal-complaint-subject');
-                    const modalContent = document.querySelector('#modal-complaint-content');
-                    const modalStatus = document.querySelector('#modal-complaint-status');
-                    const modalDate = document.querySelector('#modal-complaint-date');
-                    const modalResponse = document.querySelector('#modal-complaint-response');
-                    const modalResponder = document.querySelector('#modal-complaint-responder');
-                    const responseSection = document.querySelector('#response-section');
+                    showComplaintModal(this);
+                });
+            });
 
-                    // Extract info from data-* attributes
-                    const subject = this.getAttribute('data-complaint-subject');
-                    const content = this.getAttribute('data-complaint-content');
-                    const status = this.getAttribute('data-complaint-status');
-                    const response = this.getAttribute('data-complaint-response');
-                    const date = this.getAttribute('data-complaint-created');
-                    const responder = this.getAttribute('data-complaint-responder');
-
-                    // Update modal content
-                    modalTitle.textContent = 'Complaint Details';
-                    modalSubject.textContent = subject;
-                    modalContent.textContent = content;
-                    modalStatus.textContent = status;
-                    modalDate.textContent = 'Submitted on: ' + date;
-
-                    // Set status color
-                    if (status === 'Pending') {
-                        modalStatus.className = 'badge-status badge-pending';
-                    } else if (status === 'Resolved') {
-                        modalStatus.className = 'badge-status badge-resolved';
-                    } else {
-                        modalStatus.className = 'badge-status badge-rejected';
-                    }
-
-                    // Handle response section
-                    if (response && response.trim() !== '') {
-                        modalResponse.textContent = response;
-                        if (responder) {
-                            modalResponder.textContent = 'Response by: ' + responder;
-                        }
-                        responseSection.style.display = 'block';
-                    } else {
-                        responseSection.style.display = 'none';
-                    }
-
-                    const complaintModal = new bootstrap.Modal(document.getElementById('complaintModal'));
-                    complaintModal.show();
+            // Complaint Modal Handling for View Details button
+            document.querySelectorAll(".btn-view").forEach(button => {
+                button.addEventListener("click", function () {
+                    const card = this.closest('.complaint-card');
+                    showComplaintModal(card);
                 });
             });
 

@@ -162,14 +162,9 @@ class UserController extends AbstractController
             $session->set('id', $user->getId());
             $session->set('role', $user->getRoles());
 
-            // Redirection basée sur user.genre
-            if ($user->getGenre() === false) {
-                // Rediriger vers la page publique utilisant navbar.html.twig
-                return $this->redirectToRoute('public_page');
-            } else {
-                // Rediriger vers la page de profil utilisant sidebar.html.twig
+
                 return $this->redirectToRoute('profile');
-            }
+
         }
 
         return $this->render('user/login.html.twig', [
