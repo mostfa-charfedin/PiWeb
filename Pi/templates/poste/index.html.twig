@@ -4,31 +4,18 @@
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('css/post.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Existing styles remain unchanged, adding notification styles */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 25px;
+        /* Style pour la section de recherche/filtre/tri */
+        .search-filter-sort-section {
+            margin-bottom: 2rem;
+        }
+        .search-filter-sort-section .form-control,
+        .search-filter-sort-section .form-select {
             border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.5s ease;
+            padding: 0.5rem;
         }
-        .notification.success {
-            background-color: #28a745;
-        }
-        .notification.error {
-            background-color: #dc3545;
-        }
-        .notification.show {
-            opacity: 1;
-        }
-        /* Style for toxic comments */
+        /* Style pour les commentaires toxiques */
         #modal-comments-list li.toxic {
             background-color: #ffcccc;
             border-left: 4px solid #ff0000;
@@ -43,11 +30,22 @@
             display: block;
             margin-top: 10px;
         }
-        /* Ensure images in comments have a consistent size */
         #modal-comments-list .rounded-circle {
             width: 40px;
             height: 40px;
             object-fit: cover;
+        }
+        #modal-post-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        #modal-categories {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
     </style>
 {% endblock %}
@@ -99,7 +97,7 @@
             <div class="row">
                 {% for poste in postes %}
                     <div class="col-lg-6 col-md-6">
-                        <article class="tour-box list-style" data-poste-id="{{ poste.id }}" data-contenu-complet="{{ poste.contenu|e('html_attr') }}">
+                        <article class="tour-box list-style" data-poste-id="{{ poste.id }}" data-contenu-complet="{{ poste.contenu|e('html_attr') }}" data-title-complet="{{ poste.title|e('html_attr') }}">
                             <div class="tour-box-image">
                                 {% if poste.image %}
                                     <img src="{{ asset('Uploads/uploadposte/' ~ poste.image) }}" alt="{{ poste.title }}" class="img-fluid">
@@ -115,15 +113,18 @@
                                     <p>{{ poste.contenu|length > 100 ? poste.contenu|slice(0, 100) ~ '...' : poste.contenu }}</p>
                                 </div>
                                 <div class="categories">
-                                    {% for category in poste.categories %}
+                                    {% set maxCategories = 3 %}
+                                    {% for category in poste.categories|slice(0, maxCategories) %}
                                         <span class="badge bg-primary">{{ category }}</span>
                                     {% endfor %}
+                                    {% if poste.categories|length > maxCategories %}
+                                        <span class="more-indicator">...</span>
+                                    {% endif %}
                                 </div>
                                 <div class="d-flex">
                                     {% set isLiked = poste.id in likedPostes %}
-                                    <button class="btn btn-like" data-poste-id="{{ poste.id }}">
-                                        <i class="{{ isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart' }}"
-                                           style="color: {{ isLiked ? 'red' : '' }}"></i>
+                                    <button class="btn btn-like {{ isLiked ? 'liked' : '' }}" data-poste-id="{{ poste.id }}">
+                                        <i class="{{ isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart' }}"></i>
                                         <span class="like-count">{{ poste.getLikeCount() }}</span>
                                     </button>
                                     <button class="btn btn-comment">
@@ -141,7 +142,6 @@
         </div>
     </section>
 
-    <!-- Modal -->
     <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -151,6 +151,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-4">
+                        <h3 id="modal-post-title"></h3>
+                        <div id="modal-categories"></div>
                         <img id="modal-post-image" src="" class="img-fluid rounded" alt="Post Image">
                         <p id="modal-post-content" class="mt-3"></p>
                     </div>
@@ -169,25 +171,20 @@
             </div>
         </div>
     </div>
+{% endblock %}
 
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const currentUserId = {{ user ? user.id|json_encode|raw : 'null' }};
 
-            // Function to show notification
-            function showNotification(message, type) {
-                const notification = document.createElement("div");
-                notification.classList.add("notification", type);
-                notification.textContent = message;
-                document.body.appendChild(notification);
-                setTimeout(() => notification.classList.add("show"), 100);
-                setTimeout(() => {
-                    notification.classList.remove("show");
-                    setTimeout(() => notification.remove(), 500);
-                }, 3000);
-            }
+            {% for type, messages in app.flashes %}
+            {% for message in messages %}
+            showNotification('{{ message }}', '{{ type }}');
+            {% endfor %}
+            {% endfor %}
 
-            // Function to check toxicity
             async function checkToxicity(commentText) {
                 try {
                     const response = await fetch(`/poste/comment/check-toxicity`, {
@@ -207,7 +204,6 @@
                 }
             }
 
-            // Load comments with toxicity detection
             async function loadComments(postId) {
                 try {
                     const response = await fetch(`/poste/comments/${postId}`);
@@ -265,7 +261,6 @@
                 }
             }
 
-            // Attach event listeners for comments
             function attachCommentEventListeners() {
                 document.querySelectorAll(".btn-delete-comment").forEach(button => {
                     button.addEventListener("click", function () {
@@ -367,6 +362,16 @@
                     document.getElementById("modal-post-id").value = postId;
                     document.getElementById("modal-post-image").src = this.querySelector("img").src;
                     document.getElementById("modal-post-content").textContent = this.getAttribute("data-contenu-complet");
+                    document.getElementById("modal-post-title").textContent = this.getAttribute("data-title-complet");
+                    const categoriesContainer = document.getElementById("modal-categories");
+                    categoriesContainer.innerHTML = "";
+                    const categories = this.querySelectorAll(".categories .badge");
+                    categories.forEach(category => {
+                        const badge = document.createElement("span");
+                        badge.className = "badge bg-primary";
+                        badge.textContent = category.textContent;
+                        categoriesContainer.appendChild(badge);
+                    });
                     loadComments(postId);
                     const commentModal = new bootstrap.Modal(document.getElementById("commentModal"));
                     commentModal.show();
@@ -407,47 +412,64 @@
                     });
             });
 
-            document.querySelectorAll(".btn-like").forEach(button => {
-                button.addEventListener("click", function (event) {
-                    event.stopPropagation();
-                    const postId = this.getAttribute("data-poste-id");
-                    const isLiked = this.querySelector("i").classList.contains("fa-solid");
+            // Débouncing pour éviter les clics multiples
+            function debounce(func, wait) {
+                let timeout;
+                return function (...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
 
-                    fetch(`/like/toggle/${postId}`, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-Requested-With": "XMLHttpRequest",
-                        },
-                        body: JSON.stringify({ like: !isLiked }),
-                        credentials: 'include',
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                const likeIcon = this.querySelector("i");
-                                const likeCount = this.querySelector(".like-count");
-                                if (data.liked) {
-                                    likeIcon.classList.remove("fa-regular");
-                                    likeIcon.classList.add("fa-solid");
-                                    likeIcon.style.color = "red";
-                                    showNotification("Post liked!", "success");
-                                } else {
-                                    likeIcon.classList.remove("fa-solid");
-                                    likeIcon.classList.add("fa-regular");
-                                    likeIcon.style.color = "";
-                                    showNotification("Post unliked!", "success");
-                                }
-                                likeCount.textContent = data.likesCount;
-                            } else {
-                                showNotification("Failed to toggle like!", "error");
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error handling like:", error);
-                            showNotification("Error toggling like!", "error");
+            document.querySelectorAll(".btn-like").forEach(button => {
+                const debouncedToggleLike = debounce(async function (event) {
+                    event.stopPropagation();
+                    if (button.disabled) return; // Ignorer si le bouton est désactivé
+
+                    const postId = button.getAttribute("data-poste-id");
+                    const isLiked = button.classList.contains("liked");
+                    const likeIcon = button.querySelector("i");
+                    const likeCount = button.querySelector(".like-count");
+
+                    // Désactiver le bouton pendant la requête
+                    button.disabled = true;
+
+                    try {
+                        const response = await fetch(`/like/toggle/${postId}`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-Requested-With": "XMLHttpRequest",
+                            },
+                            body: JSON.stringify({ like: !isLiked }),
+                            credentials: 'include',
                         });
-                });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            likeCount.textContent = data.likesCount;
+                            button.classList.toggle("liked", data.liked);
+                            if (data.liked) {
+                                likeIcon.classList.remove("fa-regular");
+                                likeIcon.classList.add("fa-solid");
+                            } else {
+                                likeIcon.classList.remove("fa-solid");
+                                likeIcon.classList.add("fa-regular");
+                            }
+                            showNotification(data.liked ? "Post liked!" : "Post unliked!", "success");
+                        } else {
+                            showNotification("Failed to toggle like!", "error");
+                        }
+                    } catch (error) {
+                        console.error("Error handling like:", error);
+                        showNotification("Error toggling like!", "error");
+                    } finally {
+                        // Réactiver le bouton après la requête
+                        button.disabled = false;
+                    }
+                }, 300); // Délai de 300ms pour le débouncing
+
+                button.addEventListener("click", debouncedToggleLike);
             });
 
             document.querySelectorAll(".report-btn").forEach(button => {
@@ -478,7 +500,6 @@
                 });
             });
 
-            // Filtering and sorting logic
             const posts = document.querySelectorAll(".tour-box.list-style");
             const searchInput = document.getElementById("search-input");
             const categorySelect = document.getElementById("filter-category");
@@ -519,8 +540,4 @@
             sortSelect.addEventListener("change", sortPosts);
         });
     </script>
-{% endblock %}
-
-{% block javascripts %}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% endblock %}

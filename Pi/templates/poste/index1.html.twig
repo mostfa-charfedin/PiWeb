@@ -4,64 +4,99 @@
 
 {% block stylesheets %}
     <link rel="stylesheet" href="{{ asset('css/post.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Notification styles matching your design */
-        #notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-        .notification {
-            padding: 15px 25px;
-            border-radius: 8px;
-            color: white;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-bottom: 10px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            animation: fadeIn 0.5s, fadeOut 0.5s 4.5s;
-            animation-fill-mode: forwards;
-        }
-        .notification.success {
-            background-color: #28a745;
-        }
-        .notification.error {
-            background-color: #dc3545;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(-20px); }
-        }
-
-        /* Existing post styles */
+        /* Styles spécifiques pour les cartes */
         .tour-box {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin-bottom: 20px;
-            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
             overflow: hidden;
+            background: #ffffff;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
         }
         .tour-box:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-        .tour-box-image img {
-            height: 200px;
-            object-fit: cover;
-            width: 100%;
+        .tour-box-image {
+            height: 180px;
+            overflow: hidden;
         }
-        .btn-like, .btn-comment, .btn-modifier, .btn-supprimer {
-            margin-right: 5px;
+        .tour-box-image img {
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+        }
+        .inner-box {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+        }
+        .entry-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0.5rem 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .entry-content {
+            font-size: 0.9rem;
+            color: #555;
+            margin-bottom: 1rem;
+            flex-grow: 1;
+            line-height: 1.5;
+        }
+        .categories {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .categories .badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.6rem;
+        }
+        .categories .more-indicator {
+            font-size: 0.8rem;
+            color: #007bff;
+            align-self: center;
+        }
+        .btn-like {
+            background: transparent;
+            border: none;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            position: relative;
+        }
+        .btn-like i {
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+        .btn-like.liked i {
+            color: #dc3545;
+        }
+        .btn-like:not(.liked) i {
+            color: #6c757d;
+        }
+        .btn-like:disabled i {
+            opacity: 0.5;
+        }
+        .btn-comment, .btn-modifier, .btn-supprimer {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+            padding: 0.4rem 0.8rem;
         }
         .modal-dialog {
             max-width: 600px;
         }
-        /* Style for toxic comments */
         #modal-comments-list li.toxic {
             background-color: #ffcccc;
             border-left: 4px solid #ff0000;
@@ -76,33 +111,61 @@
             display: block;
             margin-top: 10px;
         }
-        /* Ensure images in comments have a consistent size */
         #modal-comments-list .rounded-circle {
             width: 40px;
             height: 40px;
             object-fit: cover;
         }
+        #modal-post-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        #modal-categories {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        /* Media Queries pour responsivité */
+        @media (max-width: 768px) {
+            .tour-box {
+                min-height: 350px;
+            }
+            .tour-box-image {
+                height: 150px;
+            }
+            .entry-title {
+                font-size: 1.1rem;
+            }
+            .entry-content {
+                font-size: 0.85rem;
+            }
+        }
+        @media (max-width: 576px) {
+            .tour-box {
+                min-height: 300px;
+            }
+            .tour-box-image {
+                height: 120px;
+            }
+            .btn-comment, .btn-modifier, .btn-supprimer {
+                padding: 0.3rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
     </style>
 {% endblock %}
 
 {% block content %}
-    <!-- Notification Container -->
-    <div id="notification-container">
-        {% for type, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="notification {{ type }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endfor %}
-    </div>
-
     <section>
         <div class="container">
             <div class="row">
                 {% for poste in postes %}
                     <div class="col-lg-6 col-md-6">
-                        <article class="tour-box list-style" data-poste-id="{{ poste.id }}" data-contenu-complet="{{ poste.contenu|e('html_attr') }}">
+                        <article class="tour-box list-style" data-poste-id="{{ poste.id }}" data-contenu-complet="{{ poste.contenu|e('html_attr') }}" data-title-complet="{{ poste.title|e('html_attr') }}">
                             <div class="tour-box-image">
                                 {% if poste.image %}
                                     <img src="{{ asset('Uploads/uploadposte/' ~ poste.image) }}" alt="{{ poste.title }}" class="img-fluid">
@@ -118,15 +181,18 @@
                                     <p>{{ poste.contenu|length > 100 ? poste.contenu|slice(0, 100) ~ '...' : poste.contenu }}</p>
                                 </div>
                                 <div class="categories">
-                                    {% for category in poste.categories %}
+                                    {% set maxCategories = 3 %}
+                                    {% for category in poste.categories|slice(0, maxCategories) %}
                                         <span class="badge bg-primary">{{ category }}</span>
                                     {% endfor %}
+                                    {% if poste.categories|length > maxCategories %}
+                                        <span class="more-indicator">...</span>
+                                    {% endif %}
                                 </div>
                                 <div class="d-flex">
                                     {% set isLiked = poste.id in likedPostes %}
-                                    <button class="btn btn-like" data-poste-id="{{ poste.id }}">
-                                        <i class="{{ isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart' }}"
-                                           style="color: {{ isLiked ? 'red' : '' }}"></i>
+                                    <button class="btn btn-like {{ isLiked ? 'liked' : '' }}" data-poste-id="{{ poste.id }}">
+                                        <i class="{{ isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart' }}"></i>
                                         <span class="like-count">{{ poste.getLikeCount() }}</span>
                                     </button>
                                     <button class="btn btn-comment">
@@ -148,7 +214,6 @@
         </div>
     </section>
 
-    <!-- Modal -->
     <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -158,6 +223,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="mb-4">
+                        <h3 id="modal-post-title"></h3>
+                        <div id="modal-categories"></div>
                         <img id="modal-post-image" src="" class="img-fluid rounded" alt="Post Image">
                         <p id="modal-post-content" class="mt-3"></p>
                     </div>
@@ -176,171 +243,147 @@
             </div>
         </div>
     </div>
-{% endblock %}
 
-{% block javascripts %}
-    {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const currentUserId = {{ user ? user.id|json_encode|raw : 'null' }};
+    {% block javascripts %}
+        {{ parent() }}
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const currentUserId = {{ user ? user.id|json_encode|raw : 'null' }};
 
-            // Function to show notification (identical to your design)
-            function showNotification(message, type = 'success') {
-                const notification = document.createElement("div");
-                notification.className = `notification ${type}`;
-                notification.innerHTML = message;
-                document.getElementById("notification-container").appendChild(notification);
+                {% for type, messages in app.flashes %}
+                {% for message in messages %}
+                showNotification('{{ message }}', '{{ type }}');
+                {% endfor %}
+                {% endfor %}
 
-                // Trigger the animation
-                setTimeout(() => {
-                    const notifications = document.querySelectorAll('.notification');
-                    notifications.forEach(n => {
-                        if (n !== notification) {
-                            n.style.opacity = '0';
-                            setTimeout(() => n.remove(), 500);
+                async function checkToxicity(commentText) {
+                    try {
+                        const response = await fetch(`/poste/comment/check-toxicity`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ content: commentText }),
+                        });
+                        const data = await response.json();
+                        if (data.error) {
+                            console.error("Toxicity check error:", data.error);
+                            return false;
                         }
-                    });
-                }, 100);
-            }
-
-            // Show existing flash messages
-            {% for type, messages in app.flashes %}
-            {% for message in messages %}
-            showNotification('{{ message }}', '{{ type }}');
-            {% endfor %}
-            {% endfor %}
-
-            // Function to check toxicity
-            async function checkToxicity(commentText) {
-                try {
-                    const response = await fetch(`/poste/comment/check-toxicity`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ content: commentText }),
-                    });
-                    const data = await response.json();
-                    if (data.error) {
-                        console.error("Toxicity check error:", data.error);
+                        return data.isToxic || false;
+                    } catch (error) {
+                        console.error("Error checking toxicity:", error);
                         return false;
                     }
-                    return data.isToxic || false;
-                } catch (error) {
-                    console.error("Error checking toxicity:", error);
-                    return false;
                 }
-            }
 
-            // Load comments with toxicity detection
-            async function loadComments(postId) {
-                try {
-                    const response = await fetch(`/poste/comments/${postId}`);
-                    const data = await response.json();
-                    const commentsList = document.getElementById("modal-comments-list");
-                    commentsList.innerHTML = "";
+                async function loadComments(postId) {
+                    try {
+                        const response = await fetch(`/poste/comments/${postId}`);
+                        const data = await response.json();
+                        const commentsList = document.getElementById("modal-comments-list");
+                        commentsList.innerHTML = "";
 
-                    for (const comment of data.comments) {
-                        const isToxic = await checkToxicity(comment.content);
-                        const li = document.createElement("li");
-                        li.classList.add("mb-3", "p-3", "rounded");
-                        li.dataset.id = comment.id;
+                        for (const comment of data.comments) {
+                            const isToxic = await checkToxicity(comment.content);
+                            const li = document.createElement("li");
+                            li.classList.add("mb-3", "p-3", "rounded");
+                            li.dataset.id = comment.id;
 
-                        if (isToxic) {
-                            li.classList.add("toxic");
-                        } else {
-                            li.classList.add("bg-light");
-                        }
+                            if (isToxic) {
+                                li.classList.add("toxic");
+                            } else {
+                                li.classList.add("bg-light");
+                            }
 
-                        li.innerHTML = `
+                            li.innerHTML = `
                             <div class="d-flex align-items-center mb-2">
                                 <div class="flex-shrink-0">
                                     ${comment.user.profilePicture
-                            ? `<img src="${comment.user.profilePicture}" alt="${comment.user.firstName}" class="rounded-circle">`
-                            : `<div class="rounded-circle bg-secondary"><span class="text-white">No photo</span></div>`
-                        }
+                                ? `<img src="${comment.user.profilePicture}" alt="${comment.user.firstName}" class="rounded-circle">`
+                                : `<div class="rounded-circle bg-secondary"><span class="text-white">No photo</span></div>`
+                            }
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <strong>${comment.user.firstName} ${comment.user.lastName}</strong>
                                         <small class="text-muted">${new Date(comment.createdAt).toLocaleString('en-US', {
-                            year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                        })}</small>
+                                year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                            })}</small>
                                     </div>
                                     <p class="mb-0 comment-content">${comment.content}</p>
                                     <div class="mt-2">
                                         ${comment.user.id === currentUserId && !isToxic
-                            ? `<button class="btn btn-edit-comment" data-comment-id="${comment.id}">
+                                ? `<button class="btn btn-edit-comment" data-comment-id="${comment.id}">
                                                 <i class="fas fa-edit"></i> Edit
                                             </button>
                                             <button class="btn btn-delete-comment" data-comment-id="${comment.id}">
                                                 <i class="fas fa-trash"></i> Delete
                                             </button>`
-                            : ''
-                        }
+                                : ''
+                            }
                                     </div>
                                 </div>
                             </div>
                         `;
-                        commentsList.appendChild(li);
-                    }
-                    attachCommentEventListeners();
-                } catch (error) {
-                    console.error("Error loading comments:", error);
-                }
-            }
-
-            // Attach event listeners for comments
-            function attachCommentEventListeners() {
-                document.querySelectorAll(".btn-delete-comment").forEach(button => {
-                    button.addEventListener("click", function () {
-                        const commentId = this.dataset.commentId;
-                        if (confirm("Are you sure you want to delete this comment?")) {
-                            fetch(`/poste/comment/delete/${commentId}`, {
-                                method: "POST",
-                            })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        showNotification("Comment deleted successfully!", "success");
-                                        loadComments(document.getElementById("modal-post-id").value);
-                                    } else {
-                                        showNotification("Failed to delete comment!", "error");
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error("Error deleting comment:", error);
-                                    showNotification("Error deleting comment!", "error");
-                                });
+                            commentsList.appendChild(li);
                         }
+                        attachCommentEventListeners();
+                    } catch (error) {
+                        console.error("Error loading comments:", error);
+                    }
+                }
+
+                function attachCommentEventListeners() {
+                    document.querySelectorAll(".btn-delete-comment").forEach(button => {
+                        button.addEventListener("click", function () {
+                            const commentId = this.dataset.commentId;
+                            if (confirm("Are you sure you want to delete this comment?")) {
+                                fetch(`/poste/comment/delete/${commentId}`, {
+                                    method: "POST",
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            showNotification("Comment deleted successfully!", "success");
+                                            loadComments(document.getElementById("modal-post-id").value);
+                                        } else {
+                                            showNotification("Failed to delete comment!", "error");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("Error deleting comment:", error);
+                                        showNotification("Error deleting comment!", "error");
+                                    });
+                            }
+                        });
                     });
-                });
 
-                document.querySelectorAll(".btn-edit-comment").forEach(button => {
-                    button.addEventListener("click", function () {
-                        const commentId = this.dataset.commentId;
-                        const commentElement = document.querySelector(`li[data-id="${commentId}"]`);
-                        const commentContent = commentElement.querySelector(".comment-content");
-                        const currentContent = commentContent.textContent;
+                    document.querySelectorAll(".btn-edit-comment").forEach(button => {
+                        button.addEventListener("click", function () {
+                            const commentId = this.dataset.commentId;
+                            const commentElement = document.querySelector(`li[data-id="${commentId}"]`);
+                            const commentContent = commentElement.querySelector(".comment-content");
+                            const currentContent = commentContent.textContent;
 
-                        const textarea = document.createElement("textarea");
-                        textarea.classList.add("form-control", "mb-2");
-                        textarea.value = currentContent;
+                            const textarea = document.createElement("textarea");
+                            textarea.classList.add("form-control", "mb-2");
+                            textarea.value = currentContent;
 
-                        const buttonsDiv = document.createElement("div");
-                        buttonsDiv.classList.add("edit-comment-buttons");
-                        buttonsDiv.innerHTML = `
+                            const buttonsDiv = document.createElement("div");
+                            buttonsDiv.classList.add("edit-comment-buttons");
+                            buttonsDiv.innerHTML = `
                             <button class="save">Save</button>
                             <button class="cancel">Cancel</button>
                         `;
 
-                        commentContent.replaceWith(textarea);
-                        commentElement.querySelector("div.mt-2").replaceWith(buttonsDiv);
+                            commentContent.replaceWith(textarea);
+                            commentElement.querySelector("div.mt-2").replaceWith(buttonsDiv);
 
-                        buttonsDiv.querySelector(".cancel").addEventListener("click", function () {
-                            textarea.replaceWith(commentContent);
-                            const originalButtons = document.createElement("div");
-                            originalButtons.classList.add("mt-2");
-                            originalButtons.innerHTML = `
+                            buttonsDiv.querySelector(".cancel").addEventListener("click", function () {
+                                textarea.replaceWith(commentContent);
+                                const originalButtons = document.createElement("div");
+                                originalButtons.classList.add("mt-2");
+                                originalButtons.innerHTML = `
                                 <button class="btn btn-edit-comment" data-comment-id="${commentId}">
                                     <i class="fas fa-edit"></i> Edit
                                 </button>
@@ -348,159 +391,227 @@
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             `;
-                            buttonsDiv.replaceWith(originalButtons);
-                            attachCommentEventListeners();
-                        });
+                                buttonsDiv.replaceWith(originalButtons);
+                                attachCommentEventListeners();
+                            });
 
-                        buttonsDiv.querySelector(".save").addEventListener("click", async function () {
-                            const newContent = textarea.value.trim();
-                            if (newContent) {
-                                const isToxic = await checkToxicity(newContent);
-                                if (isToxic) {
-                                    showNotification("Your comment appears toxic. Please revise it.", "error");
-                                    return;
-                                }
-                                fetch(`/poste/comment/edit/${commentId}`, {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({ content: newContent }),
-                                })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            showNotification("Comment updated successfully!", "success");
-                                            loadComments(document.getElementById("modal-post-id").value);
-                                        } else {
-                                            showNotification("Failed to update comment!", "error");
-                                        }
+                            buttonsDiv.querySelector(".save").addEventListener("click", async function () {
+                                const newContent = textarea.value.trim();
+                                if (newContent) {
+                                    const isToxic = await checkToxicity(newContent);
+                                    if (isToxic) {
+                                        showNotification("Your comment appears toxic. Please revise it.", "error");
+                                        return;
+                                    }
+                                    fetch(`/poste/comment/edit/${commentId}`, {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/json" },
+                                        body: JSON.stringify({ content: newContent }),
                                     })
-                                    .catch(error => {
-                                        console.error("Error editing comment:", error);
-                                        showNotification("Error updating comment!", "error");
-                                    });
-                            }
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            if (data.success) {
+                                                showNotification("Comment updated successfully!", "success");
+                                                loadComments(document.getElementById("modal-post-id").value);
+                                            } else {
+                                                showNotification("Failed to update comment!", "error");
+                                            }
+                                        })
+                                        .catch(error => {
+                                            console.error("Error editing comment:", error);
+                                            showNotification("Error updating comment!", "error");
+                                        });
+                                }
+                            });
                         });
                     });
-                });
-            }
-
-            // Open modal when clicking on post
-            document.querySelectorAll(".tour-box").forEach(box => {
-                box.addEventListener("click", function (e) {
-                    if (e.target.closest('.btn-like') || e.target.closest('.btn-modifier') || e.target.closest('.btn-supprimer')) return;
-                    const postId = this.getAttribute("data-poste-id");
-                    document.getElementById("modal-post-id").value = postId;
-                    document.getElementById("modal-post-image").src = this.querySelector("img").src;
-                    document.getElementById("modal-post-content").textContent = this.getAttribute("data-contenu-complet");
-                    loadComments(postId);
-                    const commentModal = new bootstrap.Modal(document.getElementById("commentModal"));
-                    commentModal.show();
-                });
-            });
-
-            // Handle comment submission
-            document.getElementById("comment-form").addEventListener("submit", async function (event) {
-                event.preventDefault();
-                const postId = document.getElementById("modal-post-id").value;
-                const commentText = document.getElementById("comment-text").value.trim();
-
-                if (!commentText) return;
-
-                const isToxic = await checkToxicity(commentText);
-                if (isToxic) {
-                    showNotification("Your comment appears toxic. Please revise it.", "error");
-                    return;
                 }
 
-                fetch(`/poste/comment/add/${postId}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ content: commentText }),
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            showNotification("Comment added successfully!", "success");
-                            document.getElementById("comment-text").value = "";
-                            loadComments(postId);
-                        } else {
-                            showNotification("Failed to add comment!", "error");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error adding comment:", error);
-                        showNotification("Error adding comment!", "error");
+                document.querySelectorAll(".tour-box").forEach(box => {
+                    box.addEventListener("click", function (e) {
+                        if (e.target.closest('.btn-like') || e.target.closest('.btn-modifier') || e.target.closest('.btn-supprimer')) return;
+                        const postId = this.getAttribute("data-poste-id");
+                        document.getElementById("modal-post-id").value = postId;
+                        document.getElementById("modal-post-image").src = this.querySelector("img").src;
+                        document.getElementById("modal-post-content").textContent = this.getAttribute("data-contenu-complet");
+                        document.getElementById("modal-post-title").textContent = this.getAttribute("data-title-complet");
+                        const categoriesContainer = document.getElementById("modal-categories");
+                        categoriesContainer.innerHTML = "";
+                        const categories = this.querySelectorAll(".categories .badge");
+                        categories.forEach(category => {
+                            const badge = document.createElement("span");
+                            badge.className = "badge bg-primary";
+                            badge.textContent = category.textContent;
+                            categoriesContainer.appendChild(badge);
+                        });
+                        loadComments(postId);
+                        const commentModal = new bootstrap.Modal(document.getElementById("commentModal"));
+                        commentModal.show();
                     });
-            });
+                });
 
-            // Handle like button
-            document.querySelectorAll(".btn-like").forEach(button => {
-                button.addEventListener("click", function (event) {
-                    event.stopPropagation();
-                    const postId = this.getAttribute("data-poste-id");
-                    const isLiked = this.querySelector("i").classList.contains("fa-solid");
+                document.getElementById("comment-form").addEventListener("submit", async function (event) {
+                    event.preventDefault();
+                    const postId = document.getElementById("modal-post-id").value;
+                    const commentText = document.getElementById("comment-text").value.trim();
 
-                    fetch(`/like/toggle/${postId}`, {
+                    if (!commentText) return;
+
+                    const isToxic = await checkToxicity(commentText);
+                    if (isToxic) {
+                        showNotification("Your comment appears toxic. Please revise it.", "error");
+                        return;
+                    }
+
+                    fetch(`/poste/comment/add/${postId}`, {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                            "X-Requested-With": "XMLHttpRequest",
-                        },
-                        body: JSON.stringify({ like: !isLiked }),
-                        credentials: 'include',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ content: commentText }),
                     })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                const likeIcon = this.querySelector("i");
-                                const likeCount = this.querySelector(".like-count");
-                                if (data.liked) {
-                                    likeIcon.classList.remove("fa-regular");
-                                    likeIcon.classList.add("fa-solid");
-                                    likeIcon.style.color = "red";
-                                    showNotification("Post liked!", "success");
-                                } else {
-                                    likeIcon.classList.remove("fa-solid");
-                                    likeIcon.classList.add("fa-regular");
-                                    likeIcon.style.color = "";
-                                    showNotification("Post unliked!", "success");
-                                }
-                                likeCount.textContent = data.likesCount;
+                                showNotification("Comment added successfully!", "success");
+                                document.getElementById("comment-text").value = "";
+                                loadComments(postId);
                             } else {
-                                showNotification("Failed to toggle like!", "error");
+                                showNotification("Failed to add comment!", "error");
                             }
                         })
                         .catch(error => {
-                            console.error("Error handling like:", error);
-                            showNotification("Error toggling like!", "error");
+                            console.error("Error adding comment:", error);
+                            showNotification("Error adding comment!", "error");
                         });
                 });
-            });
 
-            // Handle delete post
-            document.querySelectorAll(".delete-form").forEach(form => {
-                form.addEventListener("submit", function (event) {
-                    event.preventDefault();
-                    if (confirm("Are you sure you want to delete this post?")) {
-                        fetch(this.action, {
-                            method: "POST",
-                            body: new FormData(this),
-                        })
-                            .then(response => {
-                                if (response.ok) {
-                                    showNotification("Post deleted successfully!", "success");
-                                    window.location.reload();
-                                } else {
-                                    showNotification("Failed to delete post!", "error");
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Error deleting post:", error);
-                                showNotification("Error deleting post!", "error");
+                // Débouncing pour éviter les clics multiples
+                function debounce(func, wait) {
+                    let timeout;
+                    return function (...args) {
+                        clearTimeout(timeout);
+                        timeout = setTimeout(() => func.apply(this, args), wait);
+                    };
+                }
+
+                document.querySelectorAll(".btn-like").forEach(button => {
+                    const debouncedToggleLike = debounce(async function (event) {
+                        event.stopPropagation();
+                        if (button.disabled) return; // Ignorer si le bouton est désactivé
+
+                        const postId = button.getAttribute("data-poste-id");
+                        const isLiked = button.classList.contains("liked");
+                        const likeIcon = button.querySelector("i");
+                        const likeCount = button.querySelector(".like-count");
+
+                        // Désactiver le bouton pendant la requête
+                        button.disabled = true;
+
+                        try {
+                            const response = await fetch(`/like/toggle/${postId}`, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "X-Requested-With": "XMLHttpRequest",
+                                },
+                                body: JSON.stringify({ like: !isLiked }),
+                                credentials: 'include',
                             });
-                    }
+                            const data = await response.json();
+
+                            if (data.success) {
+                                likeCount.textContent = data.likesCount;
+                                button.classList.toggle("liked", data.liked);
+                                if (data.liked) {
+                                    likeIcon.classList.remove("fa-regular");
+                                    likeIcon.classList.add("fa-solid");
+                                } else {
+                                    likeIcon.classList.remove("fa-solid");
+                                    likeIcon.classList.add("fa-regular");
+                                }
+                                showNotification(data.liked ? "Post liked!" : "Post unliked!", "success");
+                            } else {
+                                showNotification("Failed to toggle like!", "error");
+                            }
+                        } catch (error) {
+                            console.error("Error handling like:", error);
+                            showNotification("Error toggling like!", "error");
+                        } finally {
+                            // Réactiver le bouton après la requête
+                            button.disabled = false;
+                        }
+                    }, 300); // Délai de 300ms pour le débouncing
+
+                    button.addEventListener("click", debouncedToggleLike);
+                });
+
+                document.querySelectorAll(".delete-form").forEach(form => {
+                    form.addEventListener("submit", function (event) {
+                        event.preventDefault();
+                        if (confirm("Are you sure you want to delete this post?")) {
+                            fetch(this.action, {
+                                method: "POST",
+                                body: new FormData(this),
+                            })
+                                .then(response => {
+                                    if (response.ok) {
+                                        showNotification("Post deleted successfully!", "success");
+                                        window.location.reload();
+                                    } else {
+                                        showNotification("Failed to delete post!", "error");
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error deleting post:", error);
+                                    showNotification("Error deleting post!", "error");
+                                });
+                        }
+                    });
                 });
             });
+            // Au début du script, ajoutez cette variable globale
+let commentModal = null;
+
+// Ajoutez ces deux fonctions
+function initModal() {
+    if (!commentModal) {
+        const modalElement = document.getElementById('commentModal');
+        commentModal = new bootstrap.Modal(modalElement);
+        
+        // Gestionnaire pour nettoyer après la fermeture du modal
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            cleanUpModal();
         });
-    </script>
+    }
+    return commentModal;
+}
+
+function cleanUpModal() {
+    // Suppression des backdrops persistants
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => {
+        backdrop.remove();
+    });
+    
+    // Réinitialisation du style du body
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+}
+
+// Modifiez la partie où vous ouvrez le modal (remplacez la ligne existante)
+document.querySelectorAll(".tour-box").forEach(box => {
+    box.addEventListener("click", function (e) {
+        if (e.target.closest('.btn-like') || e.target.closest('.btn-modifier') || e.target.closest('.btn-supprimer')) return;
+        
+        // [Votre code existant pour remplir le modal...]
+        
+        // Remplacez cette ligne:
+        // const commentModal = new bootstrap.Modal(document.getElementById("commentModal"));
+        // Par:
+        const modal = initModal();
+        cleanUpModal(); // Nettoyage préventif
+        modal.show();
+    });
+});
+        </script>
+    {% endblock %}
 {% endblock %}
