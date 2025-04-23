@@ -67,9 +67,16 @@
                         <i class="bi bi-pencil-square"></i>
                       </a>
                      
-<a href="{{ path('app_recompense_new', {'idprogramme': program.idprogramme}) }}" class="btn btn-sm btn-info">
-    <i class="bi bi-gift"></i>
-</a>
+                      {% if not app.session.get('recompenses')[program.idprogramme] is defined %}
+                        <a href="{{ path('app_recompense_new', {'idprogramme': program.idprogramme}) }}" class="btn btn-sm btn-info">
+                            <i class="bi bi-gift"></i>
+                        </a>
+                      {% else %}
+                        <a href="{{ path('app_programmebienetre_show', {'idprogramme': program.idprogramme}) }}" class="btn btn-sm btn-info">
+                            <i class="bi bi-gift"></i>
+                        </a>
+                        
+                      {% endif %}
 
                       <form method="post" action="{{ path('app_programmebienetre_delete', {'idprogramme': program.idprogramme}) }}" style="display: inline-block;">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ program.idprogramme) }}">

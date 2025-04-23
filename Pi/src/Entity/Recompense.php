@@ -49,7 +49,7 @@ class Recompense
      *
      * @ORM\ManyToOne(targetEntity="App\Entity\Programmebienetre")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idProgramme", referencedColumnName="idProgramme")
+     *   @ORM\JoinColumn(name="idProgramme", referencedColumnName="idProgramme", onDelete="CASCADE")
      * })
      */
     private $idprogramme;

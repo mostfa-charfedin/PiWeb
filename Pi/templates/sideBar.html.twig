@@ -119,6 +119,13 @@
         <span>View Reviews</span>
       </a>
     </li>
+    <li>
+      <a class="nav-link collapsed" href="{{ path('app_avis_stats') }}">
+        <i class="bi bi-star"></i>
+        <span>View stats</span>
+      </a>
+    </li>
+  
     </ul>
       <li class="nav-item">
         <a class="nav-link" href="{{ path('profile') }}">
@@ -175,8 +182,9 @@
       });
     });
   });
-</script>
+  </script>
 
+  {% block script %}{% endblock %}
 
 </body>
         

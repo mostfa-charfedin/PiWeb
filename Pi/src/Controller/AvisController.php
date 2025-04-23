@@ -20,37 +20,37 @@ use App\Entity\User;
 class AvisController extends AbstractController
 {
     #[Route('/', name: 'app_avis_index', methods: ['GET'])]
-    public function index(AvisRepository $avisRepository, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    public function index(Request $request, AvisRepository $avisRepository, SessionInterface $session, EntityManagerInterface $entityManager): Response
     {
-        // Vérifier si l'utilisateur est connecté
+        // Check if user is logged in
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
 
-        // Récupérer l'utilisateur
+        // Get user
         $userId = $session->get('id');
         $user = $entityManager->getRepository(User::class)->find($userId);
         if (!$user) {
             throw $this->createNotFoundException('User not found');
         }
 
-        // Récupérer tous les avis
-        $avis = $avisRepository->findAll();
+        // Get all reviews
+        $avis = $avisRepository->findAllWithRelations();
 
-        // Si l'utilisateur est admin, afficher la vue admin
-        if ($user->getRole() === 'ADMIN') {
-            return $this->render('avis/admin_index.html.twig', [
-                'avis' => $avis,
-                'user' => $user,
-            ]);
-        } else {
-            // Sinon, afficher uniquement les avis de l'utilisateur
-            $userAvis = $avisRepository->findBy(['user' => $user]);
-            return $this->render('avis/index.html.twig', [
-                'avis' => $userAvis,
-                'user' => $user,
-            ]);
+        // If user is not admin, filter to show only their reviews
+        if ($user->getRole() !== 'ADMIN') {
+            $avis = array_filter($avis, function($a) use ($user) {
+                return $a->getUser() && $a->getUser()->getId() === $user->getId();
+            });
         }
+
+        // Return appropriate template based on user role
+        $template = $user->getRole() === 'ADMIN' ? 'avis/admin_index.html.twig' : 'avis/index.html.twig';
+
+        return $this->render($template, [
+            'avis' => $avis,
+            'user' => $user
+        ]);
     }
 
     #[Route('/new/{idprogramme}', name: 'app_avis_new', methods: ['GET', 'POST'])]
@@ -58,6 +58,7 @@ class AvisController extends AbstractController
         Request $request,
         EntityManagerInterface $entityManager,
         ProgrammebienetreRepository $programmebienetreRepository,
+        AvisRepository $avisRepository,
         SessionInterface $session,
         int $idprogramme
     ): Response {
@@ -68,7 +69,8 @@ class AvisController extends AbstractController
 
         $programme = $programmebienetreRepository->find($idprogramme);
         if (!$programme) {
-            throw $this->createNotFoundException('Program not found');
+            $this->addFlash('error', 'Program not found.');
+            return $this->redirectToRoute('app_programmebienetre_index');
         }
 
         // Récupérer l'utilisateur
@@ -76,6 +78,12 @@ class AvisController extends AbstractController
         $user = $entityManager->getRepository(User::class)->find($userId);
         if (!$user) {
             throw $this->createNotFoundException('User not found');
+        }
+
+        // Vérifier si l'utilisateur a déjà donné son avis sur ce programme
+        if ($avisRepository->hasUserReviewedProgram($user, $programme)) {
+            $this->addFlash('warning', 'You have already reviewed this program.');
+            return $this->redirectToRoute('app_programmebienetre_show', ['idprogramme' => $idprogramme]);
         }
 
         $avis = new Avis();
@@ -89,6 +97,7 @@ class AvisController extends AbstractController
             $entityManager->persist($avis);
             $entityManager->flush();
 
+            $this->addFlash('success', 'Your review has been added successfully.');
             return $this->redirectToRoute('app_avis_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -142,29 +151,46 @@ class AvisController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_avis_delete', methods: ['POST'])]
-    public function delete(
-        Request $request,
-        #[MapEntity] Avis $avis,
-        EntityManagerInterface $entityManager,
-        SessionInterface $session
-    ): Response {
-        // Vérifier si l'utilisateur est connecté
-        if (!$session->get('id')) {
-            return $this->redirectToRoute('login');
-        }
-
-        // Vérifier si l'utilisateur est l'auteur de l'avis
-        if ($avis->getUser()->getId() !== $session->get('id')) {
-            throw $this->createAccessDeniedException('You are not authorized to delete this review');
-        }
-
-        if ($this->isCsrfTokenValid('delete'.$avis->getId(), $request->request->get('_token'))) {
-            $entityManager->remove($avis);
+    #[Route('/{id}/delete', name: 'app_avis_delete', methods: ['POST'])]
+    public function delete(Request $request, Avis $avi, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$avi->getId(), $request->request->get('_token'))) {
+            $entityManager->remove($avi);
             $entityManager->flush();
+            
+            $this->addFlash('success', 'Review deleted successfully.');
         }
 
         return $this->redirectToRoute('app_avis_index', [], Response::HTTP_SEE_OTHER);
     }
 
+    #[Route('/stats', name: 'app_avis_stats', methods: ['GET'])]
+    public function stats(AvisRepository $avisRepository, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        // Vérifier si l'utilisateur est connecté
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        // Récupérer l'utilisateur
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        // Récupérer les statistiques des avis
+        $ratingData = $avisRepository->getRatingStatistics();
+        $averageRating = $avisRepository->getAverageRating();
+        $programStats = $avisRepository->getProgramStatistics();
+        $totalReviewers = $avisRepository->getTotalUniqueReviewers();
+        
+        return $this->render('avis/stats.html.twig', [
+            'ratingData' => json_encode($ratingData),
+            'averageRating' => $averageRating,
+            'programStats' => $programStats,
+            'totalReviewers' => $totalReviewers,
+            'user' => $user
+        ]);
+    }
 }

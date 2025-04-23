@@ -35,6 +35,7 @@
                   <th scope="col">Type</th>
                   <th scope="col">Description</th>
                   <th scope="col">Program Owner</th>
+                  <th scope="col">Average Rating</th>
                   <th scope="col">Actions</th>
                 </tr>
               </thead>
@@ -53,6 +54,21 @@
                     {% endif %}
                   </td>
                   <td>
+                    <div class="d-flex align-items-center">
+                      {% set avgRating = averageRatings[program.idprogramme] %}
+                      {% for i in 1..5 %}
+                        {% if i <= avgRating %}
+                          <i class="bi bi-star-fill text-warning"></i>
+                        {% elseif i - 0.5 <= avgRating %}
+                          <i class="bi bi-star-half text-warning"></i>
+                        {% else %}
+                          <i class="bi bi-star text-warning"></i>
+                        {% endif %}
+                      {% endfor %}
+                      <span class="ms-2">{{ avgRating }}/5</span>
+                    </div>
+                  </td>
+                  <td>
                     <div class="btn-group" role="group">
                       <a href="{{ path('app_programmebienetre_show', {'idprogramme': program.idprogramme}) }}" class="btn btn-sm btn-primary" title="View">
                         <i class="bi bi-eye"></i>
@@ -65,7 +81,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                  <td colspan="6" class="text-center">No Program.</td>
+                  <td colspan="7" class="text-center">No Program.</td>
                 </tr>
                 {% endfor %}
               </tbody>

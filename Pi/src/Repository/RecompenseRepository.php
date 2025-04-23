@@ -39,5 +39,11 @@ class RecompenseRepository extends ServiceEntityRepository
         }
     }
 
+    public function hasProgrammeRecompense(int $programmeId): bool
+    {
+        $existingRecompense = $this->findOneBy(['idprogramme' => $programmeId]);
+        return $existingRecompense !== null;
+    }
+
     // Add your custom repository methods here
 } 

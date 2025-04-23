@@ -3,6 +3,8 @@
 namespace App\Repository;
 
 use App\Entity\Avis;
+use App\Entity\User;
+use App\Entity\Programmebienetre;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -51,5 +53,82 @@ class AvisRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult()
         ;
+    }
+
+    public function findAllWithRelations(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->leftJoin('a.user', 'u')
+            ->leftJoin('a.programme', 'p')
+            ->addSelect('u')
+            ->addSelect('p')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getRatingStatistics(): array
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('a.rating, COUNT(a.id) as count')
+            ->groupBy('a.rating')
+            ->orderBy('a.rating', 'ASC');
+
+        $results = $qb->getQuery()->getResult();
+        
+        // Initialize counts for all ratings (1-5)
+        $statistics = array_fill(1, 5, 0);
+        
+        // Fill in actual counts
+        foreach ($results as $result) {
+            $statistics[$result['rating']] = (int)$result['count'];
+        }
+        
+        return array_values($statistics);
+    }
+
+    public function getAverageRating(): float
+    {
+        $result = $this->createQueryBuilder('a')
+            ->select('AVG(a.rating) as average')
+            ->getQuery()
+            ->getSingleResult();
+        
+        return round($result['average'] ?? 0, 2);
+    }
+
+    public function getProgramStatistics(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->select('p.titre as programName', 
+                    'COUNT(a.id) as reviewCount', 
+                    'AVG(a.rating) as averageRating')
+            ->leftJoin('a.programme', 'p')
+            ->groupBy('p.idprogramme', 'p.titre')
+            ->orderBy('reviewCount', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getTotalUniqueReviewers(): int
+    {
+        $result = $this->createQueryBuilder('a')
+            ->select('COUNT(DISTINCT a.user) as userCount')
+            ->getQuery()
+            ->getSingleResult();
+
+        return (int)($result['userCount'] ?? 0);
+    }
+
+    public function hasUserReviewedProgram($user, $programme): bool
+    {
+        $result = $this->createQueryBuilder('a')
+            ->andWhere('a.user = :user')
+            ->andWhere('a.programme = :programme')
+            ->setParameter('user', $user)
+            ->setParameter('programme', $programme)
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        return $result !== null;
     }
 } 
