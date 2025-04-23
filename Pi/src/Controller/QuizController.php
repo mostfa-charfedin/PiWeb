@@ -18,44 +18,75 @@ use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+
 
 class QuizController extends AbstractController
 {
+    private HttpClientInterface $httpClient;
+
+    public function __construct(HttpClientInterface $httpClient)
+    {
+        $this->httpClient = $httpClient;
+    }
+
     #[Route('/quiz', name: 'app_home', methods: ['GET'])]
-    public function index(
-        QuizRepository $quizRepository,
-        SessionInterface $session,
-        EntityManagerInterface $em
-    ): Response {
+    public function index(Request $request, QuizRepository $quizRepository, SessionInterface $session, EntityManagerInterface $em): Response
+    {
         $userId = $session->get('id');
         if (!$userId) return $this->redirectToRoute('login');
 
         $user = $em->getRepository(User::class)->find($userId);
         if (!$user) throw $this->createNotFoundException('User not found');
 
-        $quizzes = $quizRepository->findAll();
+        $searchTerm = $request->query->get('search', '');
+        $quizzes = !empty($searchTerm)
+            ? $quizRepository->createQueryBuilder('q')
+                ->where('LOWER(q.nom) LIKE :search')
+                ->setParameter('search', '%' . strtolower($searchTerm) . '%')
+                ->getQuery()
+                ->getResult()
+            : $quizRepository->findAll();
+
         $quizResults = $session->get('quiz_result_history', []);
         $role = strtoupper($user->getRole() ?? '');
-
         $template = $role === 'ADMIN' ? 'quiz/ListQuiz.html.twig' : 'quiz/quiz_list_user.html.twig';
 
         return $this->render($template, [
             'quizzes' => $quizzes,
             'user' => $user,
             'quizResults' => $quizResults,
+            'searchTerm' => $searchTerm,
         ]);
     }
 
+    #[Route('/quiz/search', name: 'quiz_search')]
+    public function search(Request $request, QuizRepository $quizRepository, CsrfTokenManagerInterface $csrfTokenManager): JsonResponse
+    {
+        $searchTerm = $request->query->get('search', '');
+        $quizzes = $quizRepository->createQueryBuilder('q')
+            ->where('q.nom LIKE :search')
+            ->setParameter('search', '%' . $searchTerm . '%')
+            ->getQuery()
+            ->getResult();
+    
+        $data = array_map(function ($quiz) use ($csrfTokenManager) {
+            return [
+                'idquiz' => $quiz->getIdquiz(),
+                'nom' => $quiz->getNom(),
+                'datecreation' => $quiz->getDatecreation()?->format('Y-m-d H:i') ?? 'N/A',
+                'csrf_token' => $csrfTokenManager->getToken('delete' . $quiz->getIdquiz())->getValue(),
+            ];
+        }, $quizzes);
+    
+        return new JsonResponse($data);
+    }
+
     #[Route('/quiz/new', name: 'quiz_new')]
-    public function new(
-        Request $request,
-        EntityManagerInterface $em,
-        SessionInterface $session,
-        MailerInterface $mailer
-    ): Response {
-        if (!$session->get('id')) {
-            return $this->redirectToRoute('login');
-        }
+    public function new(Request $request, EntityManagerInterface $em, SessionInterface $session, MailerInterface $mailer): Response
+    {
+        if (!$session->get('id')) return $this->redirectToRoute('login');
 
         $user = $em->getRepository(User::class)->find($session->get('id'));
         $quiz = new Quiz();
@@ -71,13 +102,12 @@ class QuizController extends AbstractController
             $em->persist($quiz);
             $em->flush();
 
-            $users = $em->getRepository(User::class)->findAll();
-            foreach ($users as $recipient) {
+            foreach ($em->getRepository(User::class)->findAll() as $recipient) {
                 $email = (new Email())
                     ->from('admin@example.com')
                     ->to($recipient->getEmail())
                     ->subject('New Quiz Available!')
-                    ->text("Hello {$recipient->getNom()},\n\nA new quiz titled '{$quiz->getNom()}' has been added. Go check it out!");
+                    ->text("Hello {$recipient->getNom()},\n\nA new quiz titled '{$quiz->getNom()}' has been added.");
 
                 $mailer->send($email);
             }
@@ -93,13 +123,8 @@ class QuizController extends AbstractController
     }
 
     #[Route('/quiz/{id}', name: 'quiz_show', methods: ['GET'], requirements: ['id' => '\\d+'])]
-    public function show(
-        int $id,
-        QuizRepository $quizRepository,
-        QuestionRepository $questionRepository,
-        SessionInterface $session,
-        EntityManagerInterface $em
-    ): Response {
+    public function show(int $id, QuizRepository $quizRepository, QuestionRepository $questionRepository, SessionInterface $session, EntityManagerInterface $em): Response
+    {
         $userId = $session->get('id');
         if (!$userId) return $this->redirectToRoute('login');
 
@@ -115,9 +140,7 @@ class QuizController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        $template = strtoupper($user->getRole() ?? '') === 'ADMIN'
-            ? 'quiz/QuizShow.html.twig'
-            : 'quiz/quiz_take.html.twig';
+        $template = strtoupper($user->getRole() ?? '') === 'ADMIN' ? 'quiz/QuizShow.html.twig' : 'quiz/quiz_take.html.twig';
 
         return $this->render($template, [
             'quiz' => $quiz,
@@ -127,17 +150,11 @@ class QuizController extends AbstractController
     }
 
     #[Route('/quiz/{id}/edit', name: 'quiz_edit', methods: ['GET', 'POST'], requirements: ['id' => '\\d+'])]
-    public function edit(
-        int $id,
-        Request $request,
-        QuizRepository $quizRepository,
-        EntityManagerInterface $em,
-        SessionInterface $session
-    ): Response {
+    public function edit(int $id, Request $request, QuizRepository $quizRepository, EntityManagerInterface $em, SessionInterface $session): Response
+    {
         $userId = $session->get('id');
         if (!$userId) return $this->redirectToRoute('login');
 
-        $user = $em->getRepository(User::class)->find($userId);
         $quiz = $quizRepository->find($id);
         if (!$quiz) throw $this->createNotFoundException('Quiz not found');
 
@@ -152,27 +169,17 @@ class QuizController extends AbstractController
         return $this->render('quiz/QuizForm.html.twig', [
             'formQuiz' => $form->createView(),
             'edit_mode' => true,
-            'user' => $user,
         ]);
     }
 
     #[Route('/quiz/{id}/delete', name: 'quiz_delete', methods: ['POST'], requirements: ['id' => '\\d+'])]
-    public function delete(
-        Request $request,
-        int $id,
-        QuizRepository $quizRepository,
-        EntityManagerInterface $em,
-        CsrfTokenManagerInterface $csrfTokenManager,
-        SessionInterface $session
-    ): Response {
-        $userId = $session->get('id');
-        if (!$userId) return $this->redirectToRoute('login');
-
+    public function delete(Request $request, int $id, QuizRepository $quizRepository, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager): Response
+    {
         $quiz = $quizRepository->find($id);
         if (!$quiz) throw $this->createNotFoundException('Quiz not found');
 
-        $tokenId = 'delete' . $quiz->getIdquiz();
         $submittedToken = $request->request->get('_token');
+        $tokenId = 'delete' . $quiz->getIdquiz();
 
         if (!$csrfTokenManager->isTokenValid(new CsrfToken($tokenId, $submittedToken))) {
             throw $this->createAccessDeniedException('Invalid CSRF token');
@@ -185,13 +192,8 @@ class QuizController extends AbstractController
     }
 
     #[Route('/user/quiz/{id}/start', name: 'user_quiz_start', methods: ['GET'], requirements: ['id' => '\\d+'])]
-    public function startQuiz(
-        int $id,
-        QuizRepository $quizRepository,
-        QuestionRepository $questionRepository,
-        SessionInterface $session,
-        EntityManagerInterface $em
-    ): Response {
+    public function startQuiz(int $id, QuizRepository $quizRepository, QuestionRepository $questionRepository, SessionInterface $session, EntityManagerInterface $em): Response
+    {
         $userId = $session->get('id');
         if (!$userId) return $this->redirectToRoute('login');
 
@@ -215,19 +217,13 @@ class QuizController extends AbstractController
     }
 
     #[Route('/quiz/{id}/submit', name: 'user_quiz_submit', methods: ['POST'])]
-    public function submitQuiz(
-        Request $request,
-        QuizRepository $quizRepository,
-        EntityManagerInterface $em,
-        int $id,
-        SessionInterface $session
-    ): Response {
+    public function submitQuiz(Request $request, QuizRepository $quizRepository, EntityManagerInterface $em, int $id, SessionInterface $session): Response
+    {
         $quiz = $quizRepository->find($id);
         if (!$quiz) throw $this->createNotFoundException("Quiz not found.");
 
         $questions = $quiz->getQuestions();
         $score = 0;
-        $totalQuestions = count($questions);
         $userAnswers = [];
 
         foreach ($questions as $question) {
@@ -237,23 +233,20 @@ class QuizController extends AbstractController
             if ($responseId) {
                 $userAnswers["question_$questionId"] = $responseId;
                 $response = $em->getRepository(Reponse::class)->find($responseId);
-
-                if ($response && $response->getStatus() === 'correct') {
-                    $score++;
-                }
+                if ($response && $response->getStatus() === 'correct') $score++;
             }
         }
 
         $session->set('quiz_result', [
             'quiz' => $quiz->getNom(),
             'score' => $score,
-            'total' => $totalQuestions
+            'total' => count($questions)
         ]);
 
         $quizResults = $session->get('quiz_result_history', []);
         $quizResults[$quiz->getIdQuiz()] = [
             'score' => $score,
-            'total' => $totalQuestions,
+            'total' => count($questions),
         ];
 
         $session->set('quiz_result_history', $quizResults);
@@ -263,13 +256,8 @@ class QuizController extends AbstractController
     }
 
     #[Route('/quiz/{id}/result', name: 'user_quiz_result')]
-    public function quizResult(
-        SessionInterface $session,
-        EntityManagerInterface $em,
-        QuizRepository $quizRepository,
-        QuestionRepository $questionRepository,
-        int $id
-    ): Response {
+    public function quizResult(SessionInterface $session, EntityManagerInterface $em, QuizRepository $quizRepository, QuestionRepository $questionRepository, int $id): Response
+    {
         $userId = $session->get('id');
         if (!$userId) return $this->redirectToRoute('login');
 

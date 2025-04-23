@@ -35,15 +35,7 @@
       background-color: #2980b9;
     }
 
-    .badge-passed {
-      background-color: #db3498;
-      font-size: 0.75rem;
-      padding: 0.3rem 0.6rem;
-      border-radius: 0.5rem;
-      margin-top: 0.5rem;
-    }
-
-    .badge-score {
+    .badge-passed, .badge-score {
       background-color: #db3498;
       font-size: 0.75rem;
       padding: 0.3rem 0.6rem;
@@ -56,8 +48,13 @@
       margin-top: auto;
     }
 
-    #quizSearch {
+    #quizSearchInput {
       min-width: 100px;
+    }
+
+    .no-quizzes {
+      padding: 3rem;
+      font-size: 1.1rem;
     }
   </style>
 {% endblock %}
@@ -74,65 +71,103 @@
     </nav>
   </div>
 
-  <!-- 🔍 Search Bar Aligned Right -->
+  <!-- 🔍 Search Bar -->
   <div class="d-flex justify-content-end mb-4">
     <div class="col-md-3">
-      <input type="text" class="form-control form-control-sm" id="quizSearch" onkeyup="filterQuizzes()" placeholder="Search quiz by name...">
+      <input
+        type="text"
+        class="form-control form-control-sm"
+        id="quizSearchInput"
+        placeholder="Search quiz by name..."
+      >
     </div>
   </div>
 
   <section class="section">
     <div class="row" id="quizContainer">
-      {% if quizzes is not empty %}
-        {% for quiz in quizzes %}
-          <div class="col-md-6 col-lg-4 mb-4 quiz-box">
-            <div class="card quiz-card h-100">
-              <div class="card-body d-flex flex-column">
-                <h5 class="quiz-title">{{ quiz.nom }}</h5>
+      {% for quiz in quizzes %}
+        <div class="col-md-6 col-lg-4 mb-4 quiz-box">
+          <div class="card quiz-card h-100">
+            <div class="card-body d-flex flex-column">
+              <h5 class="quiz-title">{{ quiz.nom }}</h5>
 
-                {% if quizResults[quiz.idquiz] is defined %}
-                  {% set result = quizResults[quiz.idquiz] %}
-                  <span class="badge badge-passed">Already Passed</span>
-                  <span class="badge badge-score">Score: {{ result.score }}/{{ result.total }}</span>
-                
+              {% if quizResults[quiz.idquiz] is defined %}
+                <span class="badge badge-passed">Already Passed</span>
+                <span class="badge badge-score">Score: {{ quizResults[quiz.idquiz].score }}/{{ quizResults[quiz.idquiz].total }}</span>
+              {% endif %}
+
+              <div class="quiz-status mt-auto">
+                {% if quizResults[quiz.idquiz] is not defined %}
+                  <a href="{{ path('user_quiz_start', {'id': quiz.idquiz}) }}" class="btn btn-take-quiz w-100 mt-3">
+                    <i class="bi bi-play-circle-fill"></i> Take Quiz
+                  </a>
+                {% else %}
+                  <button class="btn btn-secondary w-100 mt-3" disabled>
+                    <i class="bi bi-check-circle-fill"></i> Quiz Completed
+                  </button>
                 {% endif %}
-
-                <div class="quiz-status mt-auto">
-                  {% if quizResults[quiz.idquiz] is not defined %}
-                    <a href="{{ path('user_quiz_start', {'id': quiz.idquiz}) }}" class="btn btn-take-quiz w-100 mt-3">
-                      <i class="bi bi-play-circle-fill"></i> Take Quiz
-                    </a>
-                  {% else %}
-                    <button class="btn btn-secondary w-100 mt-3" disabled>
-                      <i class="bi bi-check-circle-fill"></i> Quiz Completed
-                    </button>
-                  {% endif %}
-                </div>
               </div>
             </div>
           </div>
-        {% endfor %}
-      {% else %}
-        <div class="col-12">
-          <div class="alert alert-info text-center">
-            No quizzes available at the moment.
-          </div>
         </div>
-      {% endif %}
+      {% endfor %}
     </div>
   </section>
 </main>
+{% endblock %}
 
-<script>
-  function filterQuizzes() {
-    const input = document.getElementById("quizSearch");
-    const filter = input.value.toLowerCase();
-    const quizzes = document.querySelectorAll("#quizContainer .quiz-box");
+{% block javascripts %}
+  {{ parent() }}
+  <script>
+    const quizSearchUrl = "{{ path('quiz_search') }}";
 
-    quizzes.forEach((quizBox) => {
-      const title = quizBox.querySelector(".quiz-title").textContent.toLowerCase();
-      quizBox.style.display = title.includes(filter) ? "block" : "none";
+    document.getElementById('quizSearchInput').addEventListener('input', function () {
+      const searchTerm = this.value;
+      fetch(`${quizSearchUrl}?search=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+          const container = document.getElementById('quizContainer');
+          container.innerHTML = '';
+
+          if (data.length === 0) {
+            container.innerHTML = `
+              <div class="col-12 text-center">
+                <div class="alert alert-info no-quizzes">
+                  No quizzes found for "<strong>${searchTerm}</strong>".
+                </div>
+              </div>`;
+            return;
+          }
+
+          data.forEach(quiz => {
+            const passed = quiz.passed ?? false;
+            const score = quiz.score ?? 0;
+            const total = quiz.total ?? 0;
+
+            container.innerHTML += `
+              <div class="col-md-6 col-lg-4 mb-4 quiz-box">
+                <div class="card quiz-card h-100">
+                  <div class="card-body d-flex flex-column">
+                    <h5 class="quiz-title">${quiz.nom}</h5>
+                    ${passed
+                      ? `<span class="badge badge-passed">Already Passed</span>
+                         <span class="badge badge-score">Score: ${score}/${total}</span>`
+                      : ''}
+                    <div class="quiz-status mt-auto">
+                      ${passed
+                        ? `<button class="btn btn-secondary w-100 mt-3" disabled>
+                             <i class="bi bi-check-circle-fill"></i> Quiz Completed
+                           </button>`
+                        : `<a href="/quiz/${quiz.idquiz}/start" class="btn btn-take-quiz w-100 mt-3">
+                             <i class="bi bi-play-circle-fill"></i> Take Quiz
+                           </a>`}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        });
     });
-  }
-</script>
+  </script>
 {% endblock %}
