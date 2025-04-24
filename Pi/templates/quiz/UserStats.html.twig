@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Your Quiz Stats</h1>
+    <canvas id="userStatsChart" width="400" height="200"></canvas>
+
+    <script>
+        var ctx = document.getElementById('userStatsChart').getContext('2d');
+        var userStatsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Correct Answers', 'Incorrect Answers'],
+                datasets: [{
+                    label: 'Your Results',
+                    data: [{{ correct_answers }}, {{ incorrect_answers }}],
+                    backgroundColor: ['#4CAF50', '#F44336'],
+                    borderColor: ['#4CAF50', '#F44336'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
+{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

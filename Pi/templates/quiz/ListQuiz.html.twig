@@ -18,6 +18,7 @@
       <i class="bi bi-plus-circle"></i> Create New Quiz
     </a>
   </div>
+  
 
   <section class="section">
     <div class="row">
@@ -72,8 +73,14 @@
                           <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ quiz.idquiz) }}">
                           <button class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                         </form>
+
+                        {# Button to View Stats #}
+                        <a href="{{ path('admin_quiz_stats', { id: quiz.idquiz }) }}" class="btn btn-sm btn-info me-1" title="View Stats">
+                          <i class="bi bi-bar-chart"></i> Stats
+                        </a>
                       </td>
                     </tr>
+                    
                   {% else %}
                     <tr>
                       <td colspan="4" class="text-center text-muted">No quizzes found.</td>
@@ -117,6 +124,9 @@
                   <input type="hidden" name="_token" value="${quiz.csrf_token}">
                   <button class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                 </form>
+                <a href="/admin/quiz/${quiz.idquiz}/stats" class="btn btn-sm btn-info me-1" title="View Stats">
+                  <i class="bi bi-bar-chart"></i> Stats
+                </a>
               </td>
             </tr>
           `;

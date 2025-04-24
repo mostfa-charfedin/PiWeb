@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Quiz Statistics: {{ quiz.nom }}</h1>
+    <div>
+        <p>Total Participants: {{ total }}</p>
+        <p>Passed: {{ passed }}</p>
+        <p>Failed: {{ failed }}</p>
+        <p>Average Score: {{ average }}</p>
+    </div>
+
+    <canvas id="quizStatsChart" width="400" height="200"></canvas>
+
+    <script>
+        var ctx = document.getElementById('quizStatsChart').getContext('2d');
+        var quizStatsChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Passed', 'Failed'],
+                datasets: [{
+                    label: 'Quiz Results',
+                    data: [{{ passed }}, {{ failed }}],
+                    backgroundColor: ['#4CAF50', '#F44336'],
+                    borderColor: ['#4CAF50', '#F44336'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    </script>
+{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

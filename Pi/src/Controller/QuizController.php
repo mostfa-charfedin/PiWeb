@@ -152,7 +152,7 @@ public function index(Request $request, QuizRepository $quizRepository, SessionI
             'user' => $em->getRepository(User::class)->find($session->get('id')),
         ]);
     }
-    
+
     #[Route('/quiz/{id}/edit', name: 'quiz_edit', requirements: ['id' => '\d+'])]
     public function edit(int $id, Request $request, QuizRepository $quizRepository, EntityManagerInterface $em, SessionInterface $session): Response
     {
@@ -340,4 +340,82 @@ public function unhideQuiz(int $id, SessionInterface $session): Response
             'selectedAnswersMap' => $selectedAnswersMap,
         ]);
     }
+
+
+    #[Route('/admin/quiz/{id}/stats', name: 'admin_quiz_stats')]
+public function adminQuizStats(int $id, EntityManagerInterface $em, QuizRepository $quizRepository): Response
+{
+    $quiz = $quizRepository->find($id);
+    if (!$quiz) {
+        throw $this->createNotFoundException('Quiz not found');
+    }
+
+    $scores = $em->getRepository(Score::class)->findBy(['quiz' => $quiz]);
+
+    $total = count($scores);
+    $passed = 0;
+    $failed = 0;
+    $sum = 0;
+
+    // Loop through scores to calculate passed, failed, and total score sum
+    foreach ($scores as $score) {
+        $sum += $score->getScore();
+        if ($score->getScore() >= ($score->getTotal() / 2)) {
+            $passed++;
+        } else {
+            $failed++;
+        }
+    }
+
+    $average = $total > 0 ? round($sum / $total, 2) : 0;
+
+    return $this->render('quiz/AdminStats.html.twig', [
+        'quiz' => $quiz,
+        'passed' => $passed,
+        'failed' => $failed,
+        'average' => $average,
+        'total' => $total,
+    ]);
+}
+
+
+#[Route('/user/stats', name: 'user_stats')]
+public function userStats(SessionInterface $session, EntityManagerInterface $em): Response
+{
+    // Retrieve user ID from session
+    $userId = $session->get('id');
+    if (!$userId) {
+        return $this->redirectToRoute('login');
+    }
+
+    // Find the user based on the session ID
+    $user = $em->getRepository(User::class)->find($userId);
+    if (!$user) {
+        throw $this->createNotFoundException('User not found');
+    }
+
+    // Get scores for the user
+    $scores = $em->getRepository(Score::class)->findBy(['user' => $user]);
+
+    $total = count($scores);
+    $sum = array_sum(array_map(fn($s) => $s->getScore(), $scores));
+    $average = $total > 0 ? round($sum / $total, 2) : 0;
+
+    // Prepare data for chart (quiz names and their corresponding scores)
+    $chartLabels = [];
+    $chartData = [];
+
+    foreach ($scores as $score) {
+        $chartLabels[] = $score->getQuiz()->getName();
+        $chartData[] = $score->getScore();
+    }
+
+    return $this->render('quiz/UserStats.html.twig', [
+        'user' => $user,
+        'total' => $total,
+        'average' => $average,
+        'chartLabels' => $chartLabels,
+        'chartData' => $chartData,
+    ]);
+}
 }
