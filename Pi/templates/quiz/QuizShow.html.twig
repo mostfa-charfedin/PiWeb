@@ -57,9 +57,14 @@
         <!-- Questions Header + Add -->
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5>Questions</h5>
-          <a href="{{ path('question_new', {'quizId': quiz.idQuestion ?? quiz.idquiz}) }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add Question
-          </a>
+          <!-- Add Question Button, visible only when less than 5 questions -->
+          {% if questions|length < 5 %}
+            <a href="{{ path('question_new', {'quizId': quiz.idQuestion ?? quiz.idquiz}) }}" class="btn btn-primary">
+              <i class="bi bi-plus-circle"></i> Add Question
+            </a>
+          {% else %}
+            <p class="text-muted">Max questions (5).</p>
+          {% endif %}
         </div>
 
         <!-- Questions List -->
