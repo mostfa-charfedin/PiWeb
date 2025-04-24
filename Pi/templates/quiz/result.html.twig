@@ -9,32 +9,46 @@
       max-width: 900px;
       margin: auto;
     }
+
     .result-header {
       text-align: center;
       margin-bottom: 2rem;
     }
+
     .question-block {
       margin-bottom: 2rem;
     }
+
     .correct {
       background-color: #d4edda;
       border-left: 5px solid #28a745;
     }
+
     .incorrect {
       background-color: #f8d7da;
       border-left: 5px solid #dc3545;
     }
+
     .neutral {
       background-color: #f0f0f0;
       border-left: 5px solid #ccc;
     }
+
     .user-score {
       font-size: 1.5rem;
       font-weight: bold;
       color: #2c3e50;
     }
+
     .answer-label {
       font-weight: 500;
+    }
+
+    .return-home-btn {
+      margin-top: 1.5rem;
+      padding: 10px 30px;
+      font-size: 1rem;
+      border-radius: 30px;
     }
   </style>
 {% endblock %}
@@ -54,6 +68,9 @@
   <section class="section result-container">
     <div class="result-header">
       <p class="user-score">Your score: {{ score }}/{{ total }}</p>
+      <a href="{{ path('app_home') }}" class="btn btn-outline-primary return-home-btn">
+        ⬅ Return to Home
+      </a>
     </div>
 
     {% if questions is defined %}

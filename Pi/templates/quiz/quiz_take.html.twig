@@ -6,68 +6,94 @@
   {{ parent() }}
   <style>
     .quiz-container {
-      max-width: 800px;
+      max-width: 1000px;
       margin: auto;
-      padding-top: 100px;
+      padding-top: 40px;
     }
 
-    .fixed-progress {
-      position: fixed;
-      top: 70px;
-      left: 0;
-      width: 100%;
-      background: #f8f9fa;
-      z-index: 1000;
-      padding: 15px 30px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    .quiz-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      text-align: center;
     }
 
     .progress {
-      height: 28px;
-      background-color: #dee2e6;
+      height: 26px;
+      background-color: #e9ecef;
       border-radius: 20px;
       overflow: hidden;
+      margin: 1rem 0;
     }
 
     .progress-bar {
-      height: 100%;
-      color: white;
-      font-weight: bold;
-      line-height: 28px;
+      background: linear-gradient(90deg, #2980b9, #6dd5fa);
+      color: #fff;
+      font-weight: 600;
+      line-height: 26px;
       text-align: center;
-      background-image: linear-gradient(to right, #f39c12, #2ecc71);
-      transition: width 0.4s ease-in-out;
       border-radius: 20px;
-      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
+      transition: width 0.4s ease;
     }
 
     .question-card {
-      border-radius: 1rem;
-      transition: box-shadow 0.2s ease;
+      background: #fff;
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      transition: transform 0.2s;
     }
 
     .question-card:hover {
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      transform: translateY(-2px);
     }
 
     .question-title {
+      font-size: 1.2rem;
       font-weight: 600;
-      color: #2c3e50;
+      color: #34495e;
+    }
+
+    .form-check-input {
+      cursor: pointer;
     }
 
     .form-check-label {
       font-size: 0.95rem;
+      cursor: pointer;
     }
 
     .submit-btn {
-      background-color: #3498db;
+      background: linear-gradient(90deg, #2980b9, #6dd5fa);
       color: #fff;
       font-weight: 500;
-      border-radius: 0.5rem;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: background 0.2s ease;
     }
 
     .submit-btn:hover {
-      background-color: #2980b9;
+      background: linear-gradient(90deg, #2471a3, #5dade2);
+    }
+
+    .translate-btn {
+      font-size: 0.85rem;
+      padding: 4px 10px;
+      border-color: #3498db;
+      color: #3498db;
+    }
+
+    .translate-btn:hover {
+      background-color: #3498db;
+      color: #fff;
+    }
+
+    .lang-select {
+      font-size: 0.85rem;
+      width: auto;
     }
   </style>
 {% endblock %}
@@ -84,36 +110,37 @@
     </nav>
   </div>
 
-  <div class="fixed-progress">
-    <div class="progress">
+  <div class="quiz-container">
+    <h2 class="quiz-title">{{ quiz.nom }}</h2>
+
+    <div class="progress mb-4">
       <div id="progress-bar" class="progress-bar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
         0%
       </div>
     </div>
-  </div>
 
-  <section class="section quiz-container">
     {% if questions is not empty %}
       <form method="post" action="{{ path('user_quiz_submit', { id: quiz.idQuiz }) }}">
         {% for question in questions %}
-          <div class="card question-card mb-4 shadow-sm">
+          <div class="card question-card mb-4 p-4">
             <div class="card-body">
-              <h5 class="question-title mb-3" id="question-title-{{ question.idQuestion }}">
-                {{ loop.index }}. {{ question.question }}
-              </h5>
-
-              <div class="mb-3 d-flex align-items-center gap-2">
-                <select id="lang-{{ question.idQuestion }}" class="form-select form-select-sm w-auto">
-                  <option value="en">🇺🇸 English</option>
-                  <option value="fr">🇫🇷 Français</option>
-                  <option value="es">🇪🇸 Español</option>
-                </select>
-                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="translateQuestion({{ question.idQuestion }})">
-                  🌍 Translate
-                </button>
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h5 class="question-title" id="question-title-{{ question.idQuestion }}">
+                  {{ loop.index }}. {{ question.question }}
+                </h5>
+                <div class="d-flex align-items-center gap-2">
+                  <select id="lang-{{ question.idQuestion }}" class="form-select form-select-sm lang-select">
+                    <option value="en">🇺🇸</option>
+                    <option value="fr">🇫🇷</option>
+                    <option value="es">🇪🇸</option>
+                  </select>
+                  <button type="button" class="btn btn-outline-primary btn-sm translate-btn" onclick="translateQuestion({{ question.idQuestion }})">
+                    🌍 Translate
+                  </button>
+                </div>
               </div>
 
-              <div id="translated-question-{{ question.idQuestion }}" class="mb-3 text-muted" style="display:none;"></div>
+              <div id="translated-question-{{ question.idQuestion }}" class="text-muted mb-3" style="display:none;"></div>
 
               {% for reponse in question.reponses %}
                 <div class="form-check mb-2">
@@ -135,7 +162,7 @@
         {% endfor %}
 
         <div class="text-center mt-4">
-          <button type="submit" class="btn submit-btn px-5">
+          <button type="submit" class="btn submit-btn">
             ✅ Submit Quiz
           </button>
         </div>
@@ -145,7 +172,7 @@
         No questions available for this quiz.
       </div>
     {% endif %}
-  </section>
+  </div>
 </main>
 
 <script>
@@ -168,9 +195,6 @@
   function translateQuestion(id) {
     const lang = document.getElementById(`lang-${id}`).value;
     const questionContainer = document.getElementById(`translated-question-${id}`);
-    const questionTitle = document.getElementById(`question-title-${id}`);
-    const responseLabels = document.querySelectorAll(`[id^="reponse_"][id*="_${id}"] ~ label`);
-
     questionContainer.style.display = 'block';
     questionContainer.innerHTML = '🔄 Translating...';
 
@@ -178,31 +202,22 @@
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          // Update question translation
           questionContainer.innerHTML = `<strong>Translation:</strong><br>${data.question}`;
-
-          // Update question title (optional, if you want to show it inline too)
-          // questionTitle.innerText = data.question;
-
-          // Update responses
           const translatedResponses = data.responses;
           const labels = document.querySelectorAll(`label[for^="reponse_"]`);
-
           let responseIndex = 0;
           labels.forEach(label => {
-            // Only update labels belonging to this question
             if (label.htmlFor.includes(`_${id}`) && translatedResponses[responseIndex]) {
               label.innerText = translatedResponses[responseIndex];
               responseIndex++;
             }
           });
-
         } else {
-          questionContainer.innerHTML = `<div class="text-danger">❌ Error: ${data.message}</div>`;
+          questionContainer.innerHTML = `<div class="text-danger">❌ ${data.message}</div>`;
         }
       })
       .catch(error => {
-        questionContainer.innerHTML = `<div class="text-danger">❌ Error during translation: ${error.message}</div>`;
+        questionContainer.innerHTML = `<div class="text-danger">❌ Error: ${error.message}</div>`;
       });
   }
 </script>

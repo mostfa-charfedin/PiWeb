@@ -32,35 +32,44 @@ class QuizController extends AbstractController
     }
 
     #[Route('/quiz', name: 'app_home', methods: ['GET'])]
-    public function index(Request $request, QuizRepository $quizRepository, SessionInterface $session, EntityManagerInterface $em): Response
-    {
-        $userId = $session->get('id');
-        if (!$userId) return $this->redirectToRoute('login');
+public function index(Request $request, QuizRepository $quizRepository, SessionInterface $session, EntityManagerInterface $em): Response
+{
+    $userId = $session->get('id');
+    if (!$userId) return $this->redirectToRoute('login');
 
-        $user = $em->getRepository(User::class)->find($userId);
-        if (!$user) throw $this->createNotFoundException('User not found');
+    $user = $em->getRepository(User::class)->find($userId);
+    if (!$user) throw $this->createNotFoundException('User not found');
 
-        $searchTerm = $request->query->get('search', '');
-        $quizzes = !empty($searchTerm)
-            ? $quizRepository->createQueryBuilder('q')
-                ->where('LOWER(q.nom) LIKE :search')
-                ->setParameter('search', '%' . strtolower($searchTerm) . '%')
-                ->getQuery()
-                ->getResult()
-            : $quizRepository->findAll();
+    $searchTerm = $request->query->get('search', '');
+    $quizzes = !empty($searchTerm)
+        ? $quizRepository->createQueryBuilder('q')
+            ->where('LOWER(q.nom) LIKE :search')
+            ->setParameter('search', '%' . strtolower($searchTerm) . '%')
+            ->getQuery()
+            ->getResult()
+        : $quizRepository->findAll();
 
-        $quizResults = $session->get('quiz_result_history', []);
-        $role = strtoupper($user->getRole() ?? '');
-        $template = $role === 'ADMIN' ? 'quiz/ListQuiz.html.twig' : 'quiz/quiz_list_user.html.twig';
+    // Load hidden quizzes
+    $file = __DIR__ . '/../../config/hidden_quizzes.json';
+    $hiddenIds = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
 
-        return $this->render($template, [
-            'quizzes' => $quizzes,
-            'user' => $user,
-            'quizResults' => $quizResults,
-            'searchTerm' => $searchTerm,
-        ]);
+    // Filter hidden quizzes if not admin
+    $role = strtoupper($user->getRole() ?? '');
+    if ($role !== 'ADMIN') {
+        $quizzes = array_filter($quizzes, fn($quiz) => !in_array($quiz->getIdQuiz(), $hiddenIds));
     }
 
+    $quizResults = $session->get('quiz_result_history', []);
+    $template = $role === 'ADMIN' ? 'quiz/ListQuiz.html.twig' : 'quiz/quiz_list_user.html.twig';
+
+    return $this->render($template, [
+        'quizzes' => $quizzes,
+        'user' => $user,
+        'quizResults' => $quizResults,
+        'searchTerm' => $searchTerm,
+        'hiddenIds' => $hiddenIds, // 💡 needed for admin to toggle buttons
+    ]);
+}
     #[Route('/quiz/search', name: 'quiz_search')]
     public function search(Request $request, QuizRepository $quizRepository, CsrfTokenManagerInterface $csrfTokenManager): JsonResponse
     {
@@ -122,41 +131,39 @@ class QuizController extends AbstractController
         ]);
     }
 
-    #[Route('/quiz/{id}', name: 'quiz_show', methods: ['GET'], requirements: ['id' => '\\d+'])]
+    #[Route('/quiz/{id}', name: 'quiz_show', requirements: ['id' => '\d+'])]
     public function show(int $id, QuizRepository $quizRepository, QuestionRepository $questionRepository, SessionInterface $session, EntityManagerInterface $em): Response
     {
-        $userId = $session->get('id');
-        if (!$userId) return $this->redirectToRoute('login');
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
 
-        $user = $em->getRepository(User::class)->find($userId);
         $quiz = $quizRepository->find($id);
-        if (!$quiz) throw $this->createNotFoundException('Quiz not found');
+        if (!$quiz) {
+            throw $this->createNotFoundException('Quiz not found');
+        }
 
-        $questions = $questionRepository->createQueryBuilder('q')
-            ->leftJoin('q.reponses', 'r')
-            ->addSelect('r')
-            ->where('q.quiz = :quiz')
-            ->setParameter('quiz', $quiz)
-            ->getQuery()
-            ->getResult();
+        // Fetch questions from repository or rely on Quiz.questions
+        $questions = $questionRepository->findBy(['quiz' => $quiz]);
 
-        $template = strtoupper($user->getRole() ?? '') === 'ADMIN' ? 'quiz/QuizShow.html.twig' : 'quiz/quiz_take.html.twig';
-
-        return $this->render($template, [
+        return $this->render('quiz/QuizShow.html.twig', [
             'quiz' => $quiz,
             'questions' => $questions,
-            'user' => $user,
+            'user' => $em->getRepository(User::class)->find($session->get('id')),
         ]);
     }
-
-    #[Route('/quiz/{id}/edit', name: 'quiz_edit', methods: ['GET', 'POST'], requirements: ['id' => '\\d+'])]
+    
+    #[Route('/quiz/{id}/edit', name: 'quiz_edit', requirements: ['id' => '\d+'])]
     public function edit(int $id, Request $request, QuizRepository $quizRepository, EntityManagerInterface $em, SessionInterface $session): Response
     {
-        $userId = $session->get('id');
-        if (!$userId) return $this->redirectToRoute('login');
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
 
         $quiz = $quizRepository->find($id);
-        if (!$quiz) throw $this->createNotFoundException('Quiz not found');
+        if (!$quiz) {
+            throw $this->createNotFoundException('Quiz not found');
+        }
 
         $form = $this->createForm(QuizType::class, $quiz);
         $form->handleRequest($request);
@@ -169,8 +176,45 @@ class QuizController extends AbstractController
         return $this->render('quiz/QuizForm.html.twig', [
             'formQuiz' => $form->createView(),
             'edit_mode' => true,
+            'user' => $em->getRepository(User::class)->find($session->get('id')),
         ]);
     }
+
+    #[Route('/quiz/hide/{id}', name: 'quiz_hide', methods: ['POST'])]
+public function hideQuiz(int $id, SessionInterface $session): Response
+{
+    $userRole = strtoupper($session->get('role', ''));
+    if ($userRole !== 'ADMIN') {
+        throw $this->createAccessDeniedException('Only admins can hide quizzes.');
+    }
+
+    $file = __DIR__ . '/../../config/hidden_quizzes.json';
+    $hiddenIds = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
+
+    if (!in_array($id, $hiddenIds)) {
+        $hiddenIds[] = $id;
+        file_put_contents($file, json_encode($hiddenIds));
+    }
+
+    return $this->redirectToRoute('app_home');
+}
+#[Route('/quiz/unhide/{id}', name: 'quiz_unhide', methods: ['POST'])]
+public function unhideQuiz(int $id, SessionInterface $session): Response
+{
+    $userRole = strtoupper($session->get('role', ''));
+    if ($userRole !== 'ADMIN') {
+        throw $this->createAccessDeniedException('Only admins can unhide quizzes.');
+    }
+
+    $file = __DIR__ . '/../../config/hidden_quizzes.json';
+    $hiddenIds = file_exists($file) ? json_decode(file_get_contents($file), true) : [];
+
+    $hiddenIds = array_filter($hiddenIds, fn($qid) => $qid != $id);
+    file_put_contents($file, json_encode(array_values($hiddenIds)));
+
+    return $this->redirectToRoute('app_home');
+}
+
 
     #[Route('/quiz/{id}/delete', name: 'quiz_delete', methods: ['POST'], requirements: ['id' => '\\d+'])]
     public function delete(Request $request, int $id, QuizRepository $quizRepository, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager): Response
