@@ -92,6 +92,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(name="status", type="string", length=20, nullable=true, options={"default"="'ACTIVE'"})
      */
     private $status = 'ACTIVE';
+
+    /**
+     * @var Collection<int, Score>
+     */
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Score::class)]
+    private Collection $scores;
+
+    public function __construct()
+    {
+        $this->scores = new ArrayCollection();
+    }
   
     
     
@@ -268,5 +279,35 @@ public function getPassword(): ?string
     public function getUsername(): string
     {
         return $this->getUserIdentifier();
+    }
+
+    /**
+     * @return Collection<int, Score>
+     */
+    public function getScores(): Collection
+    {
+        return $this->scores;
+    }
+
+    public function addScore(Score $score): static
+    {
+        if (!$this->scores->contains($score)) {
+            $this->scores->add($score);
+            $score->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeScore(Score $score): static
+    {
+        if ($this->scores->removeElement($score)) {
+            // set the owning side to null (unless already changed)
+            if ($score->getUser() === $this) {
+                $score->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }
