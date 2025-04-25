@@ -95,20 +95,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
   
     
     
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="Quiz", mappedBy="iduser")
-     */
-    private $idquiz = array();
+   
 
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->idquiz = new \Doctrine\Common\Collections\ArrayCollection();
-    }
+ 
     public function getId(): ?int
     {
         return $this->id;

@@ -54,7 +54,7 @@ class Tache
      *
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idUser", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="idUser", referencedColumnName="id", onDelete="CASCADE")
      * })
      */
     private $iduser;
