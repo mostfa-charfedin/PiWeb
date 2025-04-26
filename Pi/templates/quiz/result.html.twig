@@ -50,6 +50,16 @@
       font-size: 1rem;
       border-radius: 30px;
     }
+
+    .download-pdf-btn {
+      margin-top: 1rem;
+      padding: 10px 30px;
+      font-size: 1rem;
+      border-radius: 30px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+    }
   </style>
 {% endblock %}
 
@@ -68,6 +78,12 @@
   <section class="section result-container">
     <div class="result-header">
       <p class="user-score">Your score: {{ score }}/{{ total }}</p>
+
+      <!-- Button to download the PDF -->
+      <a href="{{ path('quiz_download_certificate', {id: quiz.idquiz}) }}" class="btn btn-success mt-3">
+  📄 Download Certificate (PDF)
+</a>
+
       <a href="{{ path('app_home') }}" class="btn btn-outline-primary return-home-btn">
         ⬅ Return to Home
       </a>

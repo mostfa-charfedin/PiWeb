@@ -20,6 +20,8 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Knp\Snappy\Pdf;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 
 class QuizController extends AbstractController
@@ -416,6 +418,38 @@ public function userStats(SessionInterface $session, EntityManagerInterface $em)
         'average' => $average,
         'chartLabels' => $chartLabels,
         'chartData' => $chartData,
+    ]);
+}
+#[Route('/quiz/{id}/certificate', name: 'quiz_download_certificate')]
+public function downloadCertificate(
+    Pdf $knpSnappyPdf,
+    QuizRepository $quizRepository,
+    SessionInterface $session,
+    EntityManagerInterface $em,
+    int $id
+): Response {
+    $quiz = $quizRepository->find($id);
+    $userId = $session->get('id');
+
+    if (!$quiz || !$userId) {
+        return $this->redirectToRoute('app_home');
+    }
+
+    $user = $em->getRepository(User::class)->find($userId);
+    $result = $session->get('quiz_result');
+
+    $html = $this->renderView('quiz/quiz_certificate.html.twig', [
+        'quiz' => $quiz,
+        'score' => $result['score'],
+        'total' => $result['total'],
+        'user' => $user,
+    ]);
+
+    $pdf = $knpSnappyPdf->getOutputFromHtml($html);
+
+    return new Response($pdf, 200, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'attachment; filename="quiz_result.pdf"',
     ]);
 }
 }
