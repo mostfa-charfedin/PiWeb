@@ -35,17 +35,17 @@ class ProgrammebienetreController extends AbstractController
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
-
+    
         $userId = $session->get('id');
         $user = $em->getRepository(User::class)->find($userId);
         if (!$user) {
             throw $this->createNotFoundException('User Not Found');
         }
-
+    
         $programmebienetres = $programmebienetreRepository->findAll();
         $recompenses = [];
         $averageRatings = [];
-
+    
         foreach ($programmebienetres as $programme) {
             // Calculer la moyenne des ratings
             $avis = $avisRepository->findBy(['programme' => $programme]);
@@ -58,21 +58,22 @@ class ProgrammebienetreController extends AbstractController
             }
             
             $averageRatings[$programme->getIdprogramme()] = $count > 0 ? round($totalRatings / $count, 1) : 0;
-
+    
             if ($recompenseRepository->hasProgrammeRecompense($programme->getIdprogramme())) {
                 $recompenses[$programme->getIdprogramme()] = true;
             }
         }
         $session->set('recompenses', $recompenses);
-
+    
         $template = $user->getRole() === 'ADMIN' ? 'programmebienetre/index.html.twig' : 'programmebienetre/user_index.html.twig';
-
+    
         return $this->render($template, [
             'programmebienetres' => $programmebienetres,
             'user' => $user,
             'averageRatings' => $averageRatings
         ]);
     }
+    
 
     #[Route('/programmebienetre/new', name: 'app_programmebienetre_new', methods: ['GET', 'POST'])]
     public function new(
@@ -285,11 +286,11 @@ class ProgrammebienetreController extends AbstractController
                 'iduser' => $programme->getIduser() ? [
                     'nom' => $programme->getIduser()->getNom(),
                     'prenom' => $programme->getIduser()->getPrenom()
-                ] : null
+                ] : null,
+                'dateProgramme' => $programme->getDateProgramme() ? $programme->getDateProgramme()->format('Y-m-d') : null
             ];
         }, $programmes);
         
         return new JsonResponse($data);
     }
 }
-
