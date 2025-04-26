@@ -21,7 +21,7 @@ class Ressources
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
-    private $idresource;
+    private $idresource;   // Identifiant unique pour chaque ressource et  Déclarations 
 
     /**
      * @var string|null
@@ -66,7 +66,7 @@ class Ressources
      *   @ORM\JoinColumn(name="id", referencedColumnName="id")
      * })
      */
-    private $id;
+    private $id;   // L'utilisateur associé à la ressource (propriétaire de la ressource)
 
     /**
      * @var Collection<int, Evaluation>

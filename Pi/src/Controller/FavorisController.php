@@ -18,6 +18,7 @@ final class FavorisController extends AbstractController
     #[Route(name: 'app_favoris_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
+        // Check if user is logged in
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
@@ -27,6 +28,7 @@ final class FavorisController extends AbstractController
         if (!$user) {
             throw $this->createNotFoundException('User not found');
         }
+        // Fetch all favoris (favorites) related to the user
 
         $favoris = $entityManager
             ->getRepository(Favoris::class)
@@ -40,6 +42,8 @@ final class FavorisController extends AbstractController
             }
         }
         $entityManager->flush();
+
+        // Render the list of favorites
 
         return $this->render('favoris/index.html.twig', [
             'favoris' => $favoris,

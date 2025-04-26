@@ -61,22 +61,27 @@ class RessourcesController extends AbstractController
             'user' => $user,
         ]);
     }
+    // New resource creation route
 
     #[Route('/new', name: 'app_ressources_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
+        // Check if user is logged in, if not redirect to login page
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
+        // Retrieve the logged-in user from session
 
         $user = $entityManager->getRepository(User::class)->find($session->get('id'));
         $ressource = new Ressources();
         
         // Set the user before creating the form
         $ressource->setId($user);
-        
+
+        // Create and handle the form
         $form = $this->createForm(RessourcesType::class, $ressource);
         $form->handleRequest($request);
+        // Check if the form is submitted and valid
 
         if ($form->isSubmitted()) {
             if ($form->isValid()) {
@@ -93,21 +98,29 @@ class RessourcesController extends AbstractController
             }
         }
 
+        // Render the form for creating a new resource
+
         return $this->render('ressources/new.html.twig', [
             'form' => $form->createView(),
             'ressource' => $ressource,
             'user' => $user,
         ]);
-    }
+    } 
+
+     // Show resource details route
 
     #[Route('/{idresource}', name: 'app_ressources_show', methods: ['GET'])]
     public function show(Ressources $ressource, EntityManagerInterface $em, SessionInterface $session): Response
     {
+        // Check if user is logged in, if not redirect to login page
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
+        // Retrieve the logged-in user from session
 
         $user = $em->getRepository(User::class)->find($session->get('id'));
+
+        // Render the details of the resource
 
         return $this->render('ressources/show.html.twig', [
             'ressource' => $ressource,
@@ -184,6 +197,7 @@ class RessourcesController extends AbstractController
 
         return $this->redirectToRoute('app_ressources_index');
     }
+     // Rate resource route
 
     #[Route('/{idresource}/rate', name: 'app_ressources_rate', methods: ['POST'])]
     public function rate(Request $request, Ressources $ressource, EntityManagerInterface $em, SessionInterface $session): Response

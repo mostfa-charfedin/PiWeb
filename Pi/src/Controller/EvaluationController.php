@@ -21,6 +21,7 @@ final class EvaluationController extends AbstractController
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
+        // Get the current logged-in user
 
         $userId = $session->get('id');
         $user = $entityManager->getRepository(User::class)->find($userId);
@@ -33,6 +34,7 @@ final class EvaluationController extends AbstractController
             $this->addFlash('error', 'Access denied. This section is for administrators only.');
             return $this->redirectToRoute('profile');
         }
+        // Fetch all evaluations
 
         $evaluations = $entityManager
             ->getRepository(Evaluation::class)
@@ -51,6 +53,8 @@ final class EvaluationController extends AbstractController
         // Debug information
         dump($evaluations);
         dump($resourceTitles);
+
+        // Render the evaluations page
 
         return $this->render('evaluation/index.html.twig', [
             'evaluations' => $evaluations,
