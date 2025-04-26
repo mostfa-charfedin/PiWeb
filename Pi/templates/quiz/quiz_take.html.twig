@@ -178,49 +178,51 @@
     });
   });
 
-  function translateQuestion(id) {
+function translateQuestion(id) {
     const langSelect = document.getElementById(`lang-${id}`);
     const questionContainer = document.getElementById(`translated-question-${id}`);
 
     if (!langSelect || !questionContainer) {
-      console.error('Language selector or question container not found.');
-      return;
+        console.error('Language selector or question container not found.');
+        return;
     }
 
     const lang = langSelect.value;
     questionContainer.style.display = 'block';
     questionContainer.innerHTML = '🔄 Translating...';
 
-    const url = `{{ path('quiz_question_translate', { id: 'QUESTION_ID', lang: 'LANG' }) }}`;
-fetch(url.replace('QUESTION_ID', id).replace('LANG', lang))
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (data.success) {
-          questionContainer.innerHTML = `<strong>Translation:</strong><br>${data.question}`;
+    // Build the URL dynamically
+    const url = `/quiz/${id}/translate/${lang}`;
 
-          const translatedResponses = data.responses;
-          const labels = document.querySelectorAll(`label[for^="reponse_${id}_"]`);
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                questionContainer.innerHTML = `<strong>Translation:</strong><br>${data.question}`;
 
-          if (translatedResponses && labels.length > 0) {
-            labels.forEach((label, index) => {
-              if (translatedResponses[index] !== undefined) {
-                label.innerText = translatedResponses[index];
-              }
-            });
-          }
-        } else {
-          questionContainer.innerHTML = `<div class="text-danger">❌ ${data.message}</div>`;
-        }
-      })
-      .catch(error => {
-        questionContainer.innerHTML = `<div class="text-danger">❌ Error: ${error.message}</div>`;
-        console.error('Translation error:', error);
-      });
+                const translatedResponses = data.responses;
+                const labels = document.querySelectorAll(`label[for^="reponse_${id}_"]`);
+
+                if (translatedResponses && labels.length > 0) {
+                    labels.forEach((label, index) => {
+                        if (translatedResponses[index] !== undefined) {
+                            label.innerText = translatedResponses[index];
+                        }
+                    });
+                }
+            } else {
+                questionContainer.innerHTML = `<div class="text-danger">❌ ${data.message}</div>`;
+            }
+        })
+        .catch(error => {
+            questionContainer.innerHTML = `<div class="text-danger">❌ Error: ${error.message}</div>`;
+            console.error('Translation error:', error);
+        });
   }
 </script>
 {% endblock %}

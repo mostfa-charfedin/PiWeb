@@ -28,13 +28,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class QuizController extends AbstractController
 {
-    private HttpClientInterface $httpClient;
-
-    public function __construct(HttpClientInterface $httpClient)
-    {
-        $this->httpClient = $httpClient;
-    }
-
+ 
     #[Route('/quiz', name: 'app_home', methods: ['GET'])]
 public function index(Request $request, QuizRepository $quizRepository, SessionInterface $session, EntityManagerInterface $em): Response
 {
@@ -486,6 +480,15 @@ public function downloadCertificate(
         'Content-Disposition' => 'attachment; filename="quiz_result.pdf"',
     ]);
 }
+private HttpClientInterface $client;
+private string $googleApiKey;
+
+public function __construct(HttpClientInterface $client)
+{
+    $this->client = $client;
+    $this->googleApiKey = 'AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw'; // 🔥 Replace this with your real API Key
+}
+
 /**
  * @Route("/quiz/{id}/translate/{lang}", name="quiz_question_translate")
  */
@@ -500,12 +503,13 @@ public function translateQuestion(int $id, string $lang, QuestionRepository $que
         ], 404);
     }
 
-    // Dummy translation logic for multiple languages
-    $translatedQuestion = $this->getTranslatedText($question->getQuestion(), $lang);
+    // Translate the question text
+    $translatedQuestion = $this->translateTextWithGoogle($question->getQuestion(), $lang);
 
+    // Translate all the responses
     $translatedResponses = [];
     foreach ($question->getReponses() as $response) {
-        $translatedResponses[] = $this->getTranslatedText($response->getResponse(), $lang);
+        $translatedResponses[] = $this->translateTextWithGoogle($response->getResponse(), $lang);
     }
 
     return new JsonResponse([
@@ -515,20 +519,30 @@ public function translateQuestion(int $id, string $lang, QuestionRepository $que
     ]);
 }
 
-// Helper function for translating text based on language
-private function getTranslatedText(string $text, string $lang): string
+private function translateTextWithGoogle(string $text, string $targetLang): string
 {
-    switch ($lang) {
-        case 'en': // English
-            return $text;
-        case 'fr': // French
-            return "[fr] " . $text;
-        case 'es': // Spanish
-            return "[es] " . $text;
-        case 'de': // German
-            return "[de] " . $text;
-        // Add more languages as needed
-        default:
-            return "[{$lang}] " . $text; // Default translation
+    $url = 'https://translation.googleapis.com/language/translate/v2';
+
+    try {
+        $response = $this->client->request('POST', $url, [
+            'query' => [
+                'key' => $this->googleApiKey,
+            ],
+            'json' => [
+                'q' => $text,
+                'target' => $targetLang,
+                'format' => 'text',
+            ],
+        ]);
+
+        $data = $response->toArray();
+
+        if (isset($data['data']['translations'][0]['translatedText'])) {
+            return $data['data']['translations'][0]['translatedText'];
+        }
+
+        return $text; // fallback if translation fails
+    } catch (\Exception $e) {
+        return $text; // fallback if any error
     }
 }}
