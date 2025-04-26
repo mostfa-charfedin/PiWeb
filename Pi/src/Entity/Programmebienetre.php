@@ -4,8 +4,6 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Programmebienetre
@@ -59,22 +57,6 @@ class Programmebienetre
      * @ORM\JoinColumn(name="idUser", referencedColumnName="id")
      */
     private $iduser;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Avis", mappedBy="programme", cascade={"remove"})
-     */
-    private $avis;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Recompense", mappedBy="idprogramme", cascade={"remove"})
-     */
-    private $recompenses;
-
-    public function __construct()
-    {
-        $this->avis = new ArrayCollection();
-        $this->recompenses = new ArrayCollection();
-    }
 
     public function getIdprogramme(): ?int
     {
@@ -134,21 +116,5 @@ class Programmebienetre
     {
         $this->iduser = $iduser;
         return $this;
-    }
-
-    /**
-     * @return Collection|Avis[]
-     */
-    public function getAvis(): Collection
-    {
-        return $this->avis;
-    }
-
-    /**
-     * @return Collection|Recompense[]
-     */
-    public function getRecompenses(): Collection
-    {
-        return $this->recompenses;
     }
 }

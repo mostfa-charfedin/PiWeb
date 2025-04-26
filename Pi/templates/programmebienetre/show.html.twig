@@ -1,4 +1,4 @@
-{% extends 'navBar.html.twig' %}
+{% extends 'sideBar.html.twig' %}
 
 {% block title %}Program Details{% endblock %}
 
@@ -43,12 +43,7 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="card-title">{{ programme.titre }}</h5>
                             <div class="btn-group">
-                                {% if not has_user_reviewed %}
-                                    <a href="{{ path('app_avis_new', {'idprogramme': programme.idprogramme}) }}" class="btn btn-primary">
-                                        <i class="bi bi-star me-1"></i>
-                                        Write a Review
-                                    </a>
-                                {% endif %}
+                              
                             </div>
                         </div>
 

@@ -15,6 +15,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use App\Entity\User;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/avis')]
 class AvisController extends AbstractController
@@ -45,7 +46,7 @@ class AvisController extends AbstractController
         }
 
         // Return appropriate template based on user role
-        $template = $user->getRole() === 'ADMIN' ? 'avis/admin_index.html.twig' : 'avis/index.html.twig';
+        $template = $user->getRole() === 'ADMIN' ? 'avis/admin_index.html.twig' : 'avis/user_index.html.twig';
 
         return $this->render($template, [
             'avis' => $avis,
@@ -98,7 +99,17 @@ class AvisController extends AbstractController
             $entityManager->flush();
 
             $this->addFlash('success', 'Your review has been added successfully.');
-            return $this->redirectToRoute('app_avis_index', [], Response::HTTP_SEE_OTHER);
+            
+            // Récupérer l'utilisateur et ses avis
+            $userId = $session->get('id');
+            $user = $entityManager->getRepository(User::class)->find($userId);
+            $avis = $avisRepository->findBy(['user' => $user]);
+            
+            // Rediriger vers la page des avis de l'utilisateur
+            return $this->render('avis/user_index.html.twig', [
+                'avis' => $avis,
+                'user' => $user
+            ]);
         }
 
         return $this->render('avis/new.html.twig', [
@@ -186,11 +197,12 @@ class AvisController extends AbstractController
         $totalReviewers = $avisRepository->getTotalUniqueReviewers();
         
         return $this->render('avis/stats.html.twig', [
-            'ratingData' => json_encode($ratingData),
+            'ratingData' => $ratingData,
             'averageRating' => $averageRating,
             'programStats' => $programStats,
             'totalReviewers' => $totalReviewers,
             'user' => $user
         ]);
     }
+
 }

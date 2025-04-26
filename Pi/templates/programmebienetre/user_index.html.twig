@@ -5,6 +5,21 @@
 {% block stylesheets %}
     {{ parent() }}
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .search-loading {
+            display: none;
+        }
+        .search-loading.active {
+            display: inline-block;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 {% endblock %}
 
 {% block content %}
@@ -26,67 +41,87 @@
           <div class="card-body">
             <h5 class="card-title">Programs List</h5>
 
+            <!-- Search form -->
+            <div class="mb-4 row">
+              <div class="col-md-8">
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input type="text" 
+                         id="searchInput" 
+                         class="form-control" 
+                         placeholder="Search by title or description..."
+                         autocomplete="off">
+                  <div class="spinner-border text-primary search-loading" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Table with stripped rows -->
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">Title</th>
-                  <th scope="col">Type</th>
-                  <th scope="col">Description</th>
-                  <th scope="col">Program Owner</th>
-                  <th scope="col">Average Rating</th>
-                  <th scope="col">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for program in programmebienetres %}
-                <tr>
-                  <th scope="row">{{ loop.index }}</th>
-                  <td>{{ program.titre }}</td>
-                  <td>{{ program.type }}</td>
-                  <td>{{ program.description }}</td>
-                  <td>
-                    {% if program.iduser %}
-                      {{ program.iduser.nom }} {{ program.iduser.prenom }}
-                    {% else %}
-                      No Owner
-                    {% endif %}
-                  </td>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      {% set avgRating = averageRatings[program.idprogramme] %}
-                      {% for i in 1..5 %}
-                        {% if i <= avgRating %}
-                          <i class="bi bi-star-fill text-warning"></i>
-                        {% elseif i - 0.5 <= avgRating %}
-                          <i class="bi bi-star-half text-warning"></i>
-                        {% else %}
-                          <i class="bi bi-star text-warning"></i>
-                        {% endif %}
-                      {% endfor %}
-                      <span class="ms-2">{{ avgRating }}/5</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="btn-group" role="group">
-                      <a href="{{ path('app_programmebienetre_show', {'idprogramme': program.idprogramme}) }}" class="btn btn-sm btn-primary" title="View">
-                        <i class="bi bi-eye"></i>
-                      </a>
-                      <a href="{{ path('app_avis_new', {'idprogramme': program.idprogramme}) }}" class="btn btn-sm btn-info" title="Give Review">
-                        <i class="bi bi-star"></i>
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-                {% else %}
-                <tr>
-                  <td colspan="7" class="text-center">No Program.</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            <!-- End Table with stripped rows -->
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Program Owner</th>
+                    <th scope="col">Average Rating</th>
+                    <th scope="col">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="programsTableBody">
+                  {% for program in programmebienetres %}
+                  <tr class="fade-in">
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ program.titre }}</td>
+                    <td>{{ program.type }}</td>
+                    <td>{{ program.description }}</td>
+                    <td>
+                      {% if program.iduser %}
+                        {{ program.iduser.nom }} {{ program.iduser.prenom }}
+                      {% else %}
+                        No Owner
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        {% set avgRating = averageRatings[program.idprogramme] %}
+                        {% for i in 1..5 %}
+                          {% if i <= avgRating %}
+                            <i class="bi bi-star-fill text-warning"></i>
+                          {% elseif i - 0.5 <= avgRating %}
+                            <i class="bi bi-star-half text-warning"></i>
+                          {% else %}
+                            <i class="bi bi-star text-warning"></i>
+                          {% endif %}
+                        {% endfor %}
+                        <span class="ms-2">{{ avgRating }}/5</span>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="btn-group" role="group">
+                        <a href="{{ path('app_programmebienetre_show', {'idprogramme': program.idprogramme}) }}" class="btn btn-sm btn-primary" title="View">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{{ path('app_avis_new', {'idprogramme': program.idprogramme}) }}" class="btn btn-sm btn-info" title="Give Review">
+                          <i class="bi bi-star"></i>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                  {% else %}
+                  <tr>
+                    <td colspan="7" class="text-center">No programs found.</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -99,16 +134,104 @@
     {{ parent() }}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Add smooth fade-in animation for table rows
-            const rows = document.querySelectorAll('tbody tr');
-            rows.forEach((row, index) => {
-                row.style.opacity = '0';
-                row.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    row.style.transition = 'all 0.3s ease';
-                    row.style.opacity = '1';
-                    row.style.transform = 'translateY(0)';
-                }, 100 * index);
+            const searchInput = document.getElementById('searchInput');
+            const tableBody = document.getElementById('programsTableBody');
+            const loadingSpinner = document.querySelector('.search-loading');
+            let searchTimeout;
+
+            function renderStarRating(rating) {
+                let stars = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= rating) {
+                        stars += '<i class="bi bi-star-fill text-warning"></i>';
+                    } else if (i - 0.5 <= rating) {
+                        stars += '<i class="bi bi-star-half text-warning"></i>';
+                    } else {
+                        stars += '<i class="bi bi-star text-warning"></i>';
+                    }
+                }
+                return `
+                    <div class="d-flex align-items-center">
+                        ${stars}
+                        <span class="ms-2">${rating}/5</span>
+                    </div>`;
+            }
+
+            function updateTable(programs) {
+                tableBody.innerHTML = '';
+                
+                if (!programs || programs.length === 0) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center">No programs found</td>
+                        </tr>`;
+                    return;
+                }
+
+                programs.forEach((program, index) => {
+                    const manager = program.iduser 
+                        ? `${program.iduser.nom} ${program.iduser.prenom}` 
+                        : 'No Owner';
+
+                    const row = `
+                        <tr class="fade-in">
+                            <th scope="row">${index + 1}</th>
+                            <td>${program.titre || ''}</td>
+                            <td>${program.type || 'N/A'}</td>
+                            <td>${program.description || ''}</td>
+                            <td>${manager}</td>
+                            <td>${renderStarRating(program.averageRating || 0)}</td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="/programmebienetre/${program.idprogramme}" 
+                                       class="btn btn-sm btn-primary" title="View">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="/avis/new/${program.idprogramme}" 
+                                       class="btn btn-sm btn-info" title="Give Review">
+                                        <i class="bi bi-star"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            }
+
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                loadingSpinner.classList.add('active');
+
+                fetch(`{{ path('programme_search') }}?q=${encodeURIComponent(searchTerm)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateTable(Array.isArray(data) ? data : data.data);
+                        loadingSpinner.classList.remove('active');
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="7" class="text-center text-danger">
+                                    An error occurred while searching. Please try again.
+                                </td>
+                            </tr>`;
+                        loadingSpinner.classList.remove('active');
+                    });
+            }
+
+            // Search input handler with debounce
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(performSearch, 300);
+            });
+
+            // Handle Enter key
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    performSearch();
+                }
             });
         });
     </script>

@@ -65,7 +65,8 @@
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Rating Distribution</h5>
-                        <div style="height: 200px;">
+                        <!-- Increased height for the chart container -->
+                        <div style="height: 300px;">
                             <canvas id="ratingChart"></canvas>
                         </div>
                     </div>
@@ -140,11 +141,26 @@
 </main>
 {% endblock %}
 
-{% block script %}
+{% block javascripts %}
+{{ parent() }}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const ctx = document.getElementById('ratingChart');
-        const data = {{ ratingData|raw }};
+        // Convert PHP array to JavaScript array
+        const data = {{ ratingData|json_encode|raw }};
+        console.log('Chart data:', data);
+        
+        // Check if we have any non-zero values
+        const hasData = Array.isArray(data) && data.some(value => value > 0);
+        
+        if (!hasData) {
+            // No data to display, show a message instead
+            const parent = ctx.parentElement;
+            const message = document.createElement('div');
+            message.className = 'text-center text-muted mt-5';
+            message.innerHTML = '<i class="bi bi-exclamation-circle"></i> No rating data available yet';
+            parent.appendChild(message);
+        }
         
         new Chart(ctx, {
             type: 'bar',
@@ -185,4 +201,4 @@
         });
     });
 </script>
-{% endblock %} 
+{% endblock %}

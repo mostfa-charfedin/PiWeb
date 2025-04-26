@@ -2,6 +2,19 @@
 
 {% block title %}My Reviews{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+{% endblock %}
+
 {% block content %}
 <main id="main" class="main">
     {% for label, messages in app.flashes %}
@@ -37,7 +50,7 @@
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover">
+                            <table class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>Program</th>
@@ -46,43 +59,43 @@
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="reviewsTableBody">
                                     {% for avi in avis %}
-                                        <tr>
-                                            <td>
-                                                {% if avi.programme %}
-                                                    {{ avi.programme.titre }}
-                                                {% else %}
-                                                    <span class="text-muted">Programme supprimé</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <div class="rating">
-                                                    {% for i in 1..5 %}
-                                                        {% if i <= avi.rating %}
-                                                            <i class="bi bi-star-fill text-warning"></i>
-                                                        {% else %}
-                                                            <i class="bi bi-star text-warning"></i>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                </div>
-                                            </td>
-                                            <td>{{ avi.commentaire }}</td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ path('app_avis_edit', {'id': avi.id}) }}" class="btn btn-primary btn-sm" title="Edit">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
-                                                    <form method="post" action="{{ path('app_avis_delete', {'id': avi.id}) }}" style="display: inline-block;"
-                                                          onsubmit="return confirm('Are you sure you want to delete this review?');">
-                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avi.id) }}">
-                                                        <button class="btn btn-danger btn-sm" title="Delete">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </td>
-                                        </tr>
+                                    <tr class="fade-in">
+                                        <td>
+                                            {% if avi.programme %}
+                                                {{ avi.programme.titre }}
+                                            {% else %}
+                                                <span class="text-muted">Programme supprimé</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="rating">
+                                                {% for i in 1..5 %}
+                                                    {% if i <= avi.rating %}
+                                                        <i class="bi bi-star-fill text-warning"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star text-warning"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </td>
+                                        <td>{{ avi.commentaire }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ path('app_avis_edit', {'id': avi.id}) }}" class="btn btn-primary btn-sm" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form method="post" action="{{ path('app_avis_delete', {'id': avi.id}) }}" style="display: inline-block;"
+                                                      onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avi.id) }}">
+                                                    <button class="btn btn-danger btn-sm" title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
                                     {% else %}
                                         <tr>
                                             <td colspan="4" class="text-center">No reviews found</td>
@@ -101,18 +114,4 @@
 
 {% block javascripts %}
     {{ parent() }}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Animation d'entrée du tableau
-            const table = document.querySelector('.table');
-            table.style.opacity = '0';
-            table.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                table.style.transition = 'all 0.3s ease';
-                table.style.opacity = '1';
-                table.style.transform = 'translateY(0)';
-            }, 100);
-        });
-    </script>
-{% endblock %} 
+{% endblock %}
