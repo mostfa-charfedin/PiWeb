@@ -47,17 +47,23 @@ class Tache
      *
      * @ORM\Column(name="status", type="string", length=50, nullable=true, options={"default"="on progress"})
      */
-    private $status = 'on progress'; // Correct default value
+    private $status = 'to do'; // Correct default value
 
     /**
      * @var \User
      *
      * @ORM\ManyToOne(targetEntity="User")
      * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idUser", referencedColumnName="id")
+     *   @ORM\JoinColumn(name="idUser", referencedColumnName="id", onDelete="CASCADE")
      * })
      */
     private $iduser;
+    /**
+ * @var \DateTime
+ *
+ * @ORM\Column(name="created_at", type="datetime", options={"default": "CURRENT_TIMESTAMP"})
+ */
+private $created_at;
 
     /**
      * @var \Projet
@@ -68,6 +74,18 @@ class Tache
      * })
      */
     private $idprojet;
+    
+    /**
+     * @var \DateTime|null
+     *
+     * @ORM\Column(name="completed_at", type="datetime", nullable=true)
+     */
+    private $completedAt;
+    public function __construct()
+{
+    $this->created_at = new \DateTime();
+}
+
 
     public function getIdtache(): ?int
     {
@@ -139,4 +157,57 @@ class Tache
         $this->idprojet = $idprojet;
         return $this;
     }
+    public function getCreatedAt(): ?\DateTime
+{
+    return $this->created_at;
+}
+
+public function setCreatedAt(\DateTime $created_at): self
+{
+    $this->created_at = $created_at;
+    return $this;
+}
+public function updateCompletionTimestamp(): void
+    {
+        if ($this->status === 'Completed' && $this->completedAt === null) {
+            $this->completedAt = new \DateTime();
+        }
+    }
+    public function getCompletedAt(): ?\DateTimeInterface
+    {
+        return $this->completedAt;
+    }
+
+    public function setCompletedAt(?\DateTimeInterface $completedAt): self
+    {
+        $this->completedAt = $completedAt;
+        return $this;
+    }
+
+    /**
+     * Calculates whether task was completed early
+     */
+    public function isCompletedEarly(): bool
+    {
+        if (!$this->completedAt || !$this->date) {
+            return false;
+        }
+
+        $deadline = (clone $this->created_at)->add(new \DateInterval('P' . $this->date . 'W'));
+        return $this->completedAt < $deadline;
+    }
+
+    /**
+     * Calculates whether task is overdue
+     */
+    public function isOverdue(): bool
+    {
+        if ($this->status === 'Completed' || !$this->date) {
+            return false;
+        }
+
+        $deadline = (clone $this->created_at)->add(new \DateInterval('P' . $this->date . 'W'));
+        return new \DateTime() > $deadline;
+    }
+
 }

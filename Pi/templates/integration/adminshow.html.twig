@@ -8,7 +8,7 @@
       <h1>{{ projet.titre }}</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a >Home</a></li>
+          <li class="breadcrumb-item"><a>Home</a></li>
           <li class="breadcrumb-item"><a href="{{ path('projet_list') }}">Projects</a></li>
           <li class="breadcrumb-item active">Details</li>
         </ol>
@@ -32,24 +32,55 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5>Tasks</h5>
-          <a href="{{ path('tache_new', {'idProjet': projet.idProjet}) }}" class="btn btn-primary">
-            <i class="bi bi-plus-circle"></i> Add Task
-          </a>
+          <div>
+            <a href="{{ path('projet_stats', {'idProjet': projet.idProjet}) }}" class="btn btn-info me-2">
+              <i class="bi bi-bar-chart"></i> Show Statistics
+            </a>
+            <a href="{{ path('tache_new', {'idProjet': projet.idProjet}) }}" class="btn btn-primary">
+              <i class="bi bi-plus-circle"></i> Add Task
+            </a>
+          </div>
         </div>
 
         {% for tache in taches %}
           <div class="card mb-2">
             <div class="card-body">
-              <h6>{{ tache.titre }} <span class="badge bg-info text-dark">{{ tache.status }}</span></h6>
+              <h6>
+                {{ tache.titre }}
+                <span class="badge bg-info text-dark">{{ tache.status }}</span>
+              </h6>
               <p>{{ tache.description }}</p>
               <small>Assigned to: {{ tache.iduser.nom }} {{ tache.iduser.prenom }}</small>
               <div class="mt-2 text-end">
                 <a href="{{ path('tache_edit', {'idTache': tache.idtache}) }}" class="btn btn-sm btn-warning me-1">
                   <i class="bi bi-pencil"></i> Edit
                 </a>
-                <a href="{{ path('tache_delete', {'idTache': tache.idtache}) }}" class="btn btn-sm btn-danger" onclick="return confirm('Delete this task?')">
+
+                <!-- Trigger modal -->
+                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteTaskModal{{ tache.idtache }}">
                   <i class="bi bi-trash"></i> Delete
-                </a>
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="deleteTaskModal{{ tache.idtache }}" tabindex="-1" aria-labelledby="deleteTaskModalLabel{{ tache.idtache }}" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="deleteTaskModalLabel{{ tache.idtache }}">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to delete the task <strong>{{ tache.titre }}</strong>?
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <a href="{{ path('tache_delete', {'idTache': tache.idtache}) }}" class="btn btn-danger">Delete</a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <!-- End Modal -->
+
               </div>
             </div>
           </div>

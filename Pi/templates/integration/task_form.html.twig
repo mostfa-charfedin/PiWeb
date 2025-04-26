@@ -57,34 +57,60 @@
           <div class="card-body">
             <h5 class="card-title">{{ edit_mode ? 'Edit Task Details' : 'Create New Task' }}</h5>
 
-            {{ form_start(formTache, {'attr': {'class': 'row g-3'}}) }}
+            {{ form_start(formTache, {'attr': {'class': 'row g-3','novalidate':'novalidate'}}) }}
+
+              {# Title Field #}
               <div class="col-md-12">
-                {{ form_row(formTache.titre, {
-                    'label_attr': {'class': 'form-label'},
-                    'attr': {'class': 'form-control'}
+                <label for="{{ formTache.titre.vars.id }}" class="form-label">Title</label>
+                {{ form_widget(formTache.titre, {
+                    'attr': {'class': 'form-control' ~ (formTache.titre.vars.errors|length > 0 ? ' is-invalid' : '')}
                 }) }}
+                {% if formTache.titre.vars.errors|length %}
+                  <div class="text-danger mt-1">
+                    {% for error in formTache.titre.vars.errors %}
+                      <p>{{ error.message }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
-              
+
+              {# Description Field #}
               <div class="col-md-12">
-                {{ form_row(formTache.description, {
-                    'label_attr': {'class': 'form-label'},
-                    'attr': {'class': 'form-control', 'rows': 3}
+                <label for="{{ formTache.description.vars.id }}" class="form-label">Description</label>
+                {{ form_widget(formTache.description, {
+                    'attr': {'class': 'form-control' ~ (formTache.description.vars.errors|length > 0 ? ' is-invalid' : ''), 'rows': 3}
                 }) }}
+                {% if formTache.description.vars.errors|length %}
+                  <div class="text-danger mt-1">
+                    {% for error in formTache.description.vars.errors %}
+                      <p>{{ error.message }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
-              
+
+              {# Date Field #}
               <div class="col-md-12">
-                {{ form_row(formTache.date, {
-                    'label_attr': {'class': 'form-label'},
-                    'attr': {'class': 'form-control'}
+                <label for="{{ formTache.date.vars.id }}" class="form-label">Date</label>
+                {{ form_widget(formTache.date, {
+                    'attr': {'class': 'form-control' ~ (formTache.date.vars.errors|length > 0 ? ' is-invalid' : '')}
                 }) }}
+                {% if formTache.date.vars.errors|length %}
+                  <div class="text-danger mt-1">
+                    {% for error in formTache.date.vars.errors %}
+                      <p>{{ error.message }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
-              
+
+              {# User Assignment Field #}
               <div class="col-md-12">
                 <label class="form-label">Assign To</label>
                 <div class="selected-user">
                   {% if formTache.iduser.vars.value %}
                     {% set selectedUser = formTache.iduser.vars.choices[formTache.iduser.vars.value].data %}
-                    {{ selectedUser.getNom() }} {{ selectedUser.getPrenom() }} 
+                    {{ selectedUser.getNom() }} {{ selectedUser.getPrenom() }}
                     <span class="badge bg-{{ selectedUser.role == 'chefprojet' ? 'warning text-dark' : 'primary' }}">
                       {{ selectedUser.role == 'chefprojet' ? 'Manager' : 'Employee' }}
                     </span>
@@ -92,9 +118,9 @@
                     <span class="text-muted">No user selected</span>
                   {% endif %}
                 </div>
-                
+
                 <input type="text" class="user-search form-control" placeholder="Search users...">
-                
+
                 <div class="user-table-container">
                   <table class="user-table table table-sm table-hover">
                     <thead class="table-light">
@@ -105,7 +131,7 @@
                     </thead>
                     <tbody>
                       {% for choice in formTache.iduser.vars.choices %}
-                        <tr class="user-row {% if formTache.iduser.vars.value == choice.value %}selected{% endif %}" 
+                        <tr class="user-row {% if formTache.iduser.vars.value == choice.value %}selected{% endif %}"
                             data-user-id="{{ choice.value }}"
                             data-user-label="{{ choice.data.getNom() }} {{ choice.data.getPrenom() }}"
                             onclick="selectUser(this)">
@@ -120,7 +146,16 @@
                     </tbody>
                   </table>
                 </div>
+
                 {{ form_widget(formTache.iduser, {'attr': {'class': 'd-none'}}) }}
+
+                {% if formTache.iduser.vars.errors|length %}
+                  <div class="text-danger mt-1">
+                    {% for error in formTache.iduser.vars.errors %}
+                      <p>{{ error.message }}</p>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
 
               <div class="text-center mt-3">
@@ -129,6 +164,7 @@
                 </button>
                 <a href="{{ path('projet_show', {'idProjet': projet.idProjet}) }}" class="btn btn-secondary ms-2">Cancel</a>
               </div>
+
             {{ form_end(formTache) }}
           </div>
         </div>
@@ -161,9 +197,7 @@
         document.getElementById('{{ formTache.iduser.vars.id }}').value = row.dataset.userId;
         
         // Update row highlighting
-        document.querySelectorAll('.user-row').forEach(r => {
-            r.classList.remove('selected');
-        });
+        document.querySelectorAll('.user-row').forEach(r => r.classList.remove('selected'));
         row.classList.add('selected');
     }
 </script>
