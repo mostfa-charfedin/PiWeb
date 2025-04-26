@@ -272,6 +272,98 @@ public function deleteTache(
 
     return $this->redirectToRoute('projet_show', ['idProjet' => $projetId]);
 }
+#[Route('/mes-projets', name: 'user_projet_list')]
+public function userProjetList(
+    ProjetRepository $projetRepository,
+    TacheRepository $tacheRepository,
+    SessionInterface $session,
+    EntityManagerInterface $em
+): Response {
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
+    }
+
+    $userId = $session->get('id');
+    $user = $em->getRepository(User::class)->find($userId);
+
+    // Fetch all tasks for the connected user
+    $userTasks = $tacheRepository->findBy(['iduser' => $user]);
+
+    // Get unique projects from these tasks
+    $projects = [];
+    foreach ($userTasks as $task) {
+        $project = $task->getIdprojet();
+        if ($project && !in_array($project, $projects, true)) {
+            $projects[] = $project;
+        }
+    }
+
+    return $this->render('integration/userlist.html.twig', [
+        'projets' => $projects,
+        'user' => $user,
+    ]);
+}
+
+#[Route('/projet/{idProjet}/stats', name: 'projet_stats')]
+public function stats(
+    int $idProjet,
+    ProjetRepository $projetRepository,
+    TacheRepository $tacheRepository,
+    SessionInterface $session,
+    EntityManagerInterface $em
+): Response {
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
+    }
+
+    $projet = $projetRepository->find($idProjet);
+    if (!$projet) {
+        throw $this->createNotFoundException('Project not found');
+    }
+
+    $taches = $tacheRepository->findBy(['idprojet' => $projet]);
+    $now = new \DateTime();
+
+    $chartData = [];
+    foreach ($taches as $tache) {
+        $createdAt = $tache->getCreatedAt();
+        $deadline = $tache->getDate() ? (clone $createdAt)->add(new \DateInterval('P' . $tache->getDate() . 'W')) : null;
+        $completedAt = $tache->getCompletedAt();
+        $isCompleted = $tache->getStatus() === 'done';
+
+        $isEarly = $isCompleted && $completedAt && $deadline && $completedAt < $deadline;
+        $isOverdue = false;
+
+        if ($deadline) {
+            if (!$isCompleted && $now > $deadline) {
+                $isOverdue = true; // Not completed and past deadline
+            } elseif ($isCompleted && $completedAt > $deadline) {
+                $isOverdue = true; // Completed but late
+            }
+        }
+
+        $chartData[] = [
+            'task' => $tache->getTitre(),
+            'start' => $createdAt?->format(\DateTime::ATOM), // Use ISO format for JS
+            'end' => $deadline?->format(\DateTime::ATOM),
+            'completedAt' => $completedAt?->format(\DateTime::ATOM),
+            'status' => $tache->getStatus(),
+            'weeks' => $tache->getDate(),
+            'isEarly' => $isEarly,
+            'isOverdue' => $isOverdue,
+            'completionDelay' => $isCompleted && $deadline ? 
+                (strtotime($completedAt->format('Y-m-d')) - strtotime($deadline->format('Y-m-d'))) / (60 * 60 * 24) : 0
+        ];
+    }
+
+    return $this->render('integration/stats.html.twig', [
+        'projet' => $projet,
+        'chartData' => $chartData,
+        'user' => $em->getRepository(User::class)->find($session->get('id'))
+    ]);
+}
+
+
 
     
 }

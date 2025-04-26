@@ -2,62 +2,81 @@
 
 namespace App\Entity;
 
+use App\Repository\ReponseRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Question;
 
 /**
- * Reponse
- *
- * @ORM\Table(name="reponse", indexes={@ORM\Index(name="idQuestion", columns={"idQuestion"})})
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass=ReponseRepository::class)
+ * @ORM\Table(name="reponse")
  */
 class Reponse
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="idReponse", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Column(name="idReponse", type="integer")
      */
-    private $idreponse;
+    private $idReponse;
 
     /**
-     * @var string|null
-     *
-     * @ORM\Column(name="Response", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\Column(name="Response", type="string", length=255)
      */
-    private $response = 'NULL';
+ 
+private  $response ;
 
+  /**
+ * @ORM\Column(name="status", type="string", length=10)
+ */
+private $status;
     /**
-     * @var string|null
-     *
-     * @ORM\Column(name="status", type="string", length=255, nullable=true, options={"default"="NULL"})
+     * @ORM\ManyToOne(targetEntity=Question::class, inversedBy="reponses")
+     * @ORM\JoinColumn(name="idQuestion", referencedColumnName="idQuestion", nullable=false, onDelete="CASCADE")
      */
-    private $status = 'NULL';
+  
+    
+    private $question;
 
-    /**
-     * @var \Question
-     *
-     * @ORM\ManyToOne(targetEntity="Question")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idQuestion", referencedColumnName="idQuestion")
-     * })
-     */
-    private $idquestion;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="Question", mappedBy="repense")
-     */
-    private $question = array();
-
-    /**
-     * Constructor
-     */
-    public function __construct()
+    public function getIdReponse(): ?int
     {
-        $this->question = new \Doctrine\Common\Collections\ArrayCollection();
+        return $this->idReponse;
     }
 
+    public function getResponse(): ?string
+    {
+        return $this->response;
+    }
+
+    public function setResponse(string $response): self
+    {
+        $this->response = $response;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+    
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+        return $this;
+    }
+
+    public function getQuestion(): ?Question
+    {
+        return $this->question;
+    }
+
+    public function setQuestion(?Question $question): self
+    {
+        $this->question = $question;
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return $this->response ?? '';
+    }
 }

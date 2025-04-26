@@ -2,63 +2,110 @@
 
 namespace App\Entity;
 
+use App\Repository\QuestionRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Reponse;
+use App\Entity\Quiz;
 
 /**
- * Question
- *
- * @ORM\Table(name="question", indexes={@ORM\Index(name="idQuiz", columns={"idQuiz"})})
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass=QuestionRepository::class)
+ * @ORM\Table(name="question")
  */
 class Question
 {
     /**
-     * @var int
-     *
-     * @ORM\Column(name="idQuestion", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Column(name="idQuestion", type="integer")
      */
-    private $idquestion;
+    private $idQuestion;
 
     /**
-     * @var string|null
-     *
-     * @ORM\Column(name="Question", type="string", length=255, nullable=true, options={"default"="NULL"})
-     */
-    private $question = 'NULL';
-
-    /**
-     * @var \Quiz
-     *
-     * @ORM\ManyToOne(targetEntity="Quiz")
-     * @ORM\JoinColumns({
-     *   @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz")
-     * })
-     */
-    private $idquiz;
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     *
-     * @ORM\ManyToMany(targetEntity="Reponse", inversedBy="question")
-     * @ORM\JoinTable(name="question_repense",
-     *   joinColumns={
-     *     @ORM\JoinColumn(name="question_id", referencedColumnName="idQuestion")
-     *   },
-     *   inverseJoinColumns={
-     *     @ORM\JoinColumn(name="repense_id", referencedColumnName="idReponse")
-     *   }
+     * @ORM\Column(name="Question", type="string", length=255, nullable=true)
+     
+     *      max = 80,
+     *      maxMessage = "The question can't be more than {{ limit }} characters"
      * )
      */
-    private $repense = array();
+    private $question;
 
     /**
-     * Constructor
+     * @ORM\ManyToOne(targetEntity=Quiz::class, inversedBy="questions")
+     * @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz", nullable=false, onDelete="CASCADE")
      */
+    private $quiz;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Reponse::class, mappedBy="question", cascade={"persist", "remove"}, orphanRemoval=true)
+     */
+    private $reponses;
+
     public function __construct()
     {
-        $this->repense = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->reponses = new ArrayCollection();
     }
 
+    public function getIdQuestion(): ?int
+    {
+        return $this->idQuestion;
+    }
+
+    public function getQuestion(): ?string
+    {
+        return $this->question;
+    }
+
+    public function setQuestion(?string $question): self
+    {
+        $this->question = $question;
+        return $this;
+    }
+
+    public function getQuiz(): ?Quiz
+    {
+        return $this->quiz;
+    }
+
+    public function setQuiz(?Quiz $quiz): self
+    {
+        $this->quiz = $quiz;
+        return $this;
+    }
+
+    /**
+     * @return Collection|Reponse[]
+     */
+    public function getReponses(): Collection
+    {
+        return $this->reponses;
+    }
+
+    public function addReponse(Reponse $reponse): self
+    {
+        if (!$this->reponses->contains($reponse)) {
+            $this->reponses[] = $reponse;
+            $reponse->setQuestion($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReponse(Reponse $reponse): self
+    {
+        if ($this->reponses->removeElement($reponse)) {
+            // Set the owning side to null (unless already changed)
+            if ($reponse->getQuestion() === $this) {
+                $reponse->setQuestion(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->question;
+    }
 }

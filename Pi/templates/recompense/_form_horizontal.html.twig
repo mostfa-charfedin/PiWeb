@@ -1,0 +1,41 @@
+{{ form_start(form, {'attr': {'class': 'row g-3'}}) }}
+    <div class="col-md-6">
+        <div class="form-floating">
+            {{ form_widget(form.type, {'attr': {'class': 'form-control', 'placeholder': 'Type'}}) }}
+            {{ form_label(form.type, 'Type') }}
+            {{ form_errors(form.type) }}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-floating">
+            {{ form_widget(form.dateattribution, {'attr': {'class': 'form-control', 'placeholder': 'Attribution Date'}}) }}
+            {{ form_label(form.dateattribution, 'Attribution Date') }}
+            {{ form_errors(form.dateattribution) }}
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="form-floating">
+            {{ form_widget(form.statusrecompence, {'attr': {'class': 'form-control', 'placeholder': 'Status'}}) }}
+            {{ form_label(form.statusrecompence, 'Status') }}
+            {{ form_errors(form.statusrecompence) }}
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-save me-1"></i>
+            {% if edit_mode %}Update{% else %}Create{% endif %} Reward
+        </button>
+        {% if recompense.idprogramme is defined and recompense.idprogramme is not null %}
+            <a href="{{ path('app_recompense_program', {'idprogramme': recompense.idprogramme.idprogramme}) }}" class="btn btn-secondary ms-2">
+                <i class="bi bi-arrow-left me-1"></i>Back to List
+            </a>
+        {% else %}
+            <a href="{{ path('app_recompense_index') }}" class="btn btn-secondary ms-2">
+                <i class="bi bi-arrow-left me-1"></i>Back to List
+            </a>
+        {% endif %}
+    </div>
+{{ form_end(form) }} 

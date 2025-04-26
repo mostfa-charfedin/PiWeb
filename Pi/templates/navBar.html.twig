@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -336,7 +335,7 @@
 </head>
 
 <body>
-  <!-- ======= Header / Navbar ======= -->
+  <!-- Header -->
   <header class="header sticky-top">
     <div class="container-fluid">
       <nav class="navbar navbar-expand-lg navbar-light">
@@ -364,11 +363,16 @@
                   <li><a class="dropdown-item" href="{{ path('projet_new') }}">Create Project</a></li>
                 </ul>
               </li>
-              <li class="nav-item">
-                <a class="nav-link" href="{{ path('GestionUsers') }}">User Management</a>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="ProgramsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Programs
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="ProgramsDropdown">
+                  <li><a class="dropdown-item" href="{{ path('app_programmebienetre_index') }}">View Programs</a></li>
+                </ul>
               </li>
               <li class="nav-item">
-                <a class="nav-link" >Resources</a>
+                <a class="nav-link" href="{{ path('GestionUsers') }}">User Management</a>
               </li>
             </ul>
 
