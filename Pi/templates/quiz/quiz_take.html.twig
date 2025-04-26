@@ -10,7 +10,6 @@
       margin: auto;
       padding-top: 40px;
     }
-
     .quiz-title {
       font-size: 2rem;
       font-weight: bold;
@@ -18,7 +17,6 @@
       margin-bottom: 1rem;
       text-align: center;
     }
-
     .progress {
       height: 26px;
       background-color: #e9ecef;
@@ -26,7 +24,6 @@
       overflow: hidden;
       margin: 1rem 0;
     }
-
     .progress-bar {
       background: linear-gradient(90deg, #2980b9, #6dd5fa);
       color: #fff;
@@ -36,7 +33,6 @@
       border-radius: 20px;
       transition: width 0.4s ease;
     }
-
     .question-card {
       background: #fff;
       border: none;
@@ -44,26 +40,20 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       transition: transform 0.2s;
     }
-
     .question-card:hover {
       transform: translateY(-2px);
     }
-
     .question-title {
       font-size: 1.2rem;
       font-weight: 600;
       color: #34495e;
     }
-
-    .form-check-input {
+    .form-check-input, .form-check-label {
       cursor: pointer;
     }
-
     .form-check-label {
       font-size: 0.95rem;
-      cursor: pointer;
     }
-
     .submit-btn {
       background: linear-gradient(90deg, #2980b9, #6dd5fa);
       color: #fff;
@@ -74,23 +64,19 @@
       font-size: 1rem;
       transition: background 0.2s ease;
     }
-
     .submit-btn:hover {
       background: linear-gradient(90deg, #2471a3, #5dade2);
     }
-
     .translate-btn {
       font-size: 0.85rem;
       padding: 4px 10px;
       border-color: #3498db;
       color: #3498db;
     }
-
     .translate-btn:hover {
       background-color: #3498db;
       color: #fff;
     }
-
     .lang-select {
       font-size: 0.85rem;
       width: auto;
@@ -148,11 +134,11 @@
                     class="form-check-input quiz-answer"
                     type="radio"
                     name="question_{{ question.idQuestion }}"
-                    id="reponse_{{ reponse.idReponse }}"
+                    id="reponse_{{ question.idQuestion }}_{{ loop.index }}"
                     value="{{ reponse.idReponse }}"
                     required
                   >
-                  <label class="form-check-label" for="reponse_{{ reponse.idReponse }}">
+                  <label class="form-check-label" for="reponse_{{ question.idQuestion }}_{{ loop.index }}">
                     {{ reponse.response }}
                   </label>
                 </div>
@@ -163,7 +149,7 @@
 
         <div class="text-center mt-4">
           <button type="submit" class="btn submit-btn">
-             Submit Quiz
+            Submit Quiz
           </button>
         </div>
       </form>
@@ -193,31 +179,47 @@
   });
 
   function translateQuestion(id) {
-    const lang = document.getElementById(`lang-${id}`).value;
+    const langSelect = document.getElementById(`lang-${id}`);
     const questionContainer = document.getElementById(`translated-question-${id}`);
+
+    if (!langSelect || !questionContainer) {
+      console.error('Language selector or question container not found.');
+      return;
+    }
+
+    const lang = langSelect.value;
     questionContainer.style.display = 'block';
     questionContainer.innerHTML = '🔄 Translating...';
 
-    fetch(`/quiz/question/translate/${id}/${lang}`)
-      .then(response => response.json())
+    const url = `{{ path('quiz_question_translate', { id: 'QUESTION_ID', lang: 'LANG' }) }}`;
+fetch(url.replace('QUESTION_ID', id).replace('LANG', lang))
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
         if (data.success) {
           questionContainer.innerHTML = `<strong>Translation:</strong><br>${data.question}`;
+
           const translatedResponses = data.responses;
-          const labels = document.querySelectorAll(`label[for^="reponse_"]`);
-          let responseIndex = 0;
-          labels.forEach(label => {
-            if (label.htmlFor.includes(`_${id}`) && translatedResponses[responseIndex]) {
-              label.innerText = translatedResponses[responseIndex];
-              responseIndex++;
-            }
-          });
+          const labels = document.querySelectorAll(`label[for^="reponse_${id}_"]`);
+
+          if (translatedResponses && labels.length > 0) {
+            labels.forEach((label, index) => {
+              if (translatedResponses[index] !== undefined) {
+                label.innerText = translatedResponses[index];
+              }
+            });
+          }
         } else {
           questionContainer.innerHTML = `<div class="text-danger">❌ ${data.message}</div>`;
         }
       })
       .catch(error => {
         questionContainer.innerHTML = `<div class="text-danger">❌ Error: ${error.message}</div>`;
+        console.error('Translation error:', error);
       });
   }
 </script>

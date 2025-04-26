@@ -13,6 +13,7 @@
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^2.20",
         "dompdf/dompdf": "*",
+        "google/cloud-translate": "^2.0",
         "knplabs/knp-paginator-bundle": "^6.7",
         "knplabs/knp-snappy-bundle": "^1.10",
         "phpdocumentor/reflection-docblock": "^5.6",

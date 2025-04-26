@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Quiz;
+use App\Entity\Score;
 use App\Entity\Reponse;
 use App\Entity\User;
 use App\Form\QuizType;
@@ -22,6 +23,7 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Knp\Snappy\Pdf;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 class QuizController extends AbstractController
@@ -263,43 +265,59 @@ public function unhideQuiz(int $id, SessionInterface $session): Response
     }
 
     #[Route('/quiz/{id}/submit', name: 'user_quiz_submit', methods: ['POST'])]
-    public function submitQuiz(Request $request, QuizRepository $quizRepository, EntityManagerInterface $em, int $id, SessionInterface $session): Response
-    {
-        $quiz = $quizRepository->find($id);
-        if (!$quiz) throw $this->createNotFoundException("Quiz not found.");
+public function submitQuiz(Request $request, QuizRepository $quizRepository, EntityManagerInterface $em, int $id, SessionInterface $session): Response
+{
+    $quiz = $quizRepository->find($id);
+    if (!$quiz) throw $this->createNotFoundException("Quiz not found.");
 
-        $questions = $quiz->getQuestions();
-        $score = 0;
-        $userAnswers = [];
+    $questions = $quiz->getQuestions();
+    $score = 0;
+    $userAnswers = [];
 
-        foreach ($questions as $question) {
-            $questionId = $question->getIdQuestion();
-            $responseId = $request->request->get("question_$questionId");
+    foreach ($questions as $question) {
+        $questionId = $question->getIdQuestion();
+        $responseId = $request->request->get("question_$questionId");
 
-            if ($responseId) {
-                $userAnswers["question_$questionId"] = $responseId;
-                $response = $em->getRepository(Reponse::class)->find($responseId);
-                if ($response && $response->getStatus() === 'correct') $score++;
-            }
+        if ($responseId) {
+            $userAnswers["question_$questionId"] = $responseId;
+            $response = $em->getRepository(Reponse::class)->find($responseId);
+            if ($response && $response->getStatus() === 'correct') $score++;
         }
-
-        $session->set('quiz_result', [
-            'quiz' => $quiz->getNom(),
-            'score' => $score,
-            'total' => count($questions)
-        ]);
-
-        $quizResults = $session->get('quiz_result_history', []);
-        $quizResults[$quiz->getIdQuiz()] = [
-            'score' => $score,
-            'total' => count($questions),
-        ];
-
-        $session->set('quiz_result_history', $quizResults);
-        $session->set('user_answers', $userAnswers);
-
-        return $this->redirectToRoute('user_quiz_result', ['id' => $quiz->getIdQuiz()]);
     }
+
+    $session->set('quiz_result', [
+        'quiz' => $quiz->getNom(),
+        'score' => $score,
+        'total' => count($questions)
+    ]);
+
+    $quizResults = $session->get('quiz_result_history', []);
+    $quizResults[$quiz->getIdQuiz()] = [
+        'score' => $score,
+        'total' => count($questions),
+    ];
+
+    $session->set('quiz_result_history', $quizResults);
+    $session->set('user_answers', $userAnswers);
+
+    // 🆕 Save the score into the database
+    $scoreEntity = new Score();
+    $scoreEntity->setScore($score);
+    $scoreEntity->setQuiz($quiz);
+
+    $userId = $session->get('user')['id'] ?? null;
+    if ($userId) {
+        $user = $em->getRepository(User::class)->find($userId);
+        if ($user) {
+            $scoreEntity->setUser($user);
+            $em->persist($scoreEntity);
+            $em->flush();
+        }
+    }
+
+    return $this->redirectToRoute('user_quiz_result', ['id' => $quiz->getIdQuiz()]);
+}
+
 
     #[Route('/quiz/{id}/result', name: 'user_quiz_result')]
     public function quizResult(SessionInterface $session, EntityManagerInterface $em, QuizRepository $quizRepository, QuestionRepository $questionRepository, int $id): Response
@@ -344,82 +362,98 @@ public function unhideQuiz(int $id, SessionInterface $session): Response
     }
 
 
-    #[Route('/admin/quiz/{id}/stats', name: 'admin_quiz_stats')]
-public function adminQuizStats(int $id, EntityManagerInterface $em, QuizRepository $quizRepository): Response
-{
-    $quiz = $quizRepository->find($id);
-    if (!$quiz) {
-        throw $this->createNotFoundException('Quiz not found');
-    }
+   // ADMIN - Voir les stats d'un quiz spécifique
+   #[Route('/admin/quiz/{id}/stats', name: 'admin_quiz_stats')]
+   public function adminQuizStats(int $id, EntityManagerInterface $em, QuizRepository $quizRepository): Response
+   {
+       // Récupérer le quiz
+       $quiz = $quizRepository->find($id);
+       if (!$quiz) {
+           throw $this->createNotFoundException('Quiz not found');
+       }
 
-    $scores = $em->getRepository(Score::class)->findBy(['quiz' => $quiz]);
+       // Récupérer les scores associés à ce quiz
+       $scores = $em->getRepository(Score::class)->findBy(['IdQuiz' => $quiz]);
 
-    $total = count($scores);
-    $passed = 0;
-    $failed = 0;
-    $sum = 0;
+       $total = count($scores);
+       $passed = 0;
+       $failed = 0;
+       $sum = 0;
 
-    // Loop through scores to calculate passed, failed, and total score sum
-    foreach ($scores as $score) {
-        $sum += $score->getScore();
-        if ($score->getScore() >= ($score->getTotal() / 2)) {
-            $passed++;
-        } else {
-            $failed++;
-        }
-    }
+       // Définir une note minimale pour réussir (par exemple, 50%)
+       $maxScore = 10;
+       $passingScore = $maxScore / 2;
 
-    $average = $total > 0 ? round($sum / $total, 2) : 0;
+       // Parcourir les scores et compter les réussites/échecs
+       foreach ($scores as $score) {
+           $sum += $score->getScore();
+           if ($score->getScore() >= $passingScore) {
+               $passed++;
+           } else {
+               $failed++;
+           }
+       }
 
-    return $this->render('quiz/AdminStats.html.twig', [
-        'quiz' => $quiz,
-        'passed' => $passed,
-        'failed' => $failed,
-        'average' => $average,
-        'total' => $total,
-    ]);
-}
+       // Calcul de la moyenne
+       $average = $total > 0 ? round($sum / $total, 2) : 0;
+       // Calcul des taux de réussite et d'échec
+       $successRate = $total > 0 ? round(($passed / $total) * 100, 2) : 0;
+       $failureRate = 100 - $successRate;
 
+       // Retourner la vue avec les données de stats
+       return $this->render('quiz/AdminStats.html.twig', [
+           'quiz' => $quiz,
+           'passed' => $passed,
+           'failed' => $failed,
+           'average' => $average,
+           'total' => $total,
+           'successRate' => $successRate,
+           'failureRate' => $failureRate,
+       ]);
+   }
 
-#[Route('/user/stats', name: 'user_stats')]
-public function userStats(SessionInterface $session, EntityManagerInterface $em): Response
-{
-    // Retrieve user ID from session
-    $userId = $session->get('id');
-    if (!$userId) {
-        return $this->redirectToRoute('login');
-    }
+   // USER - Voir ses propres stats
+   #[Route('/user/stats', name: 'user_stats')]
+   public function userStats(SessionInterface $session, EntityManagerInterface $em): Response
+   {
+       // Récupérer l'ID utilisateur à partir de la session
+       $userId = $session->get('id');
+       if (!$userId) {
+           return $this->redirectToRoute('login');
+       }
 
-    // Find the user based on the session ID
-    $user = $em->getRepository(User::class)->find($userId);
-    if (!$user) {
-        throw $this->createNotFoundException('User not found');
-    }
+       // Récupérer l'utilisateur à partir de l'ID
+       $user = $em->getRepository(User::class)->find($userId);
+       if (!$user) {
+           throw $this->createNotFoundException('User not found');
+       }
 
-    // Get scores for the user
-    $scores = $em->getRepository(Score::class)->findBy(['user' => $user]);
+       // Récupérer tous les scores de cet utilisateur
+       $scores = $em->getRepository(Score::class)->findBy(['idUser' => $user]);
 
-    $total = count($scores);
-    $sum = array_sum(array_map(fn($s) => $s->getScore(), $scores));
-    $average = $total > 0 ? round($sum / $total, 2) : 0;
+       $total = count($scores);
+       $sum = array_sum(array_map(fn($s) => $s->getScore(), $scores));
+       $average = $total > 0 ? round($sum / $total, 2) : 0;
 
-    // Prepare data for chart (quiz names and their corresponding scores)
-    $chartLabels = [];
-    $chartData = [];
+       // Données pour le graphique (étiquettes et données)
+       $chartLabels = [];
+       $chartData = [];
 
-    foreach ($scores as $score) {
-        $chartLabels[] = $score->getQuiz()->getName();
-        $chartData[] = $score->getScore();
-    }
+       foreach ($scores as $score) {
+           if ($score->getIdQuiz()) {
+               $chartLabels[] = $score->getIdQuiz()->getName(); // Nom du quiz
+               $chartData[] = $score->getScore(); // Score de l'utilisateur pour chaque quiz
+           }
+       }
 
-    return $this->render('quiz/UserStats.html.twig', [
-        'user' => $user,
-        'total' => $total,
-        'average' => $average,
-        'chartLabels' => $chartLabels,
-        'chartData' => $chartData,
-    ]);
-}
+       return $this->render('quiz/UserStats.html.twig', [
+           'user' => $user,
+           'total' => $total,
+           'average' => $average,
+           'chartLabels' => $chartLabels,
+           'chartData' => $chartData,
+       ]);
+   }
 #[Route('/quiz/{id}/certificate', name: 'quiz_download_certificate')]
 public function downloadCertificate(
     Pdf $knpSnappyPdf,
@@ -452,4 +486,49 @@ public function downloadCertificate(
         'Content-Disposition' => 'attachment; filename="quiz_result.pdf"',
     ]);
 }
+/**
+ * @Route("/quiz/{id}/translate/{lang}", name="quiz_question_translate")
+ */
+public function translateQuestion(int $id, string $lang, QuestionRepository $questionRepository): JsonResponse
+{
+    $question = $questionRepository->find($id);
+
+    if (!$question) {
+        return new JsonResponse([
+            'success' => false,
+            'message' => 'Question not found.',
+        ], 404);
+    }
+
+    // Dummy translation logic for multiple languages
+    $translatedQuestion = $this->getTranslatedText($question->getQuestion(), $lang);
+
+    $translatedResponses = [];
+    foreach ($question->getReponses() as $response) {
+        $translatedResponses[] = $this->getTranslatedText($response->getResponse(), $lang);
+    }
+
+    return new JsonResponse([
+        'success' => true,
+        'question' => $translatedQuestion,
+        'responses' => $translatedResponses,
+    ]);
 }
+
+// Helper function for translating text based on language
+private function getTranslatedText(string $text, string $lang): string
+{
+    switch ($lang) {
+        case 'en': // English
+            return $text;
+        case 'fr': // French
+            return "[fr] " . $text;
+        case 'es': // Spanish
+            return "[es] " . $text;
+        case 'de': // German
+            return "[de] " . $text;
+        // Add more languages as needed
+        default:
+            return "[{$lang}] " . $text; // Default translation
+    }
+}}
