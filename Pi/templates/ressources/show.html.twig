@@ -83,11 +83,33 @@
                 </div>
               </div>
             </div>
+
+            <!-- Link Section -->
+            <div class="date-section text-center mt-4">
+              <div class="date-icon">
+                <i class="bi bi-link-45deg"></i>
+              </div>
+              <div class="date-content">
+                <div class="date-label">Resource Link</div>
+                <div class="date-value">
+                  {% if ressource.lien %}
+                    <a href="{{ ressource.lien }}" target="_blank" class="text-decoration-none resource-link">
+                      {{ ressource.lien }}
+                    </a>
+                  {% else %}
+                    <span class="text-muted">No link provided</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
         <!-- Action Buttons -->
         <div class="d-flex justify-content-end gap-3 action-buttons">
+          <a href="{{ path('app_ressources_export_pdf', {'idresource': ressource.idresource}) }}" class="btn btn-primary btn-lg rounded-circle shadow-sm pdf-btn">
+            <i class="bi bi-file-earmark-pdf"></i>
+          </a>
           <a href="{{ path('app_ressources_edit', {'idresource': ressource.idresource}) }}" class="btn btn-warning btn-lg rounded-circle shadow-sm edit-btn">
             <i class="bi bi-pencil"></i>
           </a>
@@ -343,6 +365,22 @@
     bottom: 30px;
     right: 30px;
     z-index: 10;
+  }
+
+  .pdf-btn {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .pdf-btn:hover {
+    background: linear-gradient(45deg, #D50000, #FF5252);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(255, 82, 82, 0.4);
+    color: white;
   }
 
   @media (max-width: 767px) {

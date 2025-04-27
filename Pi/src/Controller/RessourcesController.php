@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Dompdf\Dompdf;
 
 #[Route('/ressources')]
 class RessourcesController extends AbstractController
@@ -307,6 +308,56 @@ class RessourcesController extends AbstractController
                 'success' => false, 
                 'message' => 'An error occurred while saving your rating. Please try again.'
             ]);
+        }
+    }
+
+    #[Route('/{idresource}/export-pdf', name: 'app_ressources_export_pdf', methods: ['GET'])]
+    public function exportPdf(Ressources $ressource, SessionInterface $session): Response
+    {
+        // Check if user is logged in
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        try {
+            // Create new PDF instance
+            $dompdf = new \Dompdf\Dompdf();
+            
+            // Set options
+            $dompdf->set_option('defaultFont', 'Arial');
+            $dompdf->set_option('isHtml5ParserEnabled', true);
+            $dompdf->set_option('isPhpEnabled', true);
+            $dompdf->set_option('isRemoteEnabled', true);
+
+            // Generate the HTML for the PDF
+            $html = $this->renderView('ressources/pdf_template.html.twig', [
+                'ressource' => $ressource,
+            ]);
+
+            // Load HTML to Dompdf
+            $dompdf->loadHtml($html);
+
+            // Setup the paper size and orientation
+            $dompdf->setPaper('A4', 'portrait');
+
+            // Render the HTML as PDF
+            $dompdf->render();
+
+            // Generate a unique filename
+            $filename = sprintf('resource-%d-%s.pdf', $ressource->getIdresource(), date('Y-m-d'));
+
+            // Stream the file to the browser
+            return new Response(
+                $dompdf->output(),
+                Response::HTTP_OK,
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
+                ]
+            );
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'An error occurred while generating the PDF: ' . $e->getMessage());
+            return $this->redirectToRoute('app_ressources_show', ['idresource' => $ressource->getIdresource()]);
         }
     }
 }
