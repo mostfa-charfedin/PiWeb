@@ -47,8 +47,25 @@
             flex-wrap: wrap;
             gap: 0.5rem;
         }
+        .comment-count {
+            margin-left: 5px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        /* Style pour le bouton Report */
+        .report-btn {
+            background-color: #ffc107;
+            color: #000;
+            border: none;
+            margin-left: 5px;
+        }
+        .report-btn:hover {
+            background-color: #e0a800;
+            color: #000;
+        }
     </style>
 {% endblock %}
+
 
 {% block content %}
     <section class="search-filter-sort-section">
@@ -87,6 +104,7 @@
                         <option value="title-asc">Title (A-Z)</option>
                         <option value="title-desc">Title (Z-A)</option>
                         <option value="likes">Number of Likes</option>
+                        <option value="comments">Number of Comments</option>
                     </select>
                 </div>
             </div>
@@ -129,6 +147,7 @@
                                     </button>
                                     <button class="btn btn-comment">
                                         <i class="fa-regular fa-comment"></i> Comment
+                                        <span class="comment-count">{{ poste.comments|length }}</span>
                                     </button>
                                     <button class="btn report-btn" data-id="{{ poste.id }}" title="Report">
                                         <i class="fas fa-exclamation-triangle"></i> Report
@@ -255,6 +274,13 @@
                         `;
                         commentsList.appendChild(li);
                     }
+                    
+                    // Mettre à jour le nombre de commentaires sur le bouton du post
+                    const commentCountElement = document.querySelector(`.tour-box[data-poste-id="${postId}"] .comment-count`);
+                    if (commentCountElement) {
+                        commentCountElement.textContent = data.comments.length;
+                    }
+                    
                     attachCommentEventListeners();
                 } catch (error) {
                     console.error("Error loading comments:", error);
@@ -530,6 +556,12 @@
                         const likesA = parseInt(a.querySelector(".like-count").textContent, 10) || 0;
                         const likesB = parseInt(b.querySelector(".like-count").textContent, 10) || 0;
                         return likesB - likesA;
+                    });
+                } else if (sortValue === "comments") {
+                    sortedPosts.sort((a, b) => {
+                        const commentsA = parseInt(a.querySelector(".comment-count").textContent, 10) || 0;
+                        const commentsB = parseInt(b.querySelector(".comment-count").textContent, 10) || 0;
+                        return commentsB - commentsA;
                     });
                 }
                 sortedPosts.forEach(post => post.parentElement.parentElement.appendChild(post.parentElement));
