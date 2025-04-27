@@ -55,7 +55,26 @@ class RessourcesController extends AbstractController
         // Execute the query
         $ressources = $queryBuilder->getQuery()->getResult();
 
-        // Return the filtered results to the view
+        // Check if it's an AJAX request
+        if ($request->isXmlHttpRequest()) {
+            $ressourcesArray = [];
+            foreach ($ressources as $ressource) {
+                $ressourcesArray[] = [
+                    'id' => $ressource->getIdresource(),
+                    'titre' => $ressource->getTitre(),
+                    'type' => $ressource->getType(),
+                    'description' => $ressource->getDescription(),
+                    'noteaverage' => $ressource->getNoteaverage(),
+                    'csrfToken' => $this->container->get('security.csrf.token_manager')->getToken('delete' . $ressource->getIdresource())->getValue(),
+                ];
+            }
+            return $this->json([
+                'ressources' => $ressourcesArray,
+                'count' => count($ressources)
+            ]);
+        }
+
+        // Return the filtered results to the view for non-AJAX requests
         return $this->render('ressources/index.html.twig', [
             'ressources' => $ressources,
             'user' => $user,

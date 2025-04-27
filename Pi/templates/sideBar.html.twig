@@ -127,13 +127,41 @@
       </a>
     </li>
     </ul>
-    <!-- ✅ Quizzes moved up with updated icon -->
-      <li class="nav-item">
-        <a class="nav-link" href="{{ path('app_home') }}">
-            <i class="bi bi-question-circle"></i>
-          <span>Quizzes</span>
+  </li><!-- End Programs Nav -->
+
+  <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#Ressources-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-folder"></i><span>Ressources</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
-      </li>
+        <ul id="Ressources-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{{ path('app_ressources_index') }}">
+              <i class="bi bi-file-earmark-text"></i><span>View Ressources</span>
+            </a>
+          </li>
+        </ul>
+      </li><!-- End Ressources Nav -->
+
+  {# Debug information - will be removed after testing #}
+  {% if user %}
+    <!-- Debug: User role is {{ user.role }} -->
+  {% endif %}
+
+  {% if user and user.role == 'ADMIN' %}
+  <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#Charts-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-bar-chart"></i><span>Charts</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="Charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{{ path('app_evaluation_index') }}">
+              <i class="bi bi-graph-up"></i><span>Evaluation</span>
+            </a>
+          </li>
+        </ul>
+      </li><!-- End Charts Nav -->
+  {% endif %}
+
       <li class="nav-item">
         <a class="nav-link" href="{{ path('profile') }}">
           <i class="bi bi-person"></i>
