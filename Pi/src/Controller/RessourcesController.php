@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Dompdf\Dompdf;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Route('/ressources')]
 class RessourcesController extends AbstractController
@@ -168,19 +169,29 @@ class RessourcesController extends AbstractController
     #[Route('/{idresource}', name: 'app_ressources_show', methods: ['GET'])]
     public function show(Ressources $ressource, EntityManagerInterface $em, SessionInterface $session): Response
     {
-        // Check if user is logged in, if not redirect to login page
+        // Check if user is logged in
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
-        // Retrieve the logged-in user from session
 
+        // Retrieve the logged-in user from session
         $user = $em->getRepository(User::class)->find($session->get('id'));
 
-        // Render the details of the resource
+        // Prepare resource data for QR code
+        $resourceData = [
+            'id' => $ressource->getIdresource(),
+            'title' => $ressource->getTitre(),
+            'type' => $ressource->getType(),
+            'description' => $ressource->getDescription(),
+            'averageRating' => $ressource->getNoteaverage(),
+            'link' => $ressource->getLien(),
+            'url' => $this->generateUrl('app_ressources_show', ['idresource' => $ressource->getIdresource()], UrlGeneratorInterface::ABSOLUTE_URL)
+        ];
 
         return $this->render('ressources/show.html.twig', [
             'ressource' => $ressource,
             'user' => $user,
+            'resource_data' => json_encode($resourceData)
         ]);
     }
 

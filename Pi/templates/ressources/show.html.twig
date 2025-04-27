@@ -107,6 +107,9 @@
 
         <!-- Action Buttons -->
         <div class="d-flex justify-content-end gap-3 action-buttons">
+          <button type="button" class="btn btn-info btn-lg rounded-circle shadow-sm qr-btn" data-bs-toggle="modal" data-bs-target="#qrCodeModal">
+            <i class="bi bi-qr-code"></i>
+          </button>
           <a href="{{ path('app_ressources_export_pdf', {'idresource': ressource.idresource}) }}" class="btn btn-primary btn-lg rounded-circle shadow-sm pdf-btn">
             <i class="bi bi-file-earmark-pdf"></i>
           </a>
@@ -118,6 +121,30 @@
       </div>
     </div>
   </section>
+
+  <!-- QR Code Modal -->
+  <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="qrCodeModalLabel">Resource QR Code</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <div class="qr-code-container">
+            <img src="{{ qr_code_data_uri(resource_data) }}" alt="Resource QR Code" class="img-fluid">
+          </div>
+          <p class="mt-3 text-muted">Scan this QR code to access this resource</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <a href="{{ qr_code_data_uri(resource_data) }}" download="resource-{{ ressource.idresource }}-qr.png" class="btn btn-primary">
+            <i class="bi bi-download me-2"></i>Download QR Code
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 {% endblock %}
 
@@ -381,6 +408,46 @@
     transform: scale(1.1);
     box-shadow: 0 8px 20px rgba(255, 82, 82, 0.4);
     color: white;
+  }
+
+  .qr-btn {
+    background: linear-gradient(45deg, #2196F3, #1976D2);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .qr-btn:hover {
+    background: linear-gradient(45deg, #1976D2, #2196F3);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+    color: white;
+  }
+
+  .qr-code-container {
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-content {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-header {
+    border-bottom: none;
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    border-top: none;
+    padding: 1.5rem;
   }
 
   @media (max-width: 767px) {
