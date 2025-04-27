@@ -196,4 +196,79 @@ final class EvaluationController extends AbstractController
 
         return $this->redirectToRoute('app_evaluation_index', [], Response::HTTP_SEE_OTHER);
     }
+
+    #[Route('/{idevaluation}/export-pdf', name: 'app_evaluation_export_pdf', methods: ['GET'])]
+    public function exportPdf(int $idevaluation, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        // Check if user is admin
+        if ($user->getRole() !== 'ADMIN') {
+            $this->addFlash('error', 'Access denied. This section is for administrators only.');
+            return $this->redirectToRoute('profile');
+        }
+
+        $evaluation = $entityManager->getRepository(Evaluation::class)->find($idevaluation);
+
+        if (!$evaluation) {
+            throw $this->createNotFoundException('Evaluation not found');
+        }
+
+        // Get the resource title
+        $resource = $entityManager
+            ->getRepository('App\Entity\Ressources')
+            ->find($evaluation->getIdResource());
+
+        $resourceTitle = $resource ? $resource->getTitre() : 'Unknown Resource';
+
+        try {
+            // Create new PDF instance
+            $dompdf = new \Dompdf\Dompdf();
+            
+            // Set options
+            $dompdf->set_option('defaultFont', 'Arial');
+            $dompdf->set_option('isHtml5ParserEnabled', true);
+            $dompdf->set_option('isPhpEnabled', true);
+            $dompdf->set_option('isRemoteEnabled', true);
+
+            // Generate the HTML for the PDF
+            $html = $this->renderView('evaluation/pdf_template.html.twig', [
+                'evaluation' => $evaluation,
+                'resourceTitle' => $resourceTitle,
+            ]);
+
+            // Load HTML to Dompdf
+            $dompdf->loadHtml($html);
+
+            // Setup the paper size and orientation
+            $dompdf->setPaper('A4', 'portrait');
+
+            // Render the HTML as PDF
+            $dompdf->render();
+
+            // Generate a unique filename
+            $filename = sprintf('evaluation-%d-%s.pdf', $evaluation->getIdEvaluation(), date('Y-m-d'));
+
+            // Stream the file to the browser
+            return new Response(
+                $dompdf->output(),
+                Response::HTTP_OK,
+                [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => sprintf('attachment; filename="%s"', $filename),
+                ]
+            );
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'An error occurred while generating the PDF: ' . $e->getMessage());
+            return $this->redirectToRoute('app_evaluation_show', ['idevaluation' => $evaluation->getIdEvaluation()]);
+        }
+    }
 }

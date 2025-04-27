@@ -19,6 +19,9 @@
       <a href="{{ path('app_evaluation_index') }}" class="btn btn-outline-primary rounded-pill px-4 back-btn">
         <i class="bi bi-arrow-left me-2"></i> Back to List
       </a>
+      <a href="{{ path('app_evaluation_export_pdf', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-primary rounded-pill px-4 pdf-btn">
+        <i class="bi bi-file-earmark-pdf me-2"></i> Export PDF
+      </a>
       <a href="{{ path('app_evaluation_delete', {'idevaluation': evaluation.idEvaluation}) }}" 
          onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ?');" 
          class="btn btn-outline-danger rounded-pill px-4 delete-btn">
