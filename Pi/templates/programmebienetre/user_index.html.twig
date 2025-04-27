@@ -58,9 +58,7 @@
           <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h5 class="card-title">Programs List</h5>
-              <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#calendarModal">
-                <i class="bi bi-calendar3"></i> View Calendar
-              </button>
+             
             </div>
 
             <!-- Search form -->
@@ -153,27 +151,11 @@
   </section>
 </main>
 
-<!-- Calendar Modal -->
-<div class="modal fade" id="calendarModal" tabindex="-1" aria-labelledby="calendarModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="calendarModalLabel">Programs Calendar</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div id="calendar"></div>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}
 
 {% block javascripts %}
+    
     {{ parent() }}
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -275,51 +257,6 @@
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     performSearch();
-                }
-            });
-
-            // FullCalendar in modal
-            let calendar = null;
-            const calendarModal = document.getElementById('calendarModal');
-            const calendarEl = document.getElementById('calendar');
-
-            calendarModal.addEventListener('shown.bs.modal', function () {
-                setTimeout(function() {
-                    if (calendar !== null) {
-                        calendar.destroy();
-                    }
-                    const events = [
-                        {% for program in validEvents %}
-                            {
-                                title: '{{ program.titre|e('js') }}',
-                                start: '{{ program.dateProgramme|date('Y-m-d') }}',
-                                url: '{{ path('app_programmebienetre_show', {'idprogramme': program.idprogramme}) }}'
-                            }{% if not loop.last %},{% endif %}
-                        {% endfor %}
-                    ];
-                    calendar = new FullCalendar.Calendar(calendarEl, {
-                        initialView: 'dayGridMonth',
-                        headerToolbar: {
-                            left: 'prev,next today',
-                            center: 'title',
-                            right: 'dayGridMonth,dayGridWeek'
-                        },
-                        events: events,
-                        eventClick: function(info) {
-                            if (info.event.url) {
-                                window.location.href = info.event.url;
-                                info.jsEvent.preventDefault();
-                            }
-                        }
-                    });
-                    calendar.render();
-                }, 400); // 400ms delay for modal rendering
-            });
-
-            calendarModal.addEventListener('hidden.bs.modal', function () {
-                if (calendar !== null) {
-                    calendar.destroy();
-                    calendar = null;
                 }
             });
         });

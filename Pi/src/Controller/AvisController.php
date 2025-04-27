@@ -16,6 +16,10 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use App\Entity\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Knp\Snappy\Pdf;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 #[Route('/avis')]
 class AvisController extends AbstractController
@@ -205,4 +209,63 @@ class AvisController extends AbstractController
         ]);
     }
 
+    #[Route('/avis/stats/export/csv', name: 'avis_stats_export_csv')]
+    public function exportStatsCsv(AvisRepository $avisRepository): StreamedResponse
+    {
+        $programStats = $avisRepository->getProgramStats(); // Adapt this to your actual data fetching
+
+        $response = new StreamedResponse(function () use ($programStats) {
+            $handle = fopen('php://output', 'w+');
+            // Header
+            fputcsv($handle, ['Program Name', 'Number of Reviews', 'Average Rating']);
+            // Data
+            foreach ($programStats as $stat) {
+                fputcsv($handle, [
+                    $stat['programName'],
+                    $stat['reviewCount'],
+                    $stat['averageRating'],
+                ]);
+            }
+            fclose($handle);
+        });
+
+        $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="reviews_stats.csv"');
+
+        return $response;
+    }
+
+    #[Route('/avis/stats/export/pdf', name: 'avis_stats_export_pdf')]
+    public function exportStatsPdf(AvisRepository $avisRepository, Pdf $pdf): Response
+    {
+        $programStats = $avisRepository->getProgramStats();
+        $ratingData = $avisRepository->getRatingStatistics();
+        $averageRating = $avisRepository->getAverageRating();
+        $totalReviewers = $avisRepository->getTotalUniqueReviewers();
+
+        // Generate HTML
+        $html = $this->renderView('avis/stats_pdf.html.twig', [
+            'programStats' => $programStats,
+            'ratingData' => $ratingData,
+            'averageRating' => $averageRating,
+            'totalReviewers' => $totalReviewers
+        ]);
+
+        // Generate PDF
+        $pdfContent = $pdf->getOutputFromHtml($html, [
+            'page-size' => 'A4',
+            'orientation' => 'portrait',
+            'margin-top' => '20mm',
+            'margin-right' => '20mm',
+            'margin-bottom' => '20mm',
+            'margin-left' => '20mm',
+        ]);
+
+        // Create response
+        $response = new Response($pdfContent);
+        $response->headers->set('Content-Type', 'application/pdf');
+        $response->headers->set('Content-Disposition', 'attachment; filename="reviews_stats.pdf"');
+
+        return $response;
+    }
 }

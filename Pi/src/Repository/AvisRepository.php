@@ -111,12 +111,10 @@ class AvisRepository extends ServiceEntityRepository
 
     public function getTotalUniqueReviewers(): int
     {
-        $result = $this->createQueryBuilder('a')
-            ->select('COUNT(DISTINCT a.user) as userCount')
+        return $this->createQueryBuilder('a')
+            ->select('COUNT(DISTINCT a.user)')
             ->getQuery()
-            ->getSingleResult();
-
-        return (int)($result['userCount'] ?? 0);
+            ->getSingleScalarResult();
     }
 
     public function hasUserReviewedProgram($user, $programme): bool
@@ -130,5 +128,19 @@ class AvisRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
 
         return $result !== null;
+    }
+
+    /**
+     * Get program statistics (program name, number of reviews, average rating)
+     * @return array
+     */
+    public function getProgramStats(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->select('p.titre as programName, COUNT(a.id) as reviewCount, AVG(a.rating) as averageRating')
+            ->join('a.programme', 'p')
+            ->groupBy('p.idprogramme')
+            ->getQuery()
+            ->getResult();
     }
 } 
