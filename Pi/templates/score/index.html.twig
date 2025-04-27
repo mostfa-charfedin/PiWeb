@@ -1,20 +1,70 @@
-<!DOCTYPE html>
+{% extends 'base.html.twig' %}
 
-<title>Hello ScoreController!</title>
+{% block title %}Liste des Scores{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+    <h1>Liste des Scores</h1>
+    
+    {# Formulaire de filtrage #}
+    <form method="get" class="mb-4">
+        <div class="row g-3">
+            <div class="col-md-5">
+                <label for="user" class="form-label">Filtrer par utilisateur</label>
+                <select name="user" id="user" class="form-select">
+                    <option value="">Tous les utilisateurs</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}" {% if selectedUser == user.id %}selected{% endif %}>
+                            {{ user.username|default(user.email) }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label for="quiz" class="form-label">Filtrer par quiz</label>
+                <select name="quiz" id="quiz" class="form-select">
+                    <option value="">Tous les quiz</option>
+                    {% for quiz in quizzes %}
+                        <option value="{{ quiz.id }}" {% if selectedQuiz == quiz.id %}selected{% endif %}>
+                            {{ quiz.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Filtrer</button>
+                <a href="{{ path('app_score') }}" class="btn btn-outline-secondary ms-2">Réinitialiser</a>
+            </div>
+        </div>
+    </form>
+    
+    {# Tableau des scores #}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Quiz</th>
+                <th>Score</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for score in pagination %}
+                <tr>
+                    <td>{{ score.user.username|default(score.user.email) }}</td>
+                    <td>{{ score.quiz.title }}</td>
+                    <td>{{ score.value }}</td>
+                    <td>{{ score.createdAt|date('d/m/Y H:i') }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4" class="text-center">Aucun score trouvé</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/Mostfa Charfedin/Desktop/PiWeb/Pi/src/Controller/ScoreController.php</code></li>
-        <li>Your template at <code>C:/Users/Mostfa Charfedin/Desktop/PiWeb/Pi/templates/score/index.html.twig</code></li>
-    </ul>
-</div>
+    {# Pagination controls #}
+    <div class="pagination">
+        {{ knp_pagination_render(pagination) }}
+    </div>
 {% endblock %}

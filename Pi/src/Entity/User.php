@@ -11,92 +11,48 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * User
- *
- * @ORM\Table(name="user", uniqueConstraints={@ORM\UniqueConstraint(name="email", columns={"email"}), @ORM\UniqueConstraint(name="cin", columns={"cin"})})
- * @ORM\Entity
- */
+#[ORM\Entity]
+#[ORM\Table(name: "user")]
+#[ORM\UniqueConstraint(name: "email", columns: ["email"])]
+#[ORM\UniqueConstraint(name: "cin", columns: ["cin"])]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer", nullable=false)
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     */
-    private $id;
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: "IDENTITY")]
+    #[ORM\Column(name: "id", type: "integer", nullable: false)]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Column(name="nom", type="string", length=255, nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: "nom", type: "string", length: 255, nullable: true)]
+    private ?string $nom = null;
 
-     */
-    private $nom;
+    #[ORM\Column(name: "prenom", type: "string", length: 255, nullable: true)]
+    private ?string $prenom = null;
 
-    /**
-     * @ORM\Column(name="prenom", type="string", length=255, nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: "email", type: "string", length: 255, nullable: true)]
+    private ?string $email = null;
 
-     */
-    private $prenom;
+    #[ORM\Column(name: "password", type: "string", length: 255, nullable: true)]
+    private ?string $password = null;
 
-    /**
-     * @ORM\Column(name="email", type="string", length=255, nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: "cin", type: "integer", nullable: true)]
+    private ?int $cin = null;
 
-     */
-    private $email ;
+    #[ORM\Column(name: "dateNaissance", type: "date", nullable: true)]
+    private ?\DateTimeInterface $datenaissance = null;
 
-    /**
-     * @ORM\Column(name="password", type="string", length=255, nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: "role", type: "string", length: 20, nullable: true, options: ["default" => "USER"])]
+    private ?string $role = 'USER';
 
-     */
-    private $password ;
+    #[ORM\Column(name: "image_url", type: "string", length: 255, nullable: true)]
+    private ?string $image_url = null;
 
-    /**
-     * @ORM\Column(name="cin", type="integer", nullable=true, options={"default"="NULL"})
-    
-     */
-    private $cin ;
+    #[ORM\Column(type: "integer")]
+    private ?int $numPhone = null;
 
-    /**
-     * @ORM\Column(name="dateNaissance", type="date", nullable=true, options={"default"="NULL"})
+    #[ORM\Column(name: "status", type: "string", length: 20, nullable: true, options: ["default" => "ACTIVE"])]
+    private ?string $status = 'ACTIVE';
 
-     */
-    private $datenaissance ;
-
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="role", type="string", length=20, nullable=true, options={"default"="'USER'"})
-     */
-    private $role = 'USER';
-
-    /**
-     * @var string|null
-     *
-     * @ORM\Column(name="image_url", type="string", length=255, nullable=true, options={"default"="NULL"})
-     */
-    private ?string $image_url= null; 
-    
-
-     /**
-     * @ORM\Column(type="integer")
-
-     */
-    private $numPhone;
-
-
-/**
-     * @var string|null
-     *
-     * @ORM\Column(name="status", type="string", length=20, nullable=true, options={"default"="'ACTIVE'"})
-     */
-    private $status = 'ACTIVE';
-
-    /**
-     * @var Collection<int, Score>
-     */
-    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Score::class)]
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: Score::class, orphanRemoval: true)]
     private Collection $scores;
 
     public function __construct()
@@ -104,7 +60,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->scores = new ArrayCollection();
     }
   
-    
+      /**
+     * @return Collection<int, Score>
+     */
+    public function getScores(): Collection
+    {
+        return $this->scores;
+    }
+
+    public function addScore(Score $score): static
+    {
+        if (!$this->scores->contains($score)) {
+            $this->scores[] = $score;
+            $score->setUser($this);
+        }
+
+        return $this;
+    }
+
     
    
 
@@ -281,33 +254,4 @@ public function getPassword(): ?string
         return $this->getUserIdentifier();
     }
 
-    /**
-     * @return Collection<int, Score>
-     */
-    public function getScores(): Collection
-    {
-        return $this->scores;
-    }
-
-    public function addScore(Score $score): static
-    {
-        if (!$this->scores->contains($score)) {
-            $this->scores->add($score);
-            $score->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removeScore(Score $score): static
-    {
-        if ($this->scores->removeElement($score)) {
-            // set the owning side to null (unless already changed)
-            if ($score->getUser() === $this) {
-                $score->setUser(null);
-            }
-        }
-
-        return $this;
-    }
 }

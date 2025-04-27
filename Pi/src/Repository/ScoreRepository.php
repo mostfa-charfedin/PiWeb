@@ -16,6 +16,28 @@ class ScoreRepository extends ServiceEntityRepository
         parent::__construct($registry, Score::class);
     }
 
+
+    // src/Repository/ScoreRepository.php
+public function findWithFilters(?int $userId = null, ?int $quizId = null)
+{
+    $qb = $this->createQueryBuilder('s')
+        ->leftJoin('s.user', 'u')
+        ->leftJoin('s.quiz', 'q')
+        ->addSelect('u', 'q');
+    
+    if ($userId) {
+        $qb->andWhere('s.user = :user')
+           ->setParameter('user', $userId);
+    }
+    
+    if ($quizId) {
+        $qb->andWhere('s.quiz = :quiz')
+           ->setParameter('quiz', $quizId);
+    }
+    
+    return $qb;
+}
+
 //    /**
 //     * @return Score[] Returns an array of Score objects
 //     */

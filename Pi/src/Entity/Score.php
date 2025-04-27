@@ -6,32 +6,42 @@ use App\Repository\ScoreRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ScoreRepository::class)]
+#[ORM\Table(name: "score")]
 class Score
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
-
-    #[ORM\Column(nullable: true)]
-    private ?float $score = null;
-
-
-   
-
-    #[ORM\ManyToOne(inversedBy: 'idUser')]
-    private ?User $idUser = null;
-
-    #[ORM\ManyToOne(inversedBy: 'idQuiz')]
-    private ?Quiz $IdQuiz = null;
-
+    #[ORM\ManyToOne(inversedBy: 'scores')]
+    #[ORM\JoinColumn(name: "idUser", referencedColumnName: "id")]
+    private ?User $user = null;
     
 
-  
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: Quiz::class)]
+    #[ORM\JoinColumn(name: "idQuiz", referencedColumnName: "idQuiz", nullable: false)]
+    private ?Quiz $quiz = null;
 
-    public function getId(): ?int
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $score = null;
+
+    public function getUser(): ?User
     {
-        return $this->id;
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+        return $this;
+    }
+
+    public function getQuiz(): ?Quiz
+    {
+        return $this->quiz;
+    }
+
+    public function setQuiz(?Quiz $quiz): static
+    {
+        $this->quiz = $quiz;
+        return $this;
     }
 
     public function getScore(): ?float
@@ -42,31 +52,6 @@ class Score
     public function setScore(?float $score): static
     {
         $this->score = $score;
-
-        return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->idUser;
-    }
-
-    public function setUser(?User $idUser): static
-    {
-        $this->idUser = $idUser;
-
-        return $this;
-    }
-
-    public function getIdQuiz(): ?Quiz
-    {
-        return $this->IdQuiz;
-    }
-
-    public function setIdQuiz(?Quiz $IdQuiz): static
-    {
-        $this->IdQuiz = $IdQuiz;
-
         return $this;
     }
 }
