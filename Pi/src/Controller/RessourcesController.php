@@ -30,6 +30,10 @@ class RessourcesController extends AbstractController
         $searchTitle = $request->query->get('searchTitle');
         $type = $request->query->get('type');
         $searchDescription = $request->query->get('searchDescription');
+        
+        // Get pagination parameters
+        $page = $request->query->getInt('page', 1);
+        $itemsPerPage = 5; // Number of resources per page
 
         // Create the base query to filter resources
         $queryBuilder = $em->getRepository(Ressources::class)->createQueryBuilder('r');
@@ -52,6 +56,22 @@ class RessourcesController extends AbstractController
                          ->setParameter('searchDescription', '%' . $searchDescription . '%');
         }
 
+        // Get total count for pagination
+        $totalItems = $queryBuilder->select('COUNT(r.idresource)')
+                                  ->getQuery()
+                                  ->getSingleScalarResult();
+
+        // Calculate total pages
+        $totalPages = ceil($totalItems / $itemsPerPage);
+
+        // Ensure page is within valid range
+        $page = max(1, min($page, $totalPages));
+
+        // Apply pagination
+        $queryBuilder->select('r')
+                    ->setFirstResult(($page - 1) * $itemsPerPage)
+                    ->setMaxResults($itemsPerPage);
+
         // Execute the query
         $ressources = $queryBuilder->getQuery()->getResult();
 
@@ -70,7 +90,12 @@ class RessourcesController extends AbstractController
             }
             return $this->json([
                 'ressources' => $ressourcesArray,
-                'count' => count($ressources)
+                'count' => count($ressources),
+                'pagination' => [
+                    'currentPage' => $page,
+                    'totalPages' => $totalPages,
+                    'totalItems' => $totalItems
+                ]
             ]);
         }
 
@@ -78,6 +103,17 @@ class RessourcesController extends AbstractController
         return $this->render('ressources/index.html.twig', [
             'ressources' => $ressources,
             'user' => $user,
+            'pagination' => [
+                'currentPage' => $page,
+                'totalPages' => $totalPages,
+                'totalItems' => $totalItems,
+                'itemsPerPage' => $itemsPerPage
+            ],
+            'filters' => [
+                'searchTitle' => $searchTitle,
+                'type' => $type,
+                'searchDescription' => $searchDescription
+            ]
         ]);
     }
     // New resource creation route

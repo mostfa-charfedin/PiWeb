@@ -87,17 +87,17 @@
                       <td>{{ ressource.description }}</td>
                       <td>
                         <div class="btn-group" role="group">
-                          <a href="/ressources/${ressource.id}" class="btn btn-sm btn-info">
+                          <a href="{{ path('app_ressources_show', {'idresource': ressource.idresource}) }}" class="btn btn-sm btn-info">
                             <i class="bi bi-eye"></i>
                           </a>
-                          <a href="/ressources/${ressource.id}/edit" class="btn btn-sm btn-warning">
+                          <a href="{{ path('app_ressources_edit', {'idresource': ressource.idresource}) }}" class="btn btn-sm btn-warning">
                             <i class="bi bi-pencil"></i>
                           </a>
-                          <button type="button" class="btn btn-sm btn-success rate-btn" data-bs-toggle="modal" data-bs-target="#rateModal" data-resource-id="${ressource.id}" data-current-rating="${ressource.noteaverage}">
+                          <button type="button" class="btn btn-sm btn-success rate-btn" data-bs-toggle="modal" data-bs-target="#rateModal" data-resource-id="{{ ressource.idresource }}" data-current-rating="{{ ressource.noteaverage }}">
                             <i class="bi bi-star"></i>
                           </button>
-                          <form method="post" action="/ressources/${ressource.id}/delete" onsubmit="return confirm('Are you sure you want to delete this resource?');" class="d-inline">
-                            <input type="hidden" name="_token" value="${ressource.csrfToken}">
+                          <form method="post" action="{{ path('app_ressources_delete', {'idresource': ressource.idresource}) }}" onsubmit="return confirm('Are you sure you want to delete this resource?');" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ressource.idresource) }}">
                             <button type="submit" class="btn btn-sm btn-danger">
                               <i class="bi bi-trash"></i>
                             </button>
@@ -113,6 +113,9 @@
                 </tbody>
               </table>
             </div>
+
+            <!-- Pagination Container -->
+            <div id="paginationContainer"></div>
           </div>
         </div>
       </div>
@@ -401,17 +404,23 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <script>
+  // Store the base paths in JavaScript variables
+  const showPath = "{{ path('app_ressources_show', {'idresource': 'ID'}) }}";
+  const editPath = "{{ path('app_ressources_edit', {'idresource': 'ID'}) }}";
+  const deletePath = "{{ path('app_ressources_delete', {'idresource': 'ID'}) }}";
+
   document.addEventListener('DOMContentLoaded', function() {
     const filterForm = document.getElementById('filterForm');
     const resourcesTableBody = document.getElementById('resourcesTableBody');
+    const paginationContainer = document.getElementById('paginationContainer');
     const inputs = filterForm.querySelectorAll('input, select');
 
     // Function to handle form submission
-    function handleFilter() {
+    function handleFilter(page = 1) {
       const formData = new FormData(filterForm);
-      const params = new URLSearchParams(formData);
+      formData.append('page', page);
 
-      fetch(`{{ path('app_ressources_index') }}?${params.toString()}`, {
+      fetch(`{{ path('app_ressources_index') }}?${new URLSearchParams(formData).toString()}`, {
         headers: {
           'X-Requested-With': 'XMLHttpRequest'
         }
@@ -420,11 +429,16 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(data => {
         if (data.ressources.length === 0) {
           resourcesTableBody.innerHTML = '<tr><td colspan="4" class="text-center">No resources found</td></tr>';
+          paginationContainer.innerHTML = '';
           return;
         }
 
         let html = '';
         data.ressources.forEach(ressource => {
+          const showUrl = showPath.replace('ID', ressource.id);
+          const editUrl = editPath.replace('ID', ressource.id);
+          const deleteUrl = deletePath.replace('ID', ressource.id);
+
           html += `
             <tr>
               <td>${ressource.titre}</td>
@@ -432,16 +446,16 @@ document.addEventListener('DOMContentLoaded', function() {
               <td>${ressource.description}</td>
               <td>
                 <div class="btn-group" role="group">
-                  <a href="/ressources/${ressource.id}" class="btn btn-sm btn-info">
+                  <a href="${showUrl}" class="btn btn-sm btn-info">
                     <i class="bi bi-eye"></i>
                   </a>
-                  <a href="/ressources/${ressource.id}/edit" class="btn btn-sm btn-warning">
+                  <a href="${editUrl}" class="btn btn-sm btn-warning">
                     <i class="bi bi-pencil"></i>
                   </a>
                   <button type="button" class="btn btn-sm btn-success rate-btn" data-bs-toggle="modal" data-bs-target="#rateModal" data-resource-id="${ressource.id}" data-current-rating="${ressource.noteaverage}">
                     <i class="bi bi-star"></i>
                   </button>
-                  <form method="post" action="/ressources/${ressource.id}/delete" onsubmit="return confirm('Are you sure you want to delete this resource?');" class="d-inline">
+                  <form method="post" action="${deleteUrl}" onsubmit="return confirm('Are you sure you want to delete this resource?');" class="d-inline">
                     <input type="hidden" name="_token" value="${ressource.csrfToken}">
                     <button type="submit" class="btn btn-sm btn-danger">
                       <i class="bi bi-trash"></i>
@@ -453,6 +467,52 @@ document.addEventListener('DOMContentLoaded', function() {
           `;
         });
         resourcesTableBody.innerHTML = html;
+
+        // Update pagination
+        if (data.pagination.totalPages > 1) {
+          let paginationHtml = `
+            <nav aria-label="Page navigation" class="mt-4">
+              <ul class="pagination justify-content-center">
+                <li class="page-item ${data.pagination.currentPage === 1 ? 'disabled' : ''}">
+                  <a class="page-link" href="#" data-page="${data.pagination.currentPage - 1}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                  </a>
+                </li>
+          `;
+
+          for (let i = 1; i <= data.pagination.totalPages; i++) {
+            paginationHtml += `
+              <li class="page-item ${data.pagination.currentPage === i ? 'active' : ''}">
+                <a class="page-link" href="#" data-page="${i}">${i}</a>
+              </li>
+            `;
+          }
+
+          paginationHtml += `
+                <li class="page-item ${data.pagination.currentPage === data.pagination.totalPages ? 'disabled' : ''}">
+                  <a class="page-link" href="#" data-page="${data.pagination.currentPage + 1}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          `;
+
+          paginationContainer.innerHTML = paginationHtml;
+
+          // Add event listeners to pagination links
+          paginationContainer.querySelectorAll('.page-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+              e.preventDefault();
+              const page = this.dataset.page;
+              if (page > 0 && page <= data.pagination.totalPages) {
+                handleFilter(page);
+              }
+            });
+          });
+        } else {
+          paginationContainer.innerHTML = '';
+        }
       })
       .catch(error => {
         console.error('Error:', error);
@@ -470,9 +530,12 @@ document.addEventListener('DOMContentLoaded', function() {
     inputs.forEach(input => {
       input.addEventListener('input', function() {
         clearTimeout(timeout);
-        timeout = setTimeout(handleFilter, 300);
+        timeout = setTimeout(() => handleFilter(), 300);
       });
     });
+
+    // Initial load
+    handleFilter();
   });
 </script>
 {% endblock %}
