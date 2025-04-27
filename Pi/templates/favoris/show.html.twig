@@ -1,6 +1,6 @@
 {% extends 'navBar.html.twig' %}
 
-{% block title %}Détails de la Ressource{% endblock %}
+{% block title %}Resource Details{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -9,9 +9,9 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h2 class="mb-0">Détails de la Ressource</h2>
+                        <h2 class="mb-0">Resource Details</h2>
                         <a href="{{ path('app_favoris_index') }}" class="btn btn-light">
-                            <i class="bi bi-arrow-left"></i> Retour
+                            <i class="bi bi-arrow-left"></i> Back
                         </a>
                     </div>
                 </div>
@@ -22,18 +22,18 @@
                                 <div class="card mb-4">
                                     <div class="card-body">
                                         <h3 class="text-primary mb-4">{{ favori.idresource.titre }}</h3>
-                                        <h5 class="card-title mb-3">Informations</h5>
+                                        <h5 class="card-title mb-3">Information</h5>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <p><strong><i class="bi bi-tag"></i> Type:</strong> {{ favori.idresource.type }}</p>
-                                                <p><strong><i class="bi bi-link-45deg"></i> Lien:</strong> 
+                                                <p><strong><i class="bi bi-link-45deg"></i> Link:</strong> 
                                                     <a href="{{ favori.idresource.lien }}" target="_blank" class="text-decoration-none">
                                                         {{ favori.idresource.lien }}
                                                     </a>
                                                 </p>
                                             </div>
                                             <div class="col-md-6">
-                                                <p><strong><i class="bi bi-star"></i> Note moyenne:</strong> 
+                                                <p><strong><i class="bi bi-star"></i> Average rating:</strong> 
                                                     <span class="badge bg-warning text-dark">
                                                         {{ favori.idresource.noteaverage }}/5
                                                     </span>
@@ -50,7 +50,7 @@
                         </div>
                     {% else %}
                         <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle"></i> Aucune ressource associée à ce favori.
+                            <i class="bi bi-exclamation-triangle"></i> No resource associated with this favorite.
                         </div>
                     {% endif %}
                 </div>

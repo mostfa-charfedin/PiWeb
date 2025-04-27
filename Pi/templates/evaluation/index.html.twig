@@ -30,8 +30,6 @@
                                 </div>
 
                                 <!-- Bar representing the rating -->
-
-                                
                                 <div class="chart-bar-container" style="flex-grow: 1;">
                                     <div class="chart-bar {% if evaluation.note >= 7 %}bg-success{% elseif evaluation.note >= 4 %}bg-warning{% else %}bg-danger{% endif %}" 
                                          style="width: {{ (evaluation.note/10 * 100)|round }}%;">

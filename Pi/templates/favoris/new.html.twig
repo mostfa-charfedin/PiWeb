@@ -1,6 +1,6 @@
 {% extends 'navBar.html.twig' %}
 
-{% block title %}Ajouter un Favori{% endblock %}
+{% block title %}Add a Favorite{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -14,16 +14,16 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <h2 class="mb-0">
-                        <i class="bi bi-bookmark-plus"></i> Ajouter un Favori
+                        <i class="bi bi-bookmark-plus"></i> Add a Favorite
                     </h2>
                 </div>
                 <div class="card-body">
                     {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
                         <div class="mb-3">
-                            {{ form_label(form.idresource, 'Ressource', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_label(form.idresource, 'Resource', {'label_attr': {'class': 'form-label'}}) }}
                             {{ form_widget(form.idresource, {'attr': {'class': 'form-select'}}) }}
                             <div class="invalid-feedback">
-                                Veuillez sélectionner une ressource
+                                Please select a resource
                             </div>
                         </div>
 
@@ -31,10 +31,10 @@
 
                         <div class="d-flex justify-content-between">
                             <a href="{{ path('app_favoris_index') }}" class="btn btn-secondary">
-                                <i class="bi bi-arrow-left"></i> Retour à la liste
+                                <i class="bi bi-arrow-left"></i> Back to list
                             </a>
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Enregistrer
+                                <i class="bi bi-save"></i> Save
                             </button>
                         </div>
                     {{ form_end(form) }}
