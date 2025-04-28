@@ -197,7 +197,7 @@ final class ComplaintController extends AbstractController
             $this->addFlash('success', 'Complaint deleted successfully!');
         }
 
-        return $this->redirectToRoute('app_complaint_my_complaints', [], Response::HTTP_SEE_OTHER);
+        return $this->redirectToRoute('app_complaint_index', [], Response::HTTP_SEE_OTHER);
     }
 
 
