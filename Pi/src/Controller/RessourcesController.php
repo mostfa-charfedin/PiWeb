@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Ressources;
 use App\Entity\User;
+use App\Entity\Evaluation;
 use App\Form\RessourcesType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -439,41 +440,66 @@ class RessourcesController extends AbstractController
             return $this->json(['success' => false, 'message' => 'Rating must be between 0 and 10.']);
         }
 
+        // Get the current user
+        $userId = $session->get('id');
+        $user = $em->getRepository(User::class)->find($userId);
+        if (!$user) {
+            return $this->json(['success' => false, 'message' => 'User not found.']);
+        }
+
         try {
-            $user = $em->getRepository(User::class)->find($session->get('id'));
+            // Check if the user has already rated this resource
+            $existingEvaluation = $em->getRepository(Evaluation::class)->findOneBy([
+                'id' => $userId,
+                'idResource' => $ressource->getIdresource()
+            ]);
 
-            // Create new evaluation
-            $evaluation = new Evaluation();
-            $evaluation->setNote((int)round($rating));
-            $evaluation->setDateEvaluation(new \DateTime());
-            $evaluation->setRessource($ressource);
-            $evaluation->setUser($user);
-            $evaluation->setId($user->getId());
-            $evaluation->setIdResource($ressource->getIdresource());
+            if ($existingEvaluation) {
+                // Update existing evaluation
+                $existingEvaluation->setNote($rating);
+                $existingEvaluation->setDateEvaluation(new \DateTime());
+            } else {
+                // Create new evaluation
+                $evaluation = new Evaluation();
+                $evaluation->setId($userId);
+                $evaluation->setIdResource($ressource->getIdresource());
+                $evaluation->setNote($rating);
+                $evaluation->setDateEvaluation(new \DateTime());
+                $evaluation->setRessource($ressource);
+                $evaluation->setUser($user);
+                
+                $em->persist($evaluation);
+            }
 
-            // Calculate new average
-            $evaluations = $ressource->getEvaluations();
-            $totalRatings = count($evaluations) + 1;
-            $sumRatings = array_sum(array_map(fn($e) => $e->getNote(), $evaluations->toArray())) + $evaluation->getNote();
-            $newAverage = $sumRatings / $totalRatings;
-
-            // Update resource average
-            $ressource->setNoteaverage($newAverage);
-
-            // Save changes
-            $em->persist($evaluation);
+            // Calculate new average rating using DQL for accurate calculation
+            $qb = $em->createQueryBuilder();
+            $qb->select('AVG(e.note) as average')
+               ->from(Evaluation::class, 'e')
+               ->where('e.idResource = :resourceId')
+               ->setParameter('resourceId', $ressource->getIdresource());
+            
+            $result = $qb->getQuery()->getSingleScalarResult();
+            $averageRating = $result ? round($result, 1) : 0;
+            
+            // Update resource average rating
+            $ressource->setNoteaverage($averageRating);
+            
+            // Make sure to persist the resource changes
+            $em->persist($ressource);
+            
+            // Flush all changes
             $em->flush();
-
+            
+            // Refresh the resource to get the updated average
+            $em->refresh($ressource);
+            
             return $this->json([
                 'success' => true, 
                 'message' => 'Rating submitted successfully!',
-                'newAverage' => $newAverage
+                'newAverage' => number_format($ressource->getNoteaverage(), 1)
             ]);
         } catch (\Exception $e) {
-            return $this->json([
-                'success' => false, 
-                'message' => 'An error occurred while saving your rating. Please try again.'
-            ]);
+            return $this->json(['success' => false, 'message' => 'An error occurred while saving your rating: ' . $e->getMessage()]);
         }
     }
 
