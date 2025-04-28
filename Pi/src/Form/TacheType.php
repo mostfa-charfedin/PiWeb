@@ -52,7 +52,7 @@ class TacheType extends AbstractType
                 'constraints' => [
                     new Assert\NotBlank(['message' => 'The description cannot be blank.']),
                     new Assert\Length([
-                        'min' => 30,
+                        'min' => 10,
                         'minMessage' => 'The description must be at least {{ limit }} characters.',
                     ]),
                 ],

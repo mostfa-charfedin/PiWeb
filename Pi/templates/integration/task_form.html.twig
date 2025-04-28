@@ -174,16 +174,53 @@
 </main>
 
 <script>
-    // Search functionality
-    document.querySelector('.user-search').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        document.querySelectorAll('.user-row').forEach(row => {
-            const rowText = row.textContent.toLowerCase();
-            row.style.display = rowText.includes(searchTerm) ? '' : 'none';
+   document.addEventListener('DOMContentLoaded', function () {
+    // Add event listener for user selection
+    document.querySelectorAll('.user-row').forEach(row => {
+        row.addEventListener('click', function() {
+            selectUser(row);
         });
     });
 
-    // User selection
+    // Search functionality with AJAX
+    document.querySelector('.user-search').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+
+        // Make an AJAX request to search users
+        fetch(`/search-users?query=${encodeURIComponent(searchTerm)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Assuming the data is an array of user objects
+                updateUserRows(data);
+            })
+            .catch(error => console.error('Error searching users:', error));
+    });
+
+    // Function to update the displayed user rows
+    function updateUserRows(users) {
+        const userContainer = document.querySelector('.user-list'); // Adjust as necessary
+        userContainer.innerHTML = ''; // Clear existing rows
+
+        users.forEach(user => {
+            const row = document.createElement('div');
+            row.classList.add('user-row');
+            row.dataset.userId = user.id;
+            row.dataset.userLabel = user.label;
+
+            row.innerHTML = `
+                <span>${user.label}</span>
+                <span class="badge bg-${user.status === 'warning' ? 'warning text-dark' : 'primary'}">
+                    ${user.status}
+                </span>
+            `;
+            row.addEventListener('click', function() {
+                selectUser(row);
+            });
+            userContainer.appendChild(row);
+        });
+    }
+
+    // User selection function
     function selectUser(row) {
         // Update display
         document.querySelector('.selected-user').innerHTML = `
@@ -200,5 +237,7 @@
         document.querySelectorAll('.user-row').forEach(r => r.classList.remove('selected'));
         row.classList.add('selected');
     }
+});
+
 </script>
 {% endblock %}
