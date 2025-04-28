@@ -17,21 +17,33 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use GuzzleHttp\Client;
+use Knp\Component\Pager\PaginatorInterface;
+
+
 
 #[Route('/poste')]
 final class PosteController extends AbstractController
 {
     #[Route(name: 'app_poste_index', methods: ['GET'])]
-    public function index(PosteRepository $posteRepository, LikeRepository $likeRepository, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    public function index(Request $request , PosteRepository $posteRepository, LikeRepository $likeRepository, SessionInterface $session, EntityManagerInterface $entityManager,PaginatorInterface $paginator   ): Response
     {
         $userId = $session->get('id');
         $user = $userId ? $entityManager->getRepository(User::class)->find($userId) : null;
 
-        $postes = $posteRepository->findAll();
+        $all_postes = $posteRepository->findAll();
+
+            // Paginate the query
+    $postes = $paginator->paginate(
+        $all_postes,
+        $request->query->getInt('page', 1), // Current page number
+        3 // Items per page
+    );
+
         $likedPostes = [];
-        $filteredPostes = array_filter($postes, function ($poste) use ($user) {
+        $filteredPostes = array_filter($postes->getItems(), function ($poste) use ($user) {
             return $user === null || $poste->getUser() !== $user;
         });
+
 
         if ($user) {
             foreach ($filteredPostes as $poste) {
@@ -45,7 +57,8 @@ final class PosteController extends AbstractController
         }
 
         return $this->render('poste/index.html.twig', [
-            'postes' => $filteredPostes,
+            'postes' => $postes,
+            'filteredPostes' => $filteredPostes,
             'likedPostes' => $likedPostes,
             'user' => $user,
         ]);

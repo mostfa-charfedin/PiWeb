@@ -63,6 +63,26 @@
             background-color: #e0a800;
             color: #000;
         }
+
+        .pagination-container {
+    margin-top: 2rem;
+    padding: 1rem 0;
+}
+.pagination-container {
+    margin: 2rem 0;
+    padding: 1rem 0;
+    width: 100%;
+}
+
+/* Pagination item styling */
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.page-link {
+    color: #0d6efd;
+}
     </style>
 {% endblock %}
 
@@ -108,6 +128,13 @@
                     </select>
                 </div>
             </div>
+        </div>
+            {# Pagination controls at the top #}
+<div class="pagination-container">
+    <div class="row">
+        <div class="col-12 d-flex justify-content-center">
+{{ knp_pagination_render(postes, 'poste/pagination.html.twig') }}        </div>
+    </div>
         </div>
     </section>
     <section>
@@ -158,7 +185,20 @@
                     </div>
                 {% endfor %}
             </div>
+                       {# Pagination controls #}
+<div class="pagination-container">
+    <div class="row">
+        <div class="col-12 d-flex justify-content-center">
+{{ knp_pagination_render(postes, 'poste/pagination.html.twig') }}        </div>
+    </div>
         </div>
+        {# Debugging - remove after testing #}
+<div class="debug-info" style="display: none;">
+    Page Count: {{ postes.getPageCount() }}<br>
+    Total Items: {{ postes.getTotalItemCount() }}<br>
+    Current Page: {{ postes.getCurrentPageNumber() }}<br>
+    Items Per Page: {{ postes.getItemNumberPerPage() }}
+</div>
     </section>
 
     <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">

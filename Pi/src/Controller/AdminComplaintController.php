@@ -33,4 +33,27 @@ class AdminComplaintController extends AbstractController
             'form' => $form->createView(),
         ]);
     }
+    #[Route('/stats/complaints', name: 'app_complaint_stats', methods: ['GET'])]
+public function stats(ComplaintRepository $complaintRepository, SessionInterface $session, EntityManagerInterface $entityManager): Response
+{
+    $userId = $session->get('id');
+    if (!$userId) {
+        return $this->redirectToRoute('login');
+    }
+
+    $user = $entityManager->getRepository(User::class)->find($userId);
+    if (!$user) {
+        $session->invalidate();
+        return $this->redirectToRoute('login');
+    }
+
+    // Nombre total de toutes les réclamations
+    $totalComplaints = $complaintRepository->count([]);
+
+    return $this->render('complaint/stats.html.twig', [
+        'totalComplaints' => $totalComplaints,
+        'user' => $user,
+    ]);
+}
+
 }
