@@ -143,4 +143,14 @@ class AvisRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function getAverageRatingForProgramme($idProgramme): ?float
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('AVG(a.rating)')
+            ->where('a.programme = :idProgramme')
+            ->setParameter('idProgramme', $idProgramme);
+
+        return (float) $qb->getQuery()->getSingleScalarResult();
+    }
 } 

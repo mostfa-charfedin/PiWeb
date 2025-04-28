@@ -24,6 +24,30 @@
 
 {% block content %}
 <main id="main" class="main">
+    <!-- Icône flottante du chatbot -->
+    <button id="openChatbotModal" type="button" class="btn btn-primary" style="position: fixed; bottom: 40px; right: 40px; z-index: 1050; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+        <i class="bi bi-robot" style="font-size: 2rem;"></i>
+    </button>
+
+    <!-- Modal Bootstrap pour le chatbot -->
+    <div class="modal fade" id="chatbotModal" tabindex="-1" aria-labelledby="chatbotModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="chatbotModalLabel">Programme Recommendation Chatbot</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div id="chat-messages" class="mb-3" style="height: 300px; overflow-y: auto;"></div>
+            <div class="input-group">
+                <input type="text" id="user-input" class="form-control" placeholder="Type: what is the best program">
+                <button class="btn btn-primary" onclick="askChatbot()">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="pagetitle">
         <h1>Programs List</h1>
         <nav>
@@ -117,7 +141,7 @@
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
                                                 {% if not app.session.get('recompenses')[program.idprogramme] is defined %}
-                                                    <a href="{{ path('app_recompense_new', {'idprogramme': program.idprogramme}) }}" class="btn btn-sm btn-info">
+                                                    <a href="{{ path('app_recompense_new') ~ '?idprogramme=' ~ program.idprogramme }}" class="btn btn-sm btn-info">
                                                         <i class="bi bi-gift"></i>
                                                     </a>
                                                 {% else %}
@@ -276,6 +300,70 @@
                 performSearch();
             }
         });
+
+        // Ouvrir la modal au clic sur l'icône
+        const openBtn = document.getElementById('openChatbotModal');
+        if (openBtn) {
+            openBtn.addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('chatbotModal'));
+                modal.show();
+            });
+        }
+    });
+
+    async function askChatbot() {
+        const input = document.getElementById('user-input');
+        const messagesDiv = document.getElementById('chat-messages');
+        messagesDiv.innerHTML += `
+            <div class="alert alert-primary">
+                <strong>You:</strong> ${input.value}
+            </div>
+        `;
+        try {
+            const response = await fetch('/api/chatbot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    question: input.value
+                })
+            });
+            const data = await response.json();
+            messagesDiv.innerHTML += `
+                <div class="alert alert-success">
+                    <strong>Chatbot:</strong> ${data.message}
+                </div>
+            `;
+            if (data.programmes) {
+                let programsList = '<div class="alert alert-info"><strong>Available Programs:</strong><ul>';
+                data.programmes.forEach(prog => {
+                    programsList += `<li>${prog.titre} (Rating: ${prog.average}/5)</li>`;
+                });
+                programsList += '</ul></div>';
+                messagesDiv.innerHTML += programsList;
+            }
+            input.value = '';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        } catch (error) {
+            console.error('Error:', error);
+            messagesDiv.innerHTML += `
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> Could not get response from chatbot
+                </div>
+            `;
+        }
+    }
+    // Permettre l'envoi avec la touche Enter
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('user-input');
+        if (input) {
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    askChatbot();
+                }
+            });
+        }
     });
     </script>
 {% endblock %}

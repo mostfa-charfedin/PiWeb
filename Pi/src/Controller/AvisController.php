@@ -18,8 +18,6 @@ use App\Entity\User;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Knp\Snappy\Pdf;
-use Dompdf\Dompdf;
-use Dompdf\Options;
 
 #[Route('/avis')]
 class AvisController extends AbstractController
@@ -212,25 +210,57 @@ class AvisController extends AbstractController
     #[Route('/avis/stats/export/csv', name: 'avis_stats_export_csv')]
     public function exportStatsCsv(AvisRepository $avisRepository): StreamedResponse
     {
-        $programStats = $avisRepository->getProgramStats(); // Adapt this to your actual data fetching
+        // 1. Récupération des données statistiques
+        $programStats = $avisRepository->getProgramStats();        // Statistiques par programme
+        $ratingData = $avisRepository->getRatingStatistics();      // Distribution des notes
+        $averageRating = $avisRepository->getAverageRating();      // Note moyenne globale
+        $totalReviewers = $avisRepository->getTotalUniqueReviewers(); // Nombre total de reviewers
 
-        $response = new StreamedResponse(function () use ($programStats) {
+        // 2. Création de la réponse streamée
+        $response = new StreamedResponse(function () use ($programStats, $ratingData, $averageRating, $totalReviewers) {
+            // Ouverture du flux de sortie
             $handle = fopen('php://output', 'w+');
-            // Header
-            fputcsv($handle, ['Program Name', 'Number of Reviews', 'Average Rating']);
-            // Data
+            
+            // 3. Section 1: Statistiques globales
+            fputcsv($handle, ['=== GLOBAL STATISTICS ===']);
+            fputcsv($handle, ['Metric', 'Value']);
+            fputcsv($handle, ['Total Reviewers', $totalReviewers]);
+            fputcsv($handle, ['Average Rating', number_format($averageRating, 1) . '/5']);
+            fputcsv($handle, []); // Séparateur
+            
+            // 4. Section 2: Distribution des notes
+            fputcsv($handle, ['=== RATING DISTRIBUTION ===']);
+            fputcsv($handle, ['Rating', 'Number of Reviews', 'Percentage']);
+            $totalReviews = array_sum($ratingData);
+            for ($i = 5; $i >= 1; $i--) {
+                $count = $ratingData[5-$i];
+                $percentage = $totalReviews > 0 ? round(($count / $totalReviews) * 100, 1) : 0;
+                fputcsv($handle, [
+                    $i . ' Stars',
+                    $count,
+                    $percentage . '%'
+                ]);
+            }
+            fputcsv($handle, []); // Séparateur
+            
+            // 5. Section 3: Statistiques par programme
+            fputcsv($handle, ['=== PROGRAM STATISTICS ===']);
+            fputcsv($handle, ['Program Name', 'Reviews Count', 'Average Rating']);
             foreach ($programStats as $stat) {
                 fputcsv($handle, [
                     $stat['programName'],
                     $stat['reviewCount'],
-                    $stat['averageRating'],
+                    number_format($stat['averageRating'], 1) . '/5'
                 ]);
             }
+            
+            // Fermeture du flux
             fclose($handle);
         });
 
+        // Configuration des en-têtes HTTP
         $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
-        $response->headers->set('Content-Disposition', 'attachment; filename="reviews_stats.csv"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="reviews_statistics_' . date('Y-m-d') . '.csv"');
 
         return $response;
     }
