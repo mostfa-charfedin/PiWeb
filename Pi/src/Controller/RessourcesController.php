@@ -249,6 +249,7 @@ class RessourcesController extends AbstractController
 
         return $this->render('ressources/new.html.twig', [
             'form' => $form->createView(),
+            'user' => $user
         ]);
     }
 
