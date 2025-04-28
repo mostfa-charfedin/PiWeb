@@ -19,20 +19,20 @@ class Quiz
     #[ORM\Column(name: "idQuiz", type: "integer")]
     private $idquiz;
 
-    /**
-     * @ORM\Column(name="nom", type="string", length=255, nullable=true)
-     */
-    private $nom;
+    
 
-    /**
-     * @ORM\Column(name="dateCreation", type="datetime", nullable=true)
-     */
-    private $datecreation;
+    #[ORM\Column(name: "nom", type: "string", length: 255, nullable: true)]
+    private ?string $nom = null;
+    
 
-    /**
-     * @ORM\OneToMany(targetEntity=Question::class, mappedBy="quiz", orphanRemoval=true, cascade={"persist", "remove"})
-     */
-    private $questions;
+    #[ORM\Column(name: "dateCreation", type: "datetime", nullable: true)]
+    private ?\DateTimeInterface $datecreation = null;
+    
+    #[ORM\OneToMany(targetEntity: Question::class, mappedBy: "quiz", orphanRemoval: true, cascade: ["persist", "remove"])]
+    private Collection $questions;
+
+
+
 
     #[ORM\OneToMany(mappedBy: 'idQuiz', targetEntity: Score::class, orphanRemoval: true)]
     private Collection $scores;

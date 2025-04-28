@@ -9,17 +9,17 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Entity\Reponse;
 use App\Entity\Quiz;
 
-/**
- * @ORM\Entity(repositoryClass=QuestionRepository::class)
- * @ORM\Table(name="question")
- */
+
+
+#[ORM\Entity(repositoryClass: "App\Repository\QuestionRepository")]
+#[ORM\Table(name: "question")]
 class Question
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="IDENTITY")
-     * @ORM\Column(name="idQuestion", type="integer")
-     */
+
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(name: "idQuestion",type: "integer")]
+    
     private $idQuestion;
 
     /**
@@ -31,11 +31,13 @@ class Question
      */
     private $question;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Quiz::class, inversedBy="questions")
-     * @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz", nullable=false, onDelete="CASCADE")
-     */
+  
+  
+    #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: "questions", cascade: ["remove"])]
+    #[ORM\JoinColumn(name: "idQuiz", referencedColumnName: "idQuiz", nullable: false)]
     private $quiz;
+
+   
 
     /**
      * @ORM\OneToMany(targetEntity=Reponse::class, mappedBy="question", cascade={"persist", "remove"}, orphanRemoval=true)

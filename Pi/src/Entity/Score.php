@@ -9,10 +9,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Table(name: "score")]
 class Score
 {
-    #[ORM\ManyToOne(inversedBy: 'scores')]
-    #[ORM\JoinColumn(name: "idUser", referencedColumnName: "id")]
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'scores')]
+    #[ORM\JoinColumn(name: "idUser", referencedColumnName: "id", nullable: false)]
     private ?User $user = null;
-    
 
     #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: Quiz::class)]
