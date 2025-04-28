@@ -95,6 +95,7 @@ class RessourcesType extends AbstractType
             ])
             ->add('noteaverage', NumberType::class, [
                 'label' => 'Average Rating (0-10)',
+                'required' => false,
                 'constraints' => [
                     new Assert\Range([
                         'min' => 0,

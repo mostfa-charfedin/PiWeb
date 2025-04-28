@@ -385,7 +385,7 @@
                   Ressources
                 </a>
                 <ul class="dropdown-menu" aria-labelledby="RessourcesDropdown">
-                  <li><a class="dropdown-item" href="{{ path('app_ressources_index') }}">List of Resources</a></li>
+                  <li><a class="dropdown-item" href="{{ user.role == 'ADMIN' ? path('app_ressources_index') : path('app_user_ressources_index') }}">List of Resources</a></li>
                 </ul>
               </li>
               <li class="nav-item">
