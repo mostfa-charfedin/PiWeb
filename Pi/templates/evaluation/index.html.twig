@@ -17,10 +17,47 @@
                     </h5>
                 </div>
                 <div class="card-body">
+                    <!-- Summary Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stats-card bg-light p-3 rounded text-center">
+                                <h6 class="text-muted mb-2">Average Score</h6>
+                                <h3 class="mb-0 text-primary">
+                                    {% set avgScore = evaluations|reduce((sum, eval) => sum + eval.note, 0) / evaluations|length %}
+                                    {{ avgScore|number_format(1) }}/10
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card bg-light p-3 rounded text-center">
+                                <h6 class="text-muted mb-2">Highest Score</h6>
+                                <h3 class="mb-0 text-success">
+                                    {{ evaluations|sort((a, b) => b.note <=> a.note)|first.note }}/10
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card bg-light p-3 rounded text-center">
+                                <h6 class="text-muted mb-2">Lowest Score</h6>
+                                <h3 class="mb-0 text-danger">
+                                    {{ evaluations|sort((a, b) => a.note <=> b.note)|first.note }}/10
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card bg-light p-3 rounded text-center">
+                                <h6 class="text-muted mb-2">Total Resources</h6>
+                                <h3 class="mb-0 text-info">{{ evaluations|length }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Distribution -->
                     <div class="chart-container" style="min-height: 300px;">
                         {% for evaluation in evaluations|sort((a, b) => b.note <=> a.note) %}
                             {% set resourceId = evaluation.idResource %}
-                            <div class="chart-row mb-3">
+                            <div class="chart-row mb-3" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                 title="Resource: {{ resourceTitles[resourceId]|default('Resource #' ~ resourceId) }}&#10;Score: {{ evaluation.note }}/10">
                                 <div class="chart-label" style="width: 200px; overflow: hidden; text-overflow: ellipsis;">
                                     {% if resourceTitles[resourceId] is defined %}
                                         {{ resourceTitles[resourceId] }}
@@ -29,15 +66,45 @@
                                     {% endif %}
                                 </div>
 
-                                <!-- Bar representing the rating -->
+                                <!-- Bar representing the rating with trend indicator -->
                                 <div class="chart-bar-container" style="flex-grow: 1;">
-                                    <div class="chart-bar {% if evaluation.note >= 7 %}bg-success{% elseif evaluation.note >= 4 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                    <div class="chart-bar {% if evaluation.note >= 8 %}bg-success{% elseif evaluation.note >= 5 %}bg-info{% elseif evaluation.note >= 2 %}bg-warning{% else %}bg-danger{% endif %}" 
                                          style="width: {{ (evaluation.note/10 * 100)|round }}%;">
                                         <span class="chart-value">{{ evaluation.note }}/10</span>
+                                        {% if evaluation.note >= 8 %}
+                                            <i class="bi bi-arrow-up-circle-fill trend-indicator"></i>
+                                        {% elseif evaluation.note <= 3 %}
+                                            <i class="bi bi-arrow-down-circle-fill trend-indicator"></i>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
                         {% endfor %}
+                    </div>
+
+                    <!-- Performance Categories -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-3">Performance Categories</h6>
+                            <div class="d-flex gap-3">
+                                <div class="performance-category">
+                                    <span class="badge bg-success">Excellent (8-10)</span>
+                                    <span class="count">{{ evaluations|filter(e => e.note >= 8)|length }}</span>
+                                </div>
+                                <div class="performance-category">
+                                    <span class="badge bg-info">Good (5-7.9)</span>
+                                    <span class="count">{{ evaluations|filter(e => e.note >= 5 and e.note < 8)|length }}</span>
+                                </div>
+                                <div class="performance-category">
+                                    <span class="badge bg-warning">Fair (2-4.9)</span>
+                                    <span class="count">{{ evaluations|filter(e => e.note >= 2 and e.note < 5)|length }}</span>
+                                </div>
+                                <div class="performance-category">
+                                    <span class="badge bg-danger">Poor (0-1.9)</span>
+                                    <span class="count">{{ evaluations|filter(e => e.note < 2)|length }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -265,6 +332,10 @@
         background-color: #28a745;
     }
 
+    .chart-bar.bg-info {
+        background-color: #17a2b8;
+    }
+
     .chart-bar.bg-warning {
         background-color: #ffc107;
     }
@@ -302,5 +373,76 @@
             width: 120px !important;
         }
     }
+
+    /* New Styles for Enhanced Statistics */
+    .stats-card {
+        transition: transform 0.2s;
+        border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .performance-category {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .performance-category .count {
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .trend-indicator {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+    }
+
+    .chart-bar {
+        position: relative;
+        overflow: visible;
+    }
+
+    .chart-bar:hover {
+        filter: brightness(1.1);
+    }
+
+    /* Tooltip customization */
+    .tooltip {
+        font-size: 0.875rem;
+    }
+
+    .tooltip-inner {
+        max-width: 200px;
+        padding: 0.5rem;
+        text-align: left;
+        white-space: pre-line;
+    }
 </style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+
+        // Add animation to chart bars
+        document.querySelectorAll('.chart-bar').forEach((bar, index) => {
+            setTimeout(() => {
+                bar.style.width = bar.style.width;
+                bar.style.opacity = '1';
+            }, index * 100);
+        });
+    });
+</script>
 {% endblock %}

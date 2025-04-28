@@ -52,11 +52,11 @@ class Ressources
     private $lien;
 
     /**
-     * @var float
+     * @var float|null
      *
-     * @ORM\Column(name="noteAverage", type="float", precision=10, scale=0, nullable=false)
+     * @ORM\Column(name="noteAverage", type="float", precision=10, scale=0, nullable=true)
      */
-    private $noteaverage = 0;
+    private $noteaverage = null;
 
     /**
      * @var \User
@@ -140,12 +140,12 @@ class Ressources
     }
 
     // Getter and Setter for $noteaverage
-    public function getNoteaverage(): float
+    public function getNoteaverage(): ?float
     {
         return $this->noteaverage;
     }
 
-    public function setNoteaverage(float $noteaverage): self
+    public function setNoteaverage(?float $noteaverage): self
     {
         $this->noteaverage = $noteaverage;
         return $this;
