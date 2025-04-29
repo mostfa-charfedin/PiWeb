@@ -107,6 +107,9 @@
 
         <!-- Action Buttons -->
         <div class="d-flex justify-content-end gap-3 action-buttons">
+          <button type="button" class="btn btn-success btn-lg rounded-circle shadow-sm translate-btn" data-bs-toggle="modal" data-bs-target="#translateModal">
+            <i class="bi bi-translate"></i>
+          </button>
           <button type="button" class="btn btn-info btn-lg rounded-circle shadow-sm qr-btn" data-bs-toggle="modal" data-bs-target="#qrCodeModal">
             <i class="bi bi-qr-code"></i>
           </button>
@@ -121,6 +124,71 @@
       </div>
     </div>
   </section>
+
+  <!-- Translation Modal -->
+  <div class="modal fade" id="translateModal" tabindex="-1" aria-labelledby="translateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="translateModalLabel">Translate Resource</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="sourceLanguage" class="form-label">Source Language</label>
+              <select class="form-select" id="sourceLanguage">
+                <option value="auto">Auto Detect</option>
+                <option value="en">English</option>
+                <option value="fr">French</option>
+                <option value="es">Spanish</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="targetLanguage" class="form-label">Target Language</label>
+              <select class="form-select" id="targetLanguage">
+                <option value="en">English</option>
+                <option value="fr">French</option>
+                <option value="es">Spanish</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="translation-content">
+            <div class="original-text mb-3">
+              <h6>Original Text</h6>
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">{{ ressource.titre }}</h5>
+                  <p class="card-text">{{ ressource.description }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="translated-text">
+              <h6>Translated Text</h6>
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title" id="translatedTitle"></h5>
+                  <p class="card-text" id="translatedDescription"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="translateBtn">Translate</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- QR Code Modal -->
   <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
@@ -450,6 +518,34 @@
     padding: 1.5rem;
   }
 
+  .translate-btn {
+    background: linear-gradient(45deg, #4CAF50, #2E7D32);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .translate-btn:hover {
+    background: linear-gradient(45deg, #2E7D32, #4CAF50);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+    color: white;
+  }
+
+  .translation-content .card {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .translation-content h6 {
+    color: #6C63FF;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
   @media (max-width: 767px) {
     .rating-circle {
       width: 160px;
@@ -477,4 +573,93 @@
 
 {% block javascripts %}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const translateBtn = document.getElementById('translateBtn');
+    const sourceLanguage = document.getElementById('sourceLanguage');
+    const targetLanguage = document.getElementById('targetLanguage');
+    const translatedTitle = document.getElementById('translatedTitle');
+    const translatedDescription = document.getElementById('translatedDescription');
+
+    translateBtn.addEventListener('click', async function() {
+        // Show loading state
+        translateBtn.disabled = true;
+        translateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Translating...';
+
+        const title = '{{ ressource.titre|escape('js') }}';
+        const description = '{{ ressource.description|escape('js') }}';
+        
+        try {
+            console.log('Starting translation...');
+            console.log('Source language:', sourceLanguage.value);
+            console.log('Target language:', targetLanguage.value);
+            
+            // Translate title
+            console.log('Translating title:', title);
+            const titleResponse = await fetch('/api/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: title,
+                    target: targetLanguage.value,
+                    source: sourceLanguage.value === 'auto' ? null : sourceLanguage.value
+                })
+            });
+            
+            if (!titleResponse.ok) {
+                throw new Error(`Title translation failed: ${titleResponse.status} ${titleResponse.statusText}`);
+            }
+            
+            const titleData = await titleResponse.json();
+            console.log('Title translation result:', titleData);
+            translatedTitle.textContent = titleData.translation;
+
+            // Translate description
+            console.log('Translating description:', description);
+            const descResponse = await fetch('/api/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: description,
+                    target: targetLanguage.value,
+                    source: sourceLanguage.value === 'auto' ? null : sourceLanguage.value
+                })
+            });
+            
+            if (!descResponse.ok) {
+                throw new Error(`Description translation failed: ${descResponse.status} ${descResponse.statusText}`);
+            }
+            
+            const descData = await descResponse.json();
+            console.log('Description translation result:', descData);
+            translatedDescription.textContent = descData.translation;
+
+        } catch (error) {
+            console.error('Translation error:', error);
+            alert('Translation error: ' + error.message);
+        } finally {
+            // Reset button state
+            translateBtn.disabled = false;
+            translateBtn.innerHTML = 'Translate';
+        }
+    });
+
+    // Add event listener to show/hide source language based on auto-detect
+    sourceLanguage.addEventListener('change', function() {
+        const targetSelect = document.getElementById('targetLanguage');
+        if (this.value === 'auto') {
+            targetSelect.disabled = false;
+        } else {
+            // Disable target language if it matches source
+            Array.from(targetSelect.options).forEach(option => {
+                option.disabled = option.value === this.value;
+            });
+        }
+    });
+});
+</script>
 {% endblock %}

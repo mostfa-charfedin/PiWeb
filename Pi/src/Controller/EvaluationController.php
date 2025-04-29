@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Evaluation;
 use App\Form\EvaluationType;
+use App\Service\PerformanceEmailService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,10 +12,18 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use App\Entity\User;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 #[Route('/evaluation')]
 final class EvaluationController extends AbstractController
 {
+    public function __construct(
+        private readonly PerformanceEmailService $performanceEmailService
+    ) {
+    }
+
     #[Route(name: 'app_evaluation_index', methods: ['GET'])]
     public function index(EntityManagerInterface $entityManager, SessionInterface $session): Response
     {
@@ -270,5 +279,78 @@ final class EvaluationController extends AbstractController
             $this->addFlash('error', 'An error occurred while generating the PDF: ' . $e->getMessage());
             return $this->redirectToRoute('app_evaluation_show', ['idevaluation' => $evaluation->getIdEvaluation()]);
         }
+    }
+
+    #[Route('/send-stats', name: 'app_evaluation_send_stats', methods: ['POST'])]
+    public function sendStats(EntityManagerInterface $entityManager, SessionInterface $session, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator): Response
+    {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        if ($user->getRole() !== 'ADMIN') {
+            $this->addFlash('error', 'Access denied. This section is for administrators only.');
+            return $this->redirectToRoute('profile');
+        }
+
+        $evaluations = $entityManager
+            ->getRepository(Evaluation::class)
+            ->findAll();
+        
+        // Calculate statistics
+        $totalResources = count($evaluations);
+        $avgScore = $totalResources > 0 ? array_sum(array_map(fn($e) => $e->getNote(), $evaluations)) / $totalResources : 0;
+        $highestScore = $totalResources > 0 ? max(array_map(fn($e) => $e->getNote(), $evaluations)) : 0;
+        $lowestScore = $totalResources > 0 ? min(array_map(fn($e) => $e->getNote(), $evaluations)) : 0;
+
+        // Create email content
+        $timezone = new \DateTimeZone('Europe/Paris'); // This is GMT+1
+        $currentDateTime = (new \DateTime('now', $timezone))->format('Y-m-d H:i:s');
+        $emailContent = sprintf(
+            "Resource Performance Statistics Report\n\n" .
+            "**Date and Time (GMT+1): %s**\n\n" .
+            "Total Resources: %d\n" .
+            "Average Score: %.1f/10\n" .
+            "Highest Score: %.1f/10\n" .
+            "Lowest Score: %.1f/10\n\n" .
+            "Performance Categories:\n" .
+            "- Excellent (8-10): %d\n" .
+            "- Good (5-7.9): %d\n" .
+            "- Fair (2-4.9): %d\n" .
+            "- Poor (0-1.9): %d\n\n" .
+            "View detailed statistics: %s",
+            $currentDateTime,
+            $totalResources,
+            $avgScore,
+            $highestScore,
+            $lowestScore,
+            count(array_filter($evaluations, fn($e) => $e->getNote() >= 8)),
+            count(array_filter($evaluations, fn($e) => $e->getNote() >= 5 && $e->getNote() < 8)),
+            count(array_filter($evaluations, fn($e) => $e->getNote() >= 2 && $e->getNote() < 5)),
+            count(array_filter($evaluations, fn($e) => $e->getNote() < 2)),
+            $urlGenerator->generate('app_evaluation_index', [], UrlGeneratorInterface::ABSOLUTE_URL)
+        );
+
+        try {
+            // Create and send email
+            $email = (new Email())
+                ->from($_ENV['MAILER_FROM'] ?? 'noreply@yourdomain.com')
+                ->to($user->getEmail())
+                ->subject('Resource Performance Statistics Report - ' . $currentDateTime . ' (GMT+1)')
+                ->text($emailContent);
+
+            $mailer->send($email);
+            $this->addFlash('success', 'Performance statistics report has been sent to your email successfully!');
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Failed to send performance statistics report: ' . $e->getMessage());
+        }
+
+        return $this->redirectToRoute('app_evaluation_index');
     }
 }

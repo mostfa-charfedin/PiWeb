@@ -5,6 +5,22 @@
     <h1>Resource Performance Overview</h1>
 </div>
 
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
 <section class="section">
     <div class="row">
         <!-- Statistics Chart -->
@@ -15,6 +31,13 @@
                         <i class="bi bi-bar-chart-fill text-primary me-2"></i>
                         Resource Performance Statistics
                     </h5>
+                    <div class="position-absolute end-0 top-0 p-4">
+                        <form method="post" action="{{ path('app_evaluation_send_stats') }}">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-envelope-fill me-1"></i>Email Statistics
+                            </button>
+                        </form>
+                    </div>
                 </div>
                 <div class="card-body">
                     <!-- Summary Statistics -->
