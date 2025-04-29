@@ -59,6 +59,36 @@ final class EvaluationController extends AbstractController
             $resourceTitles[$resource->getIdresource()] = $resource->getTitre();
         }
 
+        // Calculate category distribution
+        $categoryDistribution = [];
+        $categoryCounts = [];
+        $categoryLabels = [];
+        $categoryColors = [
+            'Document' => '#4e73df',
+            'Video' => '#1cc88a',
+            'Link' => '#36b9cc',
+            'Article' => '#e74a3b',
+            'Other' => '#f6c23e'
+        ];
+
+        foreach ($resources as $resource) {
+            $type = $resource->getType() ?: 'Other';
+            if (!isset($categoryDistribution[$type])) {
+                $categoryDistribution[$type] = 0;
+                // If the type is not in our predefined colors, assign a random color
+                if (!isset($categoryColors[$type])) {
+                    $categoryColors[$type] = sprintf('#%06X', mt_rand(0, 0xFFFFFF));
+                }
+            }
+            $categoryDistribution[$type]++;
+        }
+
+        // Prepare data for the chart
+        foreach ($categoryDistribution as $type => $count) {
+            $categoryLabels[] = $type;
+            $categoryCounts[] = $count;
+        }
+
         // Debug information
         dump($evaluations);
         dump($resourceTitles);
@@ -69,6 +99,10 @@ final class EvaluationController extends AbstractController
             'evaluations' => $evaluations,
             'resourceTitles' => $resourceTitles,
             'user' => $user,
+            'categoryDistribution' => $categoryDistribution,
+            'categoryLabels' => $categoryLabels,
+            'categoryCounts' => $categoryCounts,
+            'categoryColors' => $categoryColors,
         ]);
     }
 

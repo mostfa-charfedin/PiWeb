@@ -261,6 +261,60 @@
     </div>
 </section>
 
+<!-- Resource Category Distribution Chart -->
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-info bg-opacity-10">
+                    <h5 class="card-title mb-0 text-center">
+                        <i class="bi bi-pie-chart-fill text-info me-2"></i>
+                        Resource Category Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="chart-container" style="position: relative; height: 400px;">
+                                <canvas id="categoryDistributionChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-center justify-content-center">
+                            <div class="category-legend p-4 bg-light rounded w-100" style="max-width: 350px;">
+                                <h6 class="mb-4 text-center">
+                                    <i class="bi bi-info-circle me-2"></i>Category Breakdown
+                                </h6>
+                                <div class="category-list">
+                                    {% for category, count in categoryDistribution %}
+                                        <div class="category-item d-flex align-items-center mb-3 p-2 rounded" 
+                                             style="background-color: {{ categoryColors[category] }}20;">
+                                            <span class="badge me-3" style="background-color: {{ categoryColors[category] }}; width: 20px; height: 20px;"></span>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <span class="category-name">{{ category }}</span>
+                                                    <span class="category-count">{{ count }}</span>
+                                                </div>
+                                                <div class="progress mt-1" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" 
+                                                         style="width: {{ (count / evaluations|length * 100)|round }}%; background-color: {{ categoryColors[category] }}"
+                                                         aria-valuenow="{{ (count / evaluations|length * 100)|round }}" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 {% endblock %}
 
 {% block stylesheets %}
@@ -447,10 +501,58 @@
         text-align: left;
         white-space: pre-line;
     }
+
+    /* Category Distribution Chart Styles */
+    .category-legend {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .category-item {
+        transition: transform 0.2s ease;
+    }
+
+    .category-item:hover {
+        transform: translateX(5px);
+    }
+
+    .category-name {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .category-count {
+        font-weight: 600;
+        color: #2c3e50;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+    }
+
+    .progress {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        transition: width 0.6s ease;
+    }
+
+    @media (max-width: 767px) {
+        .chart-container {
+            height: 300px !important;
+        }
+        
+        .category-legend {
+            margin-top: 2rem;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize tooltips
@@ -465,6 +567,62 @@
                 bar.style.width = bar.style.width;
                 bar.style.opacity = '1';
             }, index * 100);
+        });
+
+        // Initialize Category Distribution Chart
+        const ctx = document.getElementById('categoryDistributionChart').getContext('2d');
+        const categoryData = {
+            labels: {{ categoryLabels|json_encode|raw }},
+            datasets: [{
+                data: {{ categoryCounts|json_encode|raw }},
+                backgroundColor: {{ categoryColors|json_encode|raw }},
+                borderWidth: 2,
+                borderColor: '#fff',
+                hoverOffset: 15,
+                borderRadius: 5
+            }]
+        };
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: categoryData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} resources (${percentage}%)`;
+                            }
+                        },
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        padding: 12,
+                        cornerRadius: 8
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 2000,
+                    easing: 'easeOutQuart'
+                },
+                cutout: '65%'
+            }
         });
     });
 </script>
