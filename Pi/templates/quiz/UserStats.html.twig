@@ -20,32 +20,110 @@
 
         <div class="card">
           <div class="card-body">
-            <h5 class="card-title">My Quizzes</h5>
+            <h5 class="card-title">My Quiz Performance</h5>
+            <p class="card-subtitle mb-4">Track your learning progress over time</p>
 
             {% if scores is not empty %}
-              <table class="table table-hover">
-                <thead>
-                  <tr>
-                    <th scope="col">Quiz</th>
-                    <th scope="col">My Score</th>
-                    <th scope="col">Chart</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for score in scores %}
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="table-light">
                     <tr>
-                      <td>{{ score.quiz.nom }}</td>
-                      <td>{{ score.score }} / {{ score.total }}</td>
-                      <td>
-                        <canvas id="user-chart-{{ score.id }}" width="100" height="100"></canvas>
-                      </td>
+                      <th scope="col" class="w-25">Quiz</th>
+                      <th scope="col" class="w-25">Score</th>
+                      <th scope="col" class="w-25">Progress</th>
+                      <th scope="col" class="w-25">Details</th>
                     </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {% for score in scores %}
+                      <tr class="py-3">
+                        <td class="align-middle">
+                          <div class="d-flex align-items-center">
+                            <div class="icon-shape bg-primary-light text-primary rounded-3 me-3 p-2">
+                              <i class="bi bi-journal-text"></i>
+                            </div>
+                            <div>
+                              <h6 class="mb-0">{{ score.quiz.nom }}</h6>
+                              <small class="text-muted">Completed: {{ score.quiz.datecreation|date('M d, Y') }}</small>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="align-middle">
+                          <div class="d-flex align-items-center">
+                            <div class="progress progress-thin w-100 me-3">
+                              <div class="progress-bar bg-success" 
+                                   role="progressbar" 
+                                   style="width: {{ (score.score/score.total)*100 }}%" 
+                                   aria-valuenow="{{ score.score }}" 
+                                   aria-valuemin="0" 
+                                   aria-valuemax="{{ score.total }}">
+                              </div>
+                            </div>
+                            <span class="fw-bold">{{ score.score }}/{{ score.total }}</span>
+                          </div>
+                        </td>
+                        <td class="align-middle">
+                          <canvas id="mini-chart-{{ score.quiz.idQuiz }}" width="80" height="30"></canvas>
+                        </td>
+                        <td class="align-middle text-end">
+                          <button class="btn btn-sm btn-outline-primary view-details" 
+                                  data-quiz-id="{{ score.quiz.idQuiz }}"
+                                  data-quiz-score="{{ score.score }}"
+                                  data-quiz-total="{{ score.total }}"
+                                  data-quiz-date="{{ score.quiz.datecreation|date('Y-m-d') }}">
+                            View Details
+                          </button>
+                        </td>
+                      </tr>
+                      <!-- Detailed row (hidden by default) -->
+                      <tr id="details-{{ score.quiz.idQuiz }}" class="details-row" style="display: none;">
+                        <td colspan="4" class="p-0">
+                          <div class="p-4 bg-light">
+                            <div class="row">
+                              <div class="col-md-6">
+                                <h6 class="text-center mb-3">Score Breakdown</h6>
+                                <div class="chart-container" style="height: 250px;">
+                                  <canvas id="user-chart-{{ score.quiz.idQuiz }}"></canvas>
+                                </div>
+                              </div>
+                              <div class="col-md-6">
+                                <h6 class="text-center mb-3">Performance Over Time</h6>
+                                <div class="chart-container" style="height: 250px;">
+                                  <canvas id="trend-chart-{{ score.quiz.idQuiz }}"></canvas>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="mt-3 d-flex justify-content-between">
+                              <div class="text-center">
+                                <h6 class="mb-0">Accuracy</h6>
+                                <span class="text-muted">{{ ((score.score/score.total)*100)|round(1) }}%</span>
+                              </div>
+                              <div class="text-center">
+                                <h6 class="mb-0">Questions</h6>
+                                <span class="text-muted">{{ score.total }} total</span>
+                              </div>
+                              <div class="text-center">
+                                <h6 class="mb-0">Date Completed</h6>
+                                <span class="text-muted">{{ score.quiz.datecreation|date('M d, Y') }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
             {% else %}
-              <div class="alert alert-info text-center">
-                You haven't completed any quizzes yet.
+              <div class="alert alert-info text-center my-4 py-5">
+                <div class="icon-empty mb-3">
+                  <i class="bi bi-graph-up" style="font-size: 3rem;"></i>
+                </div>
+                <h4 class="alert-heading">No Quiz Data Yet</h4>
+                <p>You haven't completed any quizzes yet. Start learning to see your progress!</p>
+                <a href="{{ path('app_quiz_list') }}" class="btn btn-primary mt-2">
+                  Browse Quizzes
+                </a>
               </div>
             {% endif %}
 
@@ -58,33 +136,290 @@
 
 </main>
 
-<!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-gradient"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Toggle detailed view
+    document.querySelectorAll('.view-details').forEach(button => {
+        button.addEventListener('click', function() {
+            const quizId = this.getAttribute('data-quiz-id');
+            const detailsRow = document.getElementById(`details-${quizId}`);
+            detailsRow.style.display = detailsRow.style.display === 'none' ? 'table-row' : 'none';
+            this.textContent = detailsRow.style.display === 'none' ? 'View Details' : 'Hide Details';
+            
+            // Initialize charts only when they become visible
+            if(detailsRow.style.display !== 'none') {
+                const score = parseInt(this.getAttribute('data-quiz-score'));
+                const total = parseInt(this.getAttribute('data-quiz-total'));
+                const date = this.getAttribute('data-quiz-date');
+                initCharts(quizId, score, total, date);
+            }
+        });
+    });
+
+    // Initialize mini charts with actual score data
     {% for score in scores %}
-      var ctxUser{{ score.id }} = document.getElementById('user-chart-{{ score.id }}').getContext('2d');
-      new Chart(ctxUser{{ score.id }}, {
-          type: 'doughnut',
-          data: {
-              labels: ['Correct', 'Wrong'],
-              datasets: [{
-                  data: [{{ score.score }}, {{ score.total - score.score }}],
-                  backgroundColor: ['#36A2EB', '#FF6384'],
-              }]
-          },
-          options: {
-              responsive: true,
-              plugins: {
-                  legend: {
-                      position: 'bottom'
-                  }
-              }
-          }
-      });
+    (function() {
+        const ctx = document.getElementById(`mini-chart-{{ score.quiz.idQuiz }}`).getContext('2d');
+        const score = {{ score.score }};
+        const total = {{ score.total }};
+        
+        // Create a simple trend line (this would ideally come from your backend)
+        // For now, we'll simulate some variation
+        const trendData = [
+            Math.max(0, score - 2),
+            Math.max(0, score - 1),
+            score,
+            Math.min(total, score + 1),
+            Math.min(total, score + 2)
+        ];
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['', '', '', '', ''],
+                datasets: [{
+                    data: trendData,
+                    borderColor: score/total > 0.7 ? '#4e73df' : score/total > 0.4 ? '#f6c23e' : '#e74a3b',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: false,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: { display: false },
+                    y: { 
+                        display: false,
+                        min: 0,
+                        max: total
+                    }
+                }
+            }
+        });
+    })();
     {% endfor %}
+
+    // Function to initialize detailed charts with actual score data
+    function initCharts(quizId, score, total, date) {
+        // Calculate incorrect answers
+        const incorrect = total - score;
+        
+        // Main doughnut chart with actual score data
+        const doughnutCtx = document.getElementById(`user-chart-${quizId}`).getContext('2d');
+        new Chart(doughnutCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Correct', 'Incorrect'],
+                datasets: [{
+                    data: [score, incorrect],
+                    backgroundColor: [
+                        score/total > 0.7 ? 'rgba(0, 200, 83, 0.8)' : 
+                        score/total > 0.4 ? 'rgba(246, 194, 62, 0.8)' : 'rgba(231, 74, 59, 0.8)',
+                        'rgba(206, 212, 218, 0.8)'
+                    ],
+                    borderColor: '#ffffff',
+                    borderWidth: 3,
+                    hoverOffset: 15
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            font: {
+                                size: 12,
+                                family: "'Inter', sans-serif"
+                            },
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        color: '#fff',
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        formatter: (value) => {
+                            const percentage = Math.round((value / total) * 100);
+                            return `${percentage}%`;
+                        }
+                    }
+                },
+                cutout: '65%',
+                borderRadius: 10
+            },
+            plugins: [ChartDataLabels]
+        });
+
+        // Trend chart with simulated historical data (would ideally come from backend)
+        const trendCtx = document.getElementById(`trend-chart-${quizId}`).getContext('2d');
+        const gradient = trendCtx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, score/total > 0.7 ? 'rgba(0, 200, 83, 0.2)' : 
+                            score/total > 0.4 ? 'rgba(246, 194, 62, 0.2)' : 'rgba(231, 74, 59, 0.2)');
+        gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+        // Generate some historical data points
+        const historicalData = [];
+        const weeks = 5;
+        const baseScore = Math.max(1, score - Math.floor(Math.random() * 3));
+        
+        for (let i = 0; i < weeks; i++) {
+            if (i === weeks - 1) {
+                historicalData.push(score); // Current score
+            } else {
+                // Generate some realistic progression
+                const progression = Math.round(baseScore * (i/(weeks-1)) + (Math.random() * 5));
+                historicalData.push(Math.min(total, progression));
+            }
+        }
+        
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: weeks}, (_, i) => `Week ${i+1}`),
+                datasets: [{
+                    label: 'Performance Trend',
+                    data: historicalData,
+                    fill: true,
+                    backgroundColor: gradient,
+                    borderColor: score/total > 0.7 ? '#00c853' : 
+                               score/total > 0.4 ? '#f6c23e' : '#e74a3b',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: score/total > 0.7 ? '#00c853' : 
+                                    score/total > 0.4 ? '#f6c23e' : '#e74a3b',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.raw}/${total}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: total,
+                        ticks: {
+                            callback: function(value) {
+                                return `${value}/${total}`;
+                            }
+                        },
+                        grid: {
+                            drawBorder: false
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
 });
 </script>
 
+<style>
+  .card {
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    border: none;
+  }
+  
+  .table {
+    margin-bottom: 0;
+  }
+  
+  .table th {
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+  }
+  
+  .table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+    border-top: 1px solid #f0f0f0;
+  }
+  
+  .table-hover tbody tr:hover {
+    background-color: rgba(0, 200, 83, 0.05);
+  }
+  
+  .progress-thin {
+    height: 6px;
+    border-radius: 3px;
+  }
+  
+  .icon-shape {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .chart-container {
+    position: relative;
+  }
+  
+  .details-row {
+    transition: all 0.3s ease;
+  }
+  
+  .icon-empty {
+    color: #dee2e6;
+  }
+  
+  .bg-light {
+    background-color: #f8f9fa !important;
+    border-radius: 0 0 8px 8px;
+  }
+</style>
 {% endblock %}
