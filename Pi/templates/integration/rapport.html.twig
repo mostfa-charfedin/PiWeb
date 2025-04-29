@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project Report</title>
+    <style>
+        body {
+            font-family: 'DejaVu Sans', sans-serif;
+            background: #f8f9fa;
+            padding: 20px;
+            color: #343a40;
+        }
+        h1 {
+            color: #007bff;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .project-info, .tasks {
+            margin-top: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .task {
+            border-bottom: 1px solid #dee2e6;
+            padding: 10px 0;
+        }
+        .task:last-child {
+            border-bottom: none;
+        }
+        .status {
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+        .completed {
+            color: green;
+        }
+        .in-progress {
+            color: orange;
+        }
+        .overdue {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Project Report</h1>
+
+    <div class="project-info">
+        <h2>Project Information</h2>
+        <p><strong>Title:</strong> {{ projet.titre }}</p>
+        <p><strong>Description:</strong> {{ projet.description }}</p>
+    </div>
+
+    <div class="tasks">
+        <h2>Task List</h2>
+        {% if taches|length > 0 %}
+            {% for tache in taches %}
+                <div class="task">
+                    <p><strong>Title:</strong> {{ tache.titre }}</p>
+                    <p><strong>Description:</strong> {{ tache.description }}</p>
+                    <p><strong>Creation Date:</strong> {{ tache.createdAt ? tache.createdAt|date('d/m/Y') : 'Not defined' }}</p>
+                    <p><strong>Estimated Duration:</strong> {{ tache.date ? tache.date ~ ' weeks' : 'Not defined' }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="status 
+                            {% if tache.status == 'Completed' %}completed
+                            {% elseif tache.isOverdue() %}overdue
+                            {% else %}in-progress
+                            {% endif %}">
+                            {{ tache.status }}
+                        </span>
+                    </p>
+                    <p><strong>Assigned User:</strong> {{ tache.iduser ? tache.iduser.nom ~ ' ' ~ tache.iduser.prenom : 'No user assigned' }}</p>
+                    {% if tache.completedAt %}
+                        <p><strong>Completed On:</strong> {{ tache.completedAt|date('d/m/Y') }}</p>
+                        <p><strong>Completed Early:</strong> {{ tache.isCompletedEarly() ? 'Yes' : 'No' }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No tasks associated with this project.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>

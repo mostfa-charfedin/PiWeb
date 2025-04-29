@@ -33,6 +33,10 @@
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h5>Tasks</h5>
           <div>
+          <a href="{{ path('projet_rapport', {idProjet: projet.idProjet}) }}" class="btn btn-primary">
+    Download repport PDF
+</a>
+
             <a href="{{ path('projet_stats', {'idProjet': projet.idProjet}) }}" class="btn btn-info me-2">
               <i class="bi bi-bar-chart"></i> Show Statistics
             </a>

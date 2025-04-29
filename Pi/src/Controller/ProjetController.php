@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Controller;
-
+use Dompdf\Dompdf;
+use Dompdf\Options;
 use App\Entity\Projet;
 use App\Entity\Tache;
 use App\Form\TacheType;
@@ -15,6 +16,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+use App\Service\ClaudeApiService;
 
 class ProjetController extends AbstractController
 {
@@ -362,8 +366,156 @@ public function stats(
         'user' => $em->getRepository(User::class)->find($session->get('id'))
     ]);
 }
+/**
+ * @Route("/projet/{idProjet}/tasks", name="user_projet_tasks", requirements={"idProjet"="\d+"})
+ */
+public function userTasksForProject(
+    int $idProjet,
+    TacheRepository $tacheRepository,
+    ProjetRepository $projetRepository,
+    SessionInterface $session,
+    EntityManagerInterface $em
+): Response {
+    // Check if user is logged in
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
+    }
 
+    $userId = $session->get('id');
+    $user = $em->getRepository(User::class)->find($userId);
 
+    // Fetch the project by its ID
+    $projet = $projetRepository->find($idProjet);
+    if (!$projet) {
+        throw $this->createNotFoundException('Project not found');
+    }
+
+    // Fetch the tasks associated with the current user in the specific project
+    $tasks = $tacheRepository->findBy(['idprojet' => $projet, 'iduser' => $user]);
+
+    return $this->render('integration/user_show.html.twig', [
+        'projet' => $projet,
+        'tasks' => $tasks,
+        'user' => $user
+    ]);
+}
+
+#[Route('/projet/{idProjet}/rapport', name: 'projet_rapport')]
+public function generateRapport(
+    int $idProjet,
+    ProjetRepository $projetRepository,
+    TacheRepository $tacheRepository,
+    SessionInterface $session,
+    EntityManagerInterface $em
+) {
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
+    }
+
+    $userId = $session->get('id');
+    $user = $em->getRepository(User::class)->find($userId);
+
+    $projet = $projetRepository->find($idProjet);
+    if (!$projet) {
+        throw $this->createNotFoundException('Project not found');
+    }
+
+    $taches = $tacheRepository->findBy(['idprojet' => $projet]);
+
+    // Create HTML content using Twig
+    $html = $this->renderView('integration/rapport.html.twig', [
+        'projet' => $projet,
+        'taches' => $taches,
+        'user' => $user
+    ]);
+
+    // Setup Dompdf
+    $pdfOptions = new Options();
+    $pdfOptions->set('defaultFont', 'Arial');
+
+    $dompdf = new Dompdf($pdfOptions);
+    $dompdf->loadHtml($html);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
+
+    // Output PDF and immediately exit
+    $dompdf->stream("rapport-{$projet->getTitre()}.pdf", [
+        'Attachment' => true,
+    ]);
+
+    exit(0);
+}
+// In your controller
+public function searchUsers(Request $request)
+{
+    $query = $request->query->get('query', '');
+
+    $users = $this->getDoctrine()
+        ->getRepository(User::class)
+        ->createQueryBuilder('u')
+        ->where('u.name LIKE :query')
+        ->setParameter('query', '%' . $query . '%')
+        ->getQuery()
+        ->getResult();
+
+    // Format the data to match the front-end expectations
+    $formattedUsers = array_map(function($user) {
+        return [
+            'id' => $user->getId(),
+            'label' => $user->getName(),
+            'status' => $user->getStatus() // Example, adjust as needed
+        ];
+    }, $users);
+
+    return $this->json($formattedUsers);
+}
+#[Route('/task/{id}', name: 'user_task_show', requirements: ['id' => '\d+'])]
+public function showTask(
+    int $id,
+    TacheRepository $tacheRepository,
+    EntityManagerInterface $em,
+    SessionInterface $session
+): Response {
+    if (!$session->get('id')) {
+        return $this->redirectToRoute('login');
+    }
+
+    $userId = $session->get('id');
+    $user = $em->getRepository(User::class)->find($userId);
+
+    $task = $tacheRepository->find($id);
+
+    if (!$task) {
+        throw $this->createNotFoundException('Task not found');
+    }
+
+    return $this->render('integration\user_task_show.html.twig', [
+        'task' => $task,
+        'user' => $user,
+    ]);
+}
+#[Route('/task/{id}/done', name: 'task_mark_done', methods: ['POST'])]
+public function markTaskDone(int $id, TacheRepository $tacheRepository, EntityManagerInterface $em, Request $request): Response
+{
+    $task = $tacheRepository->find($id);
+
+    if (!$task) {
+        throw $this->createNotFoundException('Task not found');
+    }
+
+    // Check CSRF Token
+    if (!$this->isCsrfTokenValid('mark_done' . $task->getIdtache(), $request->request->get('_token'))) {
+        throw $this->createAccessDeniedException('Invalid CSRF token');
+    }
+
+    $task->setStatus('done');
+    $task->setCompletedAt(new \DateTime());
+
+    $em->persist($task);
+    $em->flush();
+
+    return $this->redirectToRoute('user_task_show', ['id' => $task->getIdtache()]);
+}
 
     
 }

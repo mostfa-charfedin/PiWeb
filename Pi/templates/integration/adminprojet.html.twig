@@ -45,7 +45,8 @@
                 {{ form_label(formProjet.titre, 'Title', {'label_attr': {'class': 'form-label'}}) }}
                 {{ form_widget(formProjet.titre, {
                   'attr': {
-                    'class': 'form-control' ~ (formProjet.titre.vars.errors|length > 0 ? ' is-invalid' : '')
+                    'class': 'form-control' ~ (formProjet.titre.vars.errors|length > 0 ? ' is-invalid' : ''),
+                    'data-role': 'project-title'
                   }
                 }) }}
                 {% if formProjet.titre.vars.errors|length %}
@@ -62,7 +63,8 @@
                 {{ form_widget(formProjet.description, {
                   'attr': {
                     'class': 'form-control' ~ (formProjet.description.vars.errors|length > 0 ? ' is-invalid' : ''),
-                    'rows': '5'
+                    'rows': '5',
+                    'data-role': 'project-description'
                   }
                 }) }}
                 {% if formProjet.description.vars.errors|length %}
@@ -96,6 +98,8 @@
                 </button>
               </div>
 
+              
+
             {{ form_end(formProjet) }}
           </div>
         </div>
@@ -103,4 +107,6 @@
     </div>
   </section>
 </main>
+
+
 {% endblock %}
