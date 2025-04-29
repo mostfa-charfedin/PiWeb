@@ -4,7 +4,7 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-
+    env(GOOGLE_APPLICATION_CREDENTIALS): '%kernel.project_dir%/valiant-azimuth-402115-0dcd3dfce8ef.json'
 services:
     # default configuration for services in *this* file
     _defaults:
@@ -20,5 +20,10 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    App\Service\GeminiService:
+        arguments:
+            $apiEndpoint: '%env(GEMINI_API_ENDPOINT)%' # Facultatif si vous gardez la valeur par défaut dans la classe
+            $geminiModelName: 'projects/valiant-azimuth-402115/locations/us-central1/publishers/google/models/gemini-pro' 
+            
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

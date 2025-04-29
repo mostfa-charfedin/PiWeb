@@ -93,14 +93,13 @@ final class ScoreController extends AbstractController
             ]);
         }
     
-        // Debug query (uncomment if needed)
-        // dd($queryBuilder->getQuery()->getSQL(), $queryBuilder->getQuery()->getParameters());
+       
     
         // Normal case with pagination - CRITICAL FIX HERE
         $pagination = $paginator->paginate(
             $queryBuilder, // Pass QueryBuilder directly (not getQuery())
             $request->query->getInt('page', 1), // Page number
-            2, // Items per page
+            10, // Items per page
             [
                 'distinct' => false,
                 'wrap-queries' => true, // Essential for complex queries
