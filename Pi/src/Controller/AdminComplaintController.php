@@ -85,7 +85,7 @@ class AdminComplaintController extends AbstractController
         ]);
     }
 
-    #[Route('/stats/complaints', name: 'app_complaint_stats', methods: ['GET'])]
+    #[Route('/stats', name: 'app_complaint_stats', methods: ['GET'])]
     public function stats(
         ComplaintRepository $complaintRepository,
         SessionInterface $session,
@@ -102,8 +102,11 @@ class AdminComplaintController extends AbstractController
             return $this->redirectToRoute('login');
         }
 
+        // Récupération des statistiques
+        $stats = $complaintRepository->getComplaintStats();
+
         return $this->render('complaint/stats.html.twig', [
-            'totalComplaints' => $complaintRepository->count([]),
+            'stats' => $stats,
             'user' => $user,
         ]);
     }

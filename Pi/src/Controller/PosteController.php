@@ -416,84 +416,175 @@ final class PosteController extends AbstractController
     #[Route('/comment/check-toxicity', name: 'check_comment_toxicity', methods: ['POST'])]
     public function checkCommentToxicity(Request $request, HttpClientInterface $httpClient, LoggerInterface $logger): JsonResponse
     {
+        // 1. Validate request content
         $data = json_decode($request->getContent(), true);
-        $commentText = substr(trim($data['content'] ?? ''), 0, 1000); // Limite à 1000 caractères
+        if (!isset($data['content'])) {
+            $logger->error('Missing content field in request', ['request_data' => $data]);
+            return new JsonResponse(['error' => 'invalid_request', 'message' => 'Le champ "content" est requis'], 400);
+        }
 
+        $commentText = substr(trim($data['content']), 0, 512);
         if (empty($commentText)) {
             $logger->warning('Empty comment content received');
-            return new JsonResponse(['error' => 'Comment content is empty'], 400);
+            return new JsonResponse(['error' => 'empty_content', 'message' => 'Le commentaire ne peut pas être vide'], 400);
         }
 
+        // 2. Verify API key
         $apiKey = $this->getParameter('huggingface_api_key');
         if (empty($apiKey)) {
-            $logger->error('Hugging Face API key not configured');
-            return new JsonResponse(['error' => 'API configuration error'], 500);
+            $logger->critical('Hugging Face API key not configured in parameters');
+            return new JsonResponse(['error' => 'api_configuration', 'message' => 'Configuration API manquante'], 500);
         }
 
-        $apiUrl = 'https://api-inference.huggingface.co/models/unitary/toxic-bert';
-        $toxicityThreshold = 0.8;
+        // 3. Model configuration with fallback
+        $models = [
+            'primary' => 'facebook/roberta-hate-speech-dynabench-r4-target',
+            'fallback' => 'IMSyPP/hate_speech_en'
+        ];
+        $toxicityThreshold = 0.75;
+        $headers = [
+            'Authorization' => 'Bearer ' . $apiKey,
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json'
+        ];
 
-        try {
-            $response = $httpClient->request('POST', $apiUrl, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $apiKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'json' => ['inputs' => $commentText],
-                'timeout' => 20, // Augmentez le timeout
-            ]);
+        // 4. Try primary and fallback models
+        foreach (['primary', 'fallback'] as $modelKey) {
+            $currentModel = $models[$modelKey];
+            $apiUrl = "https://api-inference.huggingface.co/models/{$currentModel}";
 
-            $statusCode = $response->getStatusCode();
-            $content = $response->getContent(false);
-
-            if ($statusCode !== 200) {
-                $logger->error('Hugging Face API error', [
-                    'status' => $statusCode,
-                    'response' => $content,
-                    'comment' => $commentText
+            try {
+                $logger->info('Attempting toxicity check', [
+                    'model' => $currentModel,
+                    'comment_length' => strlen($commentText),
+                    'first_50_chars' => substr($commentText, 0, 50)
                 ]);
-                return new JsonResponse([
-                    'error' => 'API error',
-                    'status' => $statusCode,
-                    'details' => json_decode($content, true) ?: $content
-                ], 500);
-            }
 
-            $result = json_decode($content, true);
+                $response = $httpClient->request('POST', $apiUrl, [
+                    'headers' => $headers,
+                    'json' => ['inputs' => $commentText],
+                    'timeout' => 30,
+                ]);
 
-            // Analyse de la réponse
-            $toxicityScore = 0.0;
-            $isToxic = false;
+                $statusCode = $response->getStatusCode();
+                $fullResponse = $response->getContent(false);
+                $responseData = json_decode($fullResponse, true);
 
-            if (is_array($result) && isset($result[0])) {
-                foreach ($result[0] as $item) {
-                    if (isset($item['label'], $item['score']) && $item['label'] === 'toxic') {
-                        $toxicityScore = (float)$item['score'];
-                        $isToxic = $toxicityScore >= $toxicityThreshold;
-                        break;
+                $logger->debug('API response details', [
+                    'status_code' => $statusCode,
+                    'headers' => $response->getHeaders(),
+                    'body' => $fullResponse
+                ]);
+
+                // 5. Handle status codes
+                switch ($statusCode) {
+                    case 200:
+                        break; // Proceed to parsing
+                    case 401:
+                        $logger->error('API key rejected', ['response' => $responseData]);
+                        return new JsonResponse(['error' => 'invalid_api_key', 'message' => 'Clé API non autorisée'], 500);
+                    case 429:
+                        $logger->warning('API rate limit exceeded', ['response' => $responseData]);
+                        return new JsonResponse(['error' => 'rate_limit', 'message' => 'Limite de requêtes dépassée, réessayez plus tard'], 429);
+                    case 503:
+                        $logger->warning('Model loading', ['response' => $responseData]);
+                        if ($modelKey === 'fallback') {
+                            return new JsonResponse([
+                                'error' => 'model_loading',
+                                'message' => 'Les modèles sont en cours de chargement',
+                                'estimated_time' => $responseData['estimated_time'] ?? null
+                            ], 503);
+                        }
+                        break; // Try fallback model
+                    default:
+                        $logger->error('Unexpected API response', ['status' => $statusCode, 'response' => $responseData]);
+                        return new JsonResponse([
+                            'error' => 'api_error',
+                            'message' => 'Réponse inattendue du service de modération',
+                            'status_code' => $statusCode
+                        ], 500);
+                }
+
+                // 6. Parse response safely
+                if ($responseData === null || !is_array($responseData)) {
+                    $logger->error('Invalid or non-JSON API response', ['response' => $fullResponse]);
+                    return new JsonResponse(['error' => 'invalid_response', 'message' => 'Réponse API non valide'], 500);
+                }
+
+                $toxicityScore = 0;
+                $isToxic = false;
+                $detectedLabel = null;
+
+                // Handle various response formats
+                $dataToParse = $responseData;
+                if (isset($responseData[0]) && is_array($responseData[0])) {
+                    $dataToParse = $responseData[0];
+                }
+
+                foreach ($dataToParse as $item) {
+                    if (is_array($item) && isset($item['label'], $item['score'])) {
+                        $label = strtolower($item['label']);
+                        if ($label === 'hate' || $label === 'toxic' || $label === 'positive' || str_contains($label, 'hate')) {
+                            $toxicityScore = (float)$item['score'];
+                            $isToxic = ($label === 'hate' || $label === 'toxic' || str_contains($label, 'hate')) && $toxicityScore >= $toxicityThreshold;
+                            $detectedLabel = $item['label'];
+                            break;
+                        }
                     }
                 }
+
+                if ($detectedLabel === null) {
+                    $logger->warning('No valid toxicity labels found in response', ['response' => $responseData]);
+                }
+
+                $logger->info('Toxicity check result', [
+                    'is_toxic' => $isToxic,
+                    'score' => $toxicityScore,
+                    'threshold' => $toxicityThreshold,
+                    'detected_label' => $detectedLabel
+                ]);
+
+                return new JsonResponse([
+                    'isToxic' => $isToxic,
+                    'score' => $toxicityScore,
+                    'threshold' => $toxicityThreshold,
+                    'label' => $detectedLabel,
+                    'model' => $currentModel
+                ]);
+
+            } catch (TransportExceptionInterface $e) {
+                $logger->critical('API transport failure', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'model' => $currentModel
+                ]);
+                if ($modelKey === 'fallback') {
+                    return new JsonResponse([
+                        'error' => 'network_error',
+                        'message' => 'Impossible de se connecter au service de modération',
+                        'debug' => ['exception' => $e->getMessage()]
+                    ], 503);
+                }
+                continue; // Try fallback model
+            } catch (\Exception $e) {
+                $logger->emergency('Unexpected toxicity check failure', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'model' => $currentModel
+                ]);
+                return new JsonResponse([
+                    'error' => 'processing_error',
+                    'message' => 'Erreur lors de l\'analyse du commentaire',
+                    'debug' => ['exception' => $e->getMessage()]
+                ], 500);
             }
-
-            return new JsonResponse([
-                'isToxic' => $isToxic,
-                'score' => $toxicityScore,
-                'threshold' => $toxicityThreshold
-            ]);
-
-        } catch (TransportExceptionInterface $e) {
-            $logger->error('API transport error', ['error' => $e->getMessage()]);
-            return new JsonResponse([
-                'error' => 'API unavailable',
-                'message' => 'Could not reach toxicity check service'
-            ], 503);
-        } catch (\Exception $e) {
-            $logger->error('Unexpected error', ['error' => $e->getMessage()]);
-            return new JsonResponse([
-                'error' => 'Internal server error',
-                'message' => 'An unexpected error occurred'
-            ], 500);
         }
+
+        // Fallback failed
+        return new JsonResponse([
+            'error' => 'service_unavailable',
+            'message' => 'Service de modération indisponible'
+        ], 503);
     }
     #[Route('/comment/report/{id}', name: 'comment_report', methods: ['POST'])]
     public function reportComment(int $id, EntityManagerInterface $entityManager, SessionInterface $session): JsonResponse

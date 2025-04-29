@@ -287,22 +287,14 @@
 
             // Fonction pour afficher les notifications
             function showNotification(message, type) {
-                // Supprimer les notifications existantes pour éviter l'accumulation
                 const existingNotifications = document.querySelectorAll('.custom-notification');
                 existingNotifications.forEach(notif => notif.remove());
 
-                // Créer un nouvel élément de notification
                 const notification = document.createElement('div');
-                notification.className = `custom-notification ${type}`; // Ajouter la classe de type (success ou error)
+                notification.className = `custom-notification ${type}`;
                 notification.textContent = message;
-
-                // Ajouter la notification au body
                 document.body.appendChild(notification);
-
-                // Supprimer la notification après 3 secondes
-                setTimeout(() => {
-                    notification.remove();
-                }, 3000);
+                setTimeout(() => notification.remove(), 3000);
             }
 
             document.addEventListener("DOMContentLoaded", function () {
@@ -319,8 +311,6 @@
                     if (!commentModal) {
                         const modalElement = document.getElementById('commentModal');
                         commentModal = new bootstrap.Modal(modalElement);
-
-                        // Gestionnaire pour nettoyer après la fermeture du modal
                         modalElement.addEventListener('hidden.bs.modal', function () {
                             cleanUpModal();
                         });
@@ -330,13 +320,8 @@
 
                 // Fonction pour nettoyer le modal
                 function cleanUpModal() {
-                    // Suppression des backdrops persistants
                     const backdrops = document.querySelectorAll('.modal-backdrop');
-                    backdrops.forEach(backdrop => {
-                        backdrop.remove();
-                    });
-
-                    // Réinitialisation du style du body
+                    backdrops.forEach(backdrop => backdrop.remove());
                     document.body.style.overflow = '';
                     document.body.style.paddingRight = '';
                 }
@@ -350,14 +335,46 @@
                         });
                         const data = await response.json();
                         if (data.error) {
-                            console.error("Toxicity check error:", data.error);
-                            showNotification("Failed to check comment toxicity.", "error");
+                            let message = 'Failed to check comment toxicity.';
+                            switch (data.error) {
+                                case 'invalid_request':
+                                    message = 'Invalid comment data.';
+                                    break;
+                                case 'empty_content':
+                                    message = 'Comment cannot be empty.';
+                                    break;
+                                case 'invalid_api_key':
+                                    message = 'API configuration error. Please contact support.';
+                                    break;
+                                case 'rate_limit':
+                                    message = 'Too many requests. Please try again later.';
+                                    break;
+                                case 'model_loading':
+                                    message = `Model is loading, try again in ${data.estimated_time || 'a few'} seconds.`;
+                                    break;
+                                case 'network_error':
+                                    message = 'Network error. Please check your connection.';
+                                    break;
+                                case 'invalid_response':
+                                    message = 'Invalid response from moderation service.';
+                                    break;
+                                case 'processing_error':
+                                    message = 'Error processing comment.';
+                                    break;
+                                case 'service_unavailable':
+                                    message = 'Moderation service unavailable.';
+                                    break;
+                            }
+                            showNotification(message, 'error');
                             return false;
+                        }
+                        if (data.isToxic) {
+                            showNotification('Your comment appears toxic. Please revise it.', 'error');
                         }
                         return data.isToxic || false;
                     } catch (error) {
-                        console.error("Error checking toxicity:", error);
-                        showNotification("Error checking comment toxicity.", "error");
+                        console.error('Error checking toxicity:', error);
+                        showNotification('Unexpected error checking comment toxicity.', 'error');
                         return false;
                     }
                 }
@@ -382,39 +399,38 @@
                             }
 
                             li.innerHTML = `
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="flex-shrink-0">
-                                        ${comment.user.profilePicture
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="flex-shrink-0">
+                                    ${comment.user.profilePicture
                                 ? `<img src="${comment.user.profilePicture}" alt="${comment.user.firstName}" class="rounded-circle">`
                                 : `<div class="rounded-circle bg-secondary"><span class="text-white">No photo</span></div>`
                             }
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <strong>${comment.user.firstName} ${comment.user.lastName}</strong>
-                                            <small class="text-muted">${new Date(comment.createdAt).toLocaleString('en-US', {
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>${comment.user.firstName} ${comment.user.lastName}</strong>
+                                        <small class="text-muted">${new Date(comment.createdAt).toLocaleString('en-US', {
                                 year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
                             })}</small>
-                                        </div>
-                                        <p class="mb-0 comment-content">${comment.content}</p>
-                                        <div class="mt-2">
-                                            ${comment.user.id === currentUserId && !isToxic
+                                    </div>
+                                    <p class="mb-0 comment-content">${comment.content}</p>
+                                    <div class="mt-2">
+                                        ${comment.user.id === currentUserId && !isToxic
                                 ? `<button class="btn btn-edit-comment" data-comment-id="${comment.id}">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </button>
-                                                <button class="btn btn-delete-comment" data-comment-id="${comment.id}">
-                                                    <i class="fas fa-trash"></i> Delete
-                                                </button>`
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <button class="btn btn-delete-comment" data-comment-id="${comment.id}">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>`
                                 : ''
                             }
-                                        </div>
                                     </div>
                                 </div>
-                            `;
+                            </div>
+                        `;
                             commentsList.appendChild(li);
                         }
 
-                        // Mettre à jour le nombre de commentaires sur le bouton du post
                         const commentCountElement = document.querySelector(`.tour-box[data-poste-id="${postId}"] .comment-count`);
                         if (commentCountElement) {
                             commentCountElement.textContent = data.comments.length;
@@ -423,6 +439,7 @@
                         attachCommentEventListeners();
                     } catch (error) {
                         console.error("Error loading comments:", error);
+                        showNotification("Error loading comments.", "error");
                     }
                 }
 
@@ -465,9 +482,9 @@
                             const buttonsDiv = document.createElement("div");
                             buttonsDiv.classList.add("edit-comment-buttons");
                             buttonsDiv.innerHTML = `
-                                <button class="save">Save</button>
-                                <button class="cancel">Cancel</button>
-                            `;
+                            <button class="btn btn-primary save">Save</button>
+                            <button class="btn btn-secondary cancel">Cancel</button>
+                        `;
 
                             commentContent.replaceWith(textarea);
                             commentElement.querySelector("div.mt-2").replaceWith(buttonsDiv);
@@ -477,13 +494,13 @@
                                 const originalButtons = document.createElement("div");
                                 originalButtons.classList.add("mt-2");
                                 originalButtons.innerHTML = `
-                                    <button class="btn btn-edit-comment" data-comment-id="${commentId}">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </button>
-                                    <button class="btn btn-delete-comment" data-comment-id="${commentId}">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </button>
-                                `;
+                                <button class="btn btn-edit-comment" data-comment-id="${commentId}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-delete-comment" data-comment-id="${commentId}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            `;
                                 buttonsDiv.replaceWith(originalButtons);
                                 attachCommentEventListeners();
                             });
@@ -539,7 +556,7 @@
                         });
                         loadComments(postId);
                         const modal = initModal();
-                        cleanUpModal(); // Nettoyage préventif
+                        cleanUpModal();
                         modal.show();
                     });
                 });
@@ -549,7 +566,10 @@
                     const postId = document.getElementById("modal-post-id").value;
                     const commentText = document.getElementById("comment-text").value.trim();
 
-                    if (!commentText) return;
+                    if (!commentText) {
+                        showNotification("Comment cannot be empty.", "error");
+                        return;
+                    }
 
                     const isToxic = await checkToxicity(commentText);
                     if (isToxic) {
@@ -578,7 +598,6 @@
                         });
                 });
 
-                // Débouncing pour éviter les clics multiples
                 function debounce(func, wait) {
                     let timeout;
                     return function (...args) {
@@ -590,14 +609,13 @@
                 document.querySelectorAll(".btn-like").forEach(button => {
                     const debouncedToggleLike = debounce(async function (event) {
                         event.stopPropagation();
-                        if (button.disabled) return; // Ignorer si le bouton est désactivé
+                        if (button.disabled) return;
 
                         const postId = button.getAttribute("data-poste-id");
                         const isLiked = button.classList.contains("liked");
                         const likeIcon = button.querySelector("i");
                         const likeCount = button.querySelector(".like-count");
 
-                        // Désactiver le bouton pendant la requête
                         button.disabled = true;
 
                         try {
@@ -630,10 +648,9 @@
                             console.error("Error handling like:", error);
                             showNotification("Error toggling like!", "error");
                         } finally {
-                            // Réactiver le bouton après la requête
                             button.disabled = false;
                         }
-                    }, 300); // Délai de 300ms pour le débouncing
+                    }, 300);
 
                     button.addEventListener("click", debouncedToggleLike);
                 });
