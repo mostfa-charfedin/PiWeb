@@ -9,6 +9,7 @@ use App\Form\PosteType;
 use App\Repository\PosteRepository;
 use App\Repository\LikeRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -18,7 +19,8 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use GuzzleHttp\Client;
 use Knp\Component\Pager\PaginatorInterface;
-
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 
 #[Route('/poste')]
@@ -412,56 +414,87 @@ final class PosteController extends AbstractController
     }
 
     #[Route('/comment/check-toxicity', name: 'check_comment_toxicity', methods: ['POST'])]
-    public function checkCommentToxicity(Request $request): JsonResponse
+    public function checkCommentToxicity(Request $request, HttpClientInterface $httpClient, LoggerInterface $logger): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $commentText = $data['content'] ?? '';
+        $commentText = substr(trim($data['content'] ?? ''), 0, 1000); // Limite à 1000 caractères
 
         if (empty($commentText)) {
+            $logger->warning('Empty comment content received');
             return new JsonResponse(['error' => 'Comment content is empty'], 400);
         }
 
         $apiKey = $this->getParameter('huggingface_api_key');
-        $apiUrl = 'https://api-inference.huggingface.co/models/unitary/toxic-bert';
+        if (empty($apiKey)) {
+            $logger->error('Hugging Face API key not configured');
+            return new JsonResponse(['error' => 'API configuration error'], 500);
+        }
 
-        $client = new Client();
+        $apiUrl = 'https://api-inference.huggingface.co/models/unitary/toxic-bert';
+        $toxicityThreshold = 0.8;
 
         try {
-            $response = $client->post($apiUrl, [
+            $response = $httpClient->request('POST', $apiUrl, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $apiKey,
                     'Content-Type' => 'application/json',
                 ],
-                'json' => [
-                    'inputs' => $commentText,
-                ],
-                'timeout' => 10,
+                'json' => ['inputs' => $commentText],
+                'timeout' => 20, // Augmentez le timeout
             ]);
 
-            $result = json_decode($response->getBody()->getContents(), true);
+            $statusCode = $response->getStatusCode();
+            $content = $response->getContent(false);
 
+            if ($statusCode !== 200) {
+                $logger->error('Hugging Face API error', [
+                    'status' => $statusCode,
+                    'response' => $content,
+                    'comment' => $commentText
+                ]);
+                return new JsonResponse([
+                    'error' => 'API error',
+                    'status' => $statusCode,
+                    'details' => json_decode($content, true) ?: $content
+                ], 500);
+            }
+
+            $result = json_decode($content, true);
+
+            // Analyse de la réponse
             $toxicityScore = 0.0;
-            if (is_array($result) && !empty($result)) {
+            $isToxic = false;
+
+            if (is_array($result) && isset($result[0])) {
                 foreach ($result[0] as $item) {
-                    if (isset($item['label']) && $item['label'] === 'toxic') {
-                        $toxicityScore = $item['score'];
+                    if (isset($item['label'], $item['score']) && $item['label'] === 'toxic') {
+                        $toxicityScore = (float)$item['score'];
+                        $isToxic = $toxicityScore >= $toxicityThreshold;
                         break;
                     }
                 }
             }
 
             return new JsonResponse([
-                'isToxic' => $toxicityScore >= 0.8,
+                'isToxic' => $isToxic,
                 'score' => $toxicityScore,
+                'threshold' => $toxicityThreshold
             ]);
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
-            $errorMessage = $e->hasResponse() ? $e->getResponse()->getBody()->getContents() : $e->getMessage();
-            return new JsonResponse(['error' => 'API request failed: ' . $errorMessage], 500);
+
+        } catch (TransportExceptionInterface $e) {
+            $logger->error('API transport error', ['error' => $e->getMessage()]);
+            return new JsonResponse([
+                'error' => 'API unavailable',
+                'message' => 'Could not reach toxicity check service'
+            ], 503);
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Unexpected error: ' . $e->getMessage()], 500);
+            $logger->error('Unexpected error', ['error' => $e->getMessage()]);
+            return new JsonResponse([
+                'error' => 'Internal server error',
+                'message' => 'An unexpected error occurred'
+            ], 500);
         }
     }
-
     #[Route('/comment/report/{id}', name: 'comment_report', methods: ['POST'])]
     public function reportComment(int $id, EntityManagerInterface $entityManager, SessionInterface $session): JsonResponse
     {
