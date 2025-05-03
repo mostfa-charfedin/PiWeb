@@ -3,6 +3,8 @@ parameters:
     upload_directory: '%kernel.project_dir%/public/uploads/uploadposte'
     huggingface_api_key: '%env(HUGGINGFACE_API_KEY)%'
     categories: '%kernel.project_dir%/config/categories.yaml'
+    gemini_api_key: '%env(GOOGLE_API_KEY)%'
+
 
 services:
     _defaults:
@@ -15,3 +17,6 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    App\Service\GeminiService:
+            arguments:
+            $apiKey: '%gemini_api_key%'

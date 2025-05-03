@@ -307,6 +307,154 @@
       }
     }
   </style>
+ <style> /* Chatbot Modernisé */
+        #chatbot-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            z-index: 10000; /* Toujours en avant */
+        }
+
+        #chatbot-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        #chatbot-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            max-height: 500px;
+            background: #f9f9f9;
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            animation: slideIn 0.5s ease;
+            overflow: hidden;
+            flex-direction: column;
+            z-index: 10001; /* Toujours en avant */
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #chatbot-header {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #close-chat {
+            font-size: 20px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        #close-chat:hover {
+            color: #ffcccc;
+        }
+
+        #chatbot-messages {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            font-family: "Poppins", sans-serif;
+            max-height: 400px;
+            scrollbar-width: thin; /* Compatibilité Firefox */
+        }
+
+        #chatbot-messages::-webkit-scrollbar {
+            width: 8px; /* Compatibilité Chrome/Safari */
+        }
+
+        #chatbot-messages::-webkit-scrollbar-thumb {
+            background-color: #1c1b1b; /* Style de la barre */
+            border-radius: 10px;
+        }
+
+        #chatbot-messages::-webkit-scrollbar-thumb:hover {
+            background-color: #737272;
+        }
+
+        .chat-message {
+            margin: 5px 0;
+            padding: 10px 15px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-message.user {
+            background: #4facfe;
+            color: white;
+            align-self: flex-end;
+        }
+
+        .chat-message.bot {
+            background: #e9e9e9;
+            color: #000;
+            align-self: flex-start;
+        }
+
+        #chatbot-input {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+
+        #chatbot-input textarea {
+            flex: 1;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            resize: none;
+            outline: none;
+            font-family: "Poppins", sans-serif;
+        }
+
+        #chatbot-input button {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+
+        #chatbot-input button:hover {
+            background: #007bce;
+        }</style>
+
   {% block stylesheets %}{% endblock %}
 </head>
 <body>
@@ -343,7 +491,6 @@
               <ul class="dropdown-menu" aria-labelledby="projectsDropdownComplaints">
                 <li><a class="dropdown-item" href="{{ path('app_complaint_new') }}">Add Complaint</a></li>
                 <li><a class="dropdown-item" href="{{ path('app_complaint_my_complaints') }}">My Complaints</a></li>
-
               </ul>
             </li>
           </ul>
@@ -366,6 +513,28 @@
     </nav>
   </div>
 </header>
+ <!-- Icône du Chatbot -->
+    <!-- Chatbot icon -->
+    <div id="chatbot-icon" onclick="toggleChatBot()">
+        <i class="fas fa-comments" ></i>
+    </div>
+
+
+
+    <!-- Fenêtre du Chatbot -->
+    <div id="chatbot-window">
+        <div id="chatbot-header">
+            Gemini Chat
+            <span id="close-chat" onclick="toggleChatBot()">✖</span>
+        </div>
+        <div id="chatbot-messages"></div>
+        <button id="chatbot-scroll" onclick="scrollToBottom()">⬇</button>
+        <div id="chatbot-input">
+            <textarea id="chatbot-prompt" rows="1" placeholder="Your message..."></textarea>
+            <button onclick="sendChatMessage()">Send</button>
+        </div>
+    </div>
+
 <main class="main-content">
   <div class="container-fluid main-container">
     <div class="row">
@@ -529,6 +698,97 @@
       notificationContainer.style.top = `${headerHeight + 80}px`;
     }
   });
+</script>
+<script>
+    function sendChatMessage() {
+        const prompt = document.getElementById('chatbot-prompt').value;
+        if (!prompt.trim()) return;
+
+        // Affiche le message de l'utilisateur
+        const messageContainer = document.getElementById('chatbot-messages');
+        const userMessage = document.createElement('div');
+        userMessage.textContent = prompt;
+        userMessage.style = "background: #007bff; color: white; margin: 5px; padding: 10px; border-radius: 5px; text-align: right;";
+        messageContainer.appendChild(userMessage);
+
+        // Réinitialise la zone de texte
+        document.getElementById('chatbot-prompt').value = '';
+        scrollToBottom(); // Faire défiler vers le bas après l'envoi
+
+        // Envoie la requête au serveur
+        fetch('/gemini', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ prompt })
+        })
+            .then(response => response.json())
+            .then(data => {
+                // Affiche la réponse de Gemini
+                const botMessage = document.createElement('div');
+                botMessage.textContent = data.response || 'Erreur lors de la génération de texte.';
+                botMessage.style = "background: #e0e0e0; color: #333333; margin: 5px; padding:" +
+                    " 10px 15px; border-radius: 10px; text-align: left; font-family: 'Poppins'" +
+                    ", sans-serif; font-size: 15px; line-height: 1.5; box-shadow: 0 4px 6px " +
+                    "rgba(0, 0, 0, 0.1); max-width: 80%;";
+                messageContainer.appendChild(botMessage);
+
+                scrollToBottom(); // Faire défiler vers le bas après la réponse
+                toggleScrollButton(); // Vérifier si le bouton de défilement doit être affiché
+            })
+            .catch(err => {
+                console.error(err);
+                const errorMessage = document.createElement('div');
+                errorMessage.textContent = 'Erreur : Impossible de charger la réponse.';
+                errorMessage.style = "background: #f8d7da; color: #842029; margin: 5px; padding: 10px; border-radius: 5px; text-align: left;";
+                messageContainer.appendChild(errorMessage);
+
+                scrollToBottom(); // Faire défiler vers le bas en cas d'erreur
+                toggleScrollButton(); // Vérifier si le bouton de défilement doit être affiché
+            });
+    }
+
+    // Fonction pour faire défiler vers le bas
+    function scrollToBottom() {
+        const chatbotMessages = document.getElementById('chatbot-messages');
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        document.getElementById('chatbot-scroll').style.display = 'none'; // Masquer le bouton après avoir défilé
+    }
+
+    // Fonction pour afficher ou masquer le bouton de défilement
+    function toggleScrollButton() {
+        const chatbotMessages = document.getElementById('chatbot-messages');
+        const chatbotScrollBtn = document.getElementById('chatbot-scroll');
+        if (chatbotMessages.scrollHeight > chatbotMessages.clientHeight) {
+            chatbotScrollBtn.style.display = 'block'; // Afficher le bouton si les messages dépassent la hauteur visible
+        } else {
+            chatbotScrollBtn.style.display = 'none'; // Masquer le bouton sinon
+        }
+    }
+
+    // Écouteur d'événement pour le défilement manuel
+    const chatbotMessages = document.getElementById('chatbot-messages');
+    chatbotMessages.addEventListener('scroll', () => {
+        const chatbotScrollBtn = document.getElementById('chatbot-scroll');
+        if (chatbotMessages.scrollTop + chatbotMessages.clientHeight >= chatbotMessages.scrollHeight - 10) {
+            chatbotScrollBtn.style.display = 'none'; // Masquer le bouton si l'utilisateur est en bas
+        } else {
+            chatbotScrollBtn.style.display = 'block'; // Afficher le bouton si l'utilisateur remonte
+        }
+    });
+</script>
+
+<script>
+    // Fonction pour afficher/masquer la fenêtre du chatbot
+    function toggleChatBot() {
+        const chatbot = document.getElementById('chatbot-window');
+        chatbot.style.display = chatbot.style.display === 'block' ? 'none' : 'block';
+        if (chatbot.style.display === 'block') {
+            toggleScrollButton(); // Vérifier si le bouton de défilement doit être affiché
+        }
+    }
 </script>
 {% block javascripts %}{% endblock %}
 </body>
