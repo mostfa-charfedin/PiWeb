@@ -4,37 +4,40 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-//use Doctrine\Common\Collections\ArrayCollection;
-//use Doctrine\Common\Collections\Collection;
 use App\Entity\Question;
 
-#[ORM\Entity(repositoryClass: "App\Repository\QuizRepository")]
-#[ORM\Table(name: "quiz")]
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\QuizRepository")
+ * @ORM\Table(name="quiz")
+ */
 class Quiz
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue(strategy: "IDENTITY")]
-    #[ORM\Column(name: "idQuiz", type: "integer")]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     * @ORM\Column(name="idQuiz", type="integer")
+     */
     private $idquiz;
 
-    
-
-    #[ORM\Column(name: "nom", type: "string", length: 255, nullable: true)]
+    /**
+     * @ORM\Column(name="nom", type="string", length=255, nullable=true)
+     */
     private ?string $nom = null;
-    
 
-    #[ORM\Column(name: "dateCreation", type: "datetime", nullable: true)]
+    /**
+     * @ORM\Column(name="dateCreation", type="datetime", nullable=true)
+     */
     private ?\DateTimeInterface $datecreation = null;
-    
-    #[ORM\OneToMany(targetEntity: Question::class, mappedBy: "quiz", orphanRemoval: true, cascade: ["persist", "remove"])]
+
+    /**
+     * @ORM\OneToMany(targetEntity="Question", mappedBy="quiz", orphanRemoval=true, cascade={"persist", "remove"})
+     */
     private Collection $questions;
 
-
-
-
-    #[ORM\OneToMany(mappedBy: 'idQuiz', targetEntity: Score::class, orphanRemoval: true)]
+    /**
+     * @ORM\OneToMany(targetEntity="Score", mappedBy="quiz", orphanRemoval=true)
+     */
     private Collection $scores;
 
     public function __construct()
@@ -99,8 +102,8 @@ class Quiz
         return $this;
     }
 
-/**
-     * @return Collection<int, Score>
+    /**
+     * @return Collection|Score[]
      */
     public function getScores(): Collection
     {
@@ -120,7 +123,6 @@ class Quiz
     public function removeScore(Score $score): static
     {
         if ($this->scores->removeElement($score)) {
-            // set the owning side to null (unless already changed)
             if ($score->getQuiz() === $this) {
                 $score->setQuiz(null);
             }

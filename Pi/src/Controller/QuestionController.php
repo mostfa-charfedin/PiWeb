@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Question;
+use App\Entity\zQuestion;
 use App\Entity\Quiz;
 use App\Entity\Reponse;
 use App\Entity\User;

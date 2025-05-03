@@ -5,21 +5,29 @@ namespace App\Entity;
 use App\Repository\ScoreRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ScoreRepository::class)]
-#[ORM\Table(name: "score")]
+/**
+ * @ORM\Entity(repositoryClass=ScoreRepository::class)
+ * @ORM\Table(name="score")
+ */
 class Score
 {
-    #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'scores')]
-    #[ORM\JoinColumn(name: "idUser", referencedColumnName: "id", nullable: false)]
+    /**
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="scores")
+     * @ORM\JoinColumn(name="idUser", referencedColumnName="id", nullable=false)
+     */
     private ?User $user = null;
 
-    #[ORM\Id]
-    #[ORM\ManyToOne(targetEntity: Quiz::class)]
-    #[ORM\JoinColumn(name: "idQuiz", referencedColumnName: "idQuiz", nullable: false)]
+    /**
+     * @ORM\Id
+     * @ORM\ManyToOne(targetEntity="Quiz")
+     * @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz", nullable=false)
+     */
     private ?Quiz $quiz = null;
 
-    #[ORM\Column(type: 'float', nullable: true)]
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
     private ?float $score = null;
 
     public function getUser(): ?User

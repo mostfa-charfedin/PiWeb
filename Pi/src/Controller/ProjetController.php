@@ -38,9 +38,7 @@ class ProjetController extends AbstractController
         $user = $em->getRepository(User::class)->find($userId);
         
         // Assuming Projet has a setUser method
-        if (method_exists($projet, 'setUser')) {
-            $projet->setUser($user);
-        }
+       
         
         $form = $this->createForm(ProjetType::class, $projet);
         
