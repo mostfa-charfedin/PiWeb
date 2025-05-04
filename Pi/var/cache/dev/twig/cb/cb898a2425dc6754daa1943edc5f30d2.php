@@ -636,6 +636,6 @@ class __TwigTemplate_5f5959aef630c5220e79aa2bcfe0f774 extends Template
         </div>
     </div>
 </main>
-{% endblock %}", "score/index.html.twig", "C:\\Users\\Acer\\Desktop\\xampp\\htdocs\\PiWeb\\Pi\\templates\\score\\index.html.twig");
+{% endblock %}", "score/index.html.twig", "C:\\Users\\akrim\\OneDrive\\Desktop\\PiWeb\\Pi\\templates\\score\\index.html.twig");
     }
 }

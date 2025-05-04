@@ -894,6 +894,6 @@ document.addEventListener(\"DOMContentLoaded\", () => {
     font-size: 12px;
 }
 </style>
-{% endblock %}", "integration/stats.html.twig", "C:\\Users\\Acer\\Desktop\\xampp\\htdocs\\PiWeb\\Pi\\templates\\integration\\stats.html.twig");
+{% endblock %}", "integration/stats.html.twig", "C:\\Users\\akrim\\OneDrive\\Desktop\\PiWeb\\Pi\\templates\\integration\\stats.html.twig");
     }
 }

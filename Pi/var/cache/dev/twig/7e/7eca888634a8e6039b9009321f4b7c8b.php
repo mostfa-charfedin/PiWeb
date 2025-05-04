@@ -400,6 +400,6 @@ class __TwigTemplate_743fac2f9b3acd10f5093aeaa4b78d09 extends Template
   </section>
 </main>
 {% endblock %}
-", "integration/adminshow.html.twig", "C:\\Users\\Acer\\Desktop\\xampp\\htdocs\\PiWeb\\Pi\\templates\\integration\\adminshow.html.twig");
+", "integration/adminshow.html.twig", "C:\\Users\\akrim\\OneDrive\\Desktop\\PiWeb\\Pi\\templates\\integration\\adminshow.html.twig");
     }
 }

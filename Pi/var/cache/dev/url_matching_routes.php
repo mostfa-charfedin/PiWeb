@@ -20,8 +20,10 @@ return [
         '/new' => [[['_route' => 'projet_new', '_controller' => 'App\\Controller\\ProjetController::new'], null, null, null, false, false, null]],
         '/projet' => [[['_route' => 'projet_list', '_controller' => 'App\\Controller\\ProjetController::list'], null, null, null, false, false, null]],
         '/mes-projets' => [[['_route' => 'user_projet_list', '_controller' => 'App\\Controller\\ProjetController::userProjetList'], null, null, null, false, false, null]],
-        '/quiz' => [[['_route' => 'app_home', '_controller' => 'App\\Controller\\QuizController::list'], null, null, null, false, false, null]],
+        '/quiz' => [[['_route' => 'app_home', '_controller' => 'App\\Controller\\QuizController::index'], null, ['GET' => 0], null, false, false, null]],
+        '/quiz/search' => [[['_route' => 'quiz_search', '_controller' => 'App\\Controller\\QuizController::search'], null, null, null, false, false, null]],
         '/quiz/new' => [[['_route' => 'quiz_new', '_controller' => 'App\\Controller\\QuizController::new'], null, null, null, false, false, null]],
+        '/user/stats' => [[['_route' => 'user_stats', '_controller' => 'App\\Controller\\QuizController::userStats'], null, null, null, false, false, null]],
         '/recompense' => [[['_route' => 'app_recompense_index', '_controller' => 'App\\Controller\\RecompenseController::index'], null, ['GET' => 0], null, true, false, null]],
         '/recompense/new' => [[['_route' => 'app_recompense_new', '_controller' => 'App\\Controller\\RecompenseController::new'], null, ['GET' => 0, 'POST' => 1], null, false, false, null]],
         '/reset-password' => [[['_route' => 'app_forgot_password_request', '_controller' => 'App\\Controller\\ResetPasswordController::request'], null, null, null, false, false, null]],
@@ -99,32 +101,44 @@ return [
                         .'|([^/]++)/reponse/new(*:691)'
                     .')'
                     .'|iz/(?'
-                        .'|(\\d+)/edit(*:716)'
-                        .'|(\\d+)(*:729)'
-                        .'|([^/]++)/delete(*:752)'
+                        .'|(\\d+)(*:711)'
+                        .'|(\\d+)/edit(*:729)'
+                        .'|hide/([^/]++)(*:750)'
+                        .'|unhide/([^/]++)(*:773)'
+                        .'|(\\d+)/delete(*:793)'
+                        .'|(\\d+)/start(*:812)'
+                        .'|([^/]++)/(?'
+                            .'|submit(*:838)'
+                            .'|result(*:852)'
+                            .'|certificate(*:871)'
+                            .'|translate/([^/]++)(*:897)'
+                        .')'
+                    .')'
+                .')'
+                .'|/admin/(?'
+                    .'|quiz/([^/]++)/stats(*:937)'
+                    .'|user/([^/]++)/(?'
+                        .'|de(?'
+                            .'|tails(*:972)'
+                            .'|lete(*:984)'
+                        .')'
+                        .'|edit\\-modal(*:1004)'
+                        .'|update(*:1019)'
                     .')'
                 .')'
                 .'|/re(?'
                     .'|compense/(?'
-                        .'|program/([^/]++)(*:796)'
+                        .'|program/([^/]++)(*:1064)'
                         .'|([^/]++)(?'
-                            .'|(*:815)'
+                            .'|(*:1084)'
                             .'|/(?'
-                                .'|edit(*:831)'
-                                .'|delete(*:845)'
+                                .'|edit(*:1101)'
+                                .'|delete(*:1116)'
                             .')'
                         .')'
                     .')'
-                    .'|ponse/([^/]++)/delete(*:877)'
-                    .'|set\\-password/reset(?:/([^/]++))?(*:918)'
-                .')'
-                .'|/admin/user/([^/]++)/(?'
-                    .'|de(?'
-                        .'|tails(*:961)'
-                        .'|lete(*:973)'
-                    .')'
-                    .'|edit\\-modal(*:993)'
-                    .'|update(*:1007)'
+                    .'|ponse/([^/]++)/delete(*:1149)'
+                    .'|set\\-password/reset(?:/([^/]++))?(*:1191)'
                 .')'
             .')/?$}sDu',
     ],
@@ -159,20 +173,28 @@ return [
         650 => [[['_route' => 'question_delete', '_controller' => 'App\\Controller\\QuestionController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
         663 => [[['_route' => 'question_show', '_controller' => 'App\\Controller\\QuestionController::show'], ['id'], null, null, false, true, null]],
         691 => [[['_route' => 'reponse_new', '_controller' => 'App\\Controller\\ReponseController::createReponse'], ['idQuestion'], null, null, false, false, null]],
-        716 => [[['_route' => 'quiz_edit', '_controller' => 'App\\Controller\\QuizController::edit'], ['id'], null, null, false, false, null]],
-        729 => [[['_route' => 'quiz_show', '_controller' => 'App\\Controller\\QuizController::show'], ['id'], null, null, false, true, null]],
-        752 => [[['_route' => 'quiz_delete', '_controller' => 'App\\Controller\\QuizController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
-        796 => [[['_route' => 'app_recompense_program', '_controller' => 'App\\Controller\\RecompenseController::programRewards'], ['idprogramme'], ['GET' => 0], null, false, true, null]],
-        815 => [[['_route' => 'app_recompense_show', '_controller' => 'App\\Controller\\RecompenseController::show'], ['idrecompense'], ['GET' => 0], null, false, true, null]],
-        831 => [[['_route' => 'app_recompense_edit', '_controller' => 'App\\Controller\\RecompenseController::edit'], ['idrecompense'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
-        845 => [[['_route' => 'app_recompense_delete', '_controller' => 'App\\Controller\\RecompenseController::delete'], ['idrecompense'], ['POST' => 0], null, false, false, null]],
-        877 => [[['_route' => 'reponse_delete', '_controller' => 'App\\Controller\\ReponseController::deleteReponse'], ['idReponse'], ['POST' => 0], null, false, false, null]],
-        918 => [[['_route' => 'app_reset_password_reset', 'token' => null, '_controller' => 'App\\Controller\\ResetPasswordController::reset'], ['token'], null, null, false, true, null]],
-        961 => [[['_route' => 'admin_user_details', '_controller' => 'App\\Controller\\UserController::details'], ['id'], ['GET' => 0], null, false, false, null]],
-        973 => [[['_route' => 'admin_user_delete', '_controller' => 'App\\Controller\\UserController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
-        993 => [[['_route' => 'admin_user_edit_modal', '_controller' => 'App\\Controller\\UserController::editModal'], ['id'], ['GET' => 0], null, false, false, null]],
-        1007 => [
-            [['_route' => 'admin_user_update', '_controller' => 'App\\Controller\\UserController::update'], ['id'], ['POST' => 0], null, false, false, null],
+        711 => [[['_route' => 'quiz_show', '_controller' => 'App\\Controller\\QuizController::show'], ['id'], null, null, false, true, null]],
+        729 => [[['_route' => 'quiz_edit', '_controller' => 'App\\Controller\\QuizController::edit'], ['id'], null, null, false, false, null]],
+        750 => [[['_route' => 'quiz_hide', '_controller' => 'App\\Controller\\QuizController::hideQuiz'], ['id'], ['POST' => 0], null, false, true, null]],
+        773 => [[['_route' => 'quiz_unhide', '_controller' => 'App\\Controller\\QuizController::unhideQuiz'], ['id'], ['POST' => 0], null, false, true, null]],
+        793 => [[['_route' => 'quiz_delete', '_controller' => 'App\\Controller\\QuizController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
+        812 => [[['_route' => 'user_quiz_start', '_controller' => 'App\\Controller\\QuizController::startQuiz'], ['id'], ['GET' => 0], null, false, false, null]],
+        838 => [[['_route' => 'user_quiz_submit', '_controller' => 'App\\Controller\\QuizController::submitQuiz'], ['id'], ['POST' => 0], null, false, false, null]],
+        852 => [[['_route' => 'user_quiz_result', '_controller' => 'App\\Controller\\QuizController::quizResult'], ['id'], null, null, false, false, null]],
+        871 => [[['_route' => 'quiz_download_certificate', '_controller' => 'App\\Controller\\QuizController::downloadCertificate'], ['id'], null, null, false, false, null]],
+        897 => [[['_route' => 'quiz_question_translate', '_controller' => 'App\\Controller\\QuizController::translateQuestion'], ['id', 'lang'], null, null, false, true, null]],
+        937 => [[['_route' => 'admin_quiz_stats', '_controller' => 'App\\Controller\\QuizController::adminQuizStats'], ['id'], null, null, false, false, null]],
+        972 => [[['_route' => 'admin_user_details', '_controller' => 'App\\Controller\\UserController::details'], ['id'], ['GET' => 0], null, false, false, null]],
+        984 => [[['_route' => 'admin_user_delete', '_controller' => 'App\\Controller\\UserController::delete'], ['id'], ['POST' => 0], null, false, false, null]],
+        1004 => [[['_route' => 'admin_user_edit_modal', '_controller' => 'App\\Controller\\UserController::editModal'], ['id'], ['GET' => 0], null, false, false, null]],
+        1019 => [[['_route' => 'admin_user_update', '_controller' => 'App\\Controller\\UserController::update'], ['id'], ['POST' => 0], null, false, false, null]],
+        1064 => [[['_route' => 'app_recompense_program', '_controller' => 'App\\Controller\\RecompenseController::programRewards'], ['idprogramme'], ['GET' => 0], null, false, true, null]],
+        1084 => [[['_route' => 'app_recompense_show', '_controller' => 'App\\Controller\\RecompenseController::show'], ['idrecompense'], ['GET' => 0], null, false, true, null]],
+        1101 => [[['_route' => 'app_recompense_edit', '_controller' => 'App\\Controller\\RecompenseController::edit'], ['idrecompense'], ['GET' => 0, 'POST' => 1], null, false, false, null]],
+        1116 => [[['_route' => 'app_recompense_delete', '_controller' => 'App\\Controller\\RecompenseController::delete'], ['idrecompense'], ['POST' => 0], null, false, false, null]],
+        1149 => [[['_route' => 'reponse_delete', '_controller' => 'App\\Controller\\ReponseController::deleteReponse'], ['idReponse'], ['POST' => 0], null, false, false, null]],
+        1191 => [
+            [['_route' => 'app_reset_password_reset', 'token' => null, '_controller' => 'App\\Controller\\ResetPasswordController::reset'], ['token'], null, null, false, true, null],
             [null, null, null, null, false, false, 0],
         ],
     ],

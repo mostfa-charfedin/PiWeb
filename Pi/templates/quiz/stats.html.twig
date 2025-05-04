@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Your Quiz Stats{% endblock %}
+
+{% block body %}
+    <h1>Quiz Statistics for {{ user.nom }}</h1>
+
+    <div class="stats-container">
+        <p><strong>Total Quizzes Taken:</strong> {{ totalQuizzes }}</p>
+        <p><strong>Quizzes Passed:</strong> {{ passedQuizzes }}</p>
+        <p><strong>Quizzes Failed:</strong> {{ failedQuizzes }}</p>
+        <p><strong>Total Score:</strong> {{ totalScore }} out of {{ totalMaxScore }}</p>
+        <p><strong>Average Score:</strong> {{ averageScore }}%</p>
+    </div>
+    
+    <hr>
+
+    <h2>Recent Quiz Results</h2>
+    <ul>
+        {% for quizResult, quizId in quizResults %}
+            <li>
+                <strong>{{ quizResult.quizName }}</strong>: 
+                {{ quizResult.score }} / {{ quizResult.total }} 
+                - {% if quizResult.score >= quizResult.total / 2 %} <span class="text-success">Passed</span> {% else %} <span class="text-danger">Failed</span> {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

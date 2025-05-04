@@ -1289,6 +1289,6 @@ class __TwigTemplate_1115b9545d55488622a0e43608dacef8 extends Template
 
   {% block javascripts %}{% endblock %}
 </body>
-</html>", "navBar.html.twig", "C:\\Users\\Acer\\Desktop\\xampp\\htdocs\\PiWeb\\Pi\\templates\\navBar.html.twig");
+</html>", "navBar.html.twig", "C:\\Users\\akrim\\OneDrive\\Desktop\\PiWeb\\Pi\\templates\\navBar.html.twig");
     }
 }

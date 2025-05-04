@@ -397,6 +397,6 @@ class __TwigTemplate_bf23067f422eaf367e390050e2a8ea14 extends Template
   </section>
 </main><!-- End #main -->
 {% endblock %}
-", "integration/adminlist.html.twig", "C:\\Users\\Acer\\Desktop\\xampp\\htdocs\\PiWeb\\Pi\\templates\\integration\\adminlist.html.twig");
+", "integration/adminlist.html.twig", "C:\\Users\\akrim\\OneDrive\\Desktop\\PiWeb\\Pi\\templates\\integration\\adminlist.html.twig");
     }
 }

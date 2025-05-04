@@ -677,6 +677,6 @@ class __TwigTemplate_79715a937c04cc157a3cb212e0b835cb extends Template
   <script src=\"{{ asset('assets/js/main.js') }}\"></script>
 </body>
 </html>
-", "user/inscrit.html.twig", "C:\\Users\\Acer\\Desktop\\xampp\\htdocs\\PiWeb\\Pi\\templates\\user\\inscrit.html.twig");
+", "user/inscrit.html.twig", "C:\\Users\\akrim\\OneDrive\\Desktop\\PiWeb\\Pi\\templates\\user\\inscrit.html.twig");
     }
 }
