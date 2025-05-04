@@ -1,0 +1,794 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}Ressources{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center">
+    <div>
+      <h1>Ressources</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Home</a></li>
+          <li class="breadcrumb-item active">Ressources</li>
+        </ol>
+      </nav>
+    </div>
+    <div>
+      <a href="{{ path('app_user_ressources_new') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Add New Resource
+      </a>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="row">
+      <div class="col-12">
+        <!-- Flash Messages -->
+        {% for label, messages in app.flashes %}
+          {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+              {% if label == 'success' %}
+                <i class="bi bi-check-circle me-1"></i>
+              {% elseif label == 'error' %}
+                <i class="bi bi-exclamation-octagon me-1"></i>
+              {% endif %}
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endfor %}
+
+        <!-- Search and Filter Form -->
+        <div class="card shadow-sm rounded mb-4">
+          <div class="card-body">
+            <form id="filterForm" class="row g-3">
+              <div class="col-md-4">
+                <input type="text" name="searchTitle" class="form-control" placeholder="Search by title..." value="{{ app.request.query.get('searchTitle') }}">
+              </div>
+              <div class="col-md-3">
+                <select name="type" class="form-select">
+                  <option value="">All Types</option>
+                  <option value="Document" {% if app.request.query.get('type') == 'Document' %}selected{% endif %}>Document</option>
+                  <option value="Video" {% if app.request.query.get('type') == 'Video' %}selected{% endif %}>Video</option>
+                  <option value="Link" {% if app.request.query.get('type') == 'Link' %}selected{% endif %}>Link</option>
+                  <option value="Other" {% if app.request.query.get('type') == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <input type="text" name="searchDescription" class="form-control" placeholder="Search by description..." value="{{ app.request.query.get('searchDescription') }}">
+              </div>
+              <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                  <i class="bi bi-search me-1"></i> Search
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Resources Grid -->
+        <div id="resourcesGrid" class="row g-4">
+          {% for ressource in ressources %}
+            <div class="col-md-6 col-lg-4">
+              <div class="card resource-card h-100 {% if ressource.type == 'Document' %}document-card{% elseif ressource.type == 'Video' %}video-card{% elseif ressource.type == 'Link' %}link-card{% else %}other-card{% endif %}">
+                <div class="card-body">
+                  <div class="resource-icon mb-3">
+                    {% if ressource.type == 'Document' %}
+                      <i class="bi bi-journal-text document-icon"></i>
+                    {% elseif ressource.type == 'Video' %}
+                      <i class="bi bi-play-circle video-icon"></i>
+                    {% elseif ressource.type == 'Link' %}
+                      <i class="bi bi-globe link-icon"></i>
+                    {% else %}
+                      <i class="bi bi-collection other-icon"></i>
+                    {% endif %}
+                  </div>
+                  <h5 class="card-title">{{ ressource.titre }}</h5>
+                  <p class="card-text text-muted">{{ ressource.description|length > 100 ? ressource.description|slice(0, 100) ~ '...' : ressource.description }}</p>
+                  <div class="resource-meta d-flex justify-content-between align-items-center mt-3">
+                    <span class="badge {% if ressource.type == 'Document' %}bg-primary{% elseif ressource.type == 'Video' %}bg-danger{% elseif ressource.type == 'Link' %}bg-success{% else %}bg-secondary{% endif %}">{{ ressource.type }}</span>
+                  </div>
+                </div>
+                <div class="card-footer bg-transparent border-0">
+                  <div class="d-flex gap-2">
+                    <a href="{{ path('app_user_ressources_show', {'idresource': ressource.idresource}) }}" class="btn btn-outline-primary flex-grow-1">
+                      <i class="bi bi-eye me-1"></i> View Details
+                    </a>
+                    <button type="button" class="btn btn-outline-warning rate-btn" data-bs-toggle="modal" data-bs-target="#rateModal" data-resource-id="{{ ressource.idresource }}" data-resource-title="{{ ressource.titre }}">
+                      <i class="bi bi-star"></i>
+                    </button>
+                    {% if user and user.id == ressource.id.id %}
+                      <form method="post" action="{{ path('app_ressources_delete', {'idresource': ressource.idresource}) }}" onsubmit="return confirm('Are you sure you want to delete this resource?');" style="display: inline;">
+                        <input type="hidden" name="_method" value="DELETE">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ ressource.idresource) }}">
+                        <button class="btn btn-outline-danger">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% else %}
+            <div class="col-12">
+              <div class="alert alert-info">
+                <i class="bi bi-info-circle me-1"></i> No resources found.
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        <div id="paginationContainer" class="d-flex justify-content-center mt-4">
+          {% if pagination.totalPages > 1 %}
+            <nav aria-label="Page navigation">
+              <ul class="pagination">
+                {% if pagination.currentPage > 1 %}
+                  <li class="page-item">
+                    <a class="page-link" href="#" data-page="{{ pagination.currentPage - 1 }}" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                {% endif %}
+                
+                {% for i in 1..pagination.totalPages %}
+                  <li class="page-item {% if i == pagination.currentPage %}active{% endif %}">
+                    <a class="page-link" href="#" data-page="{{ i }}">{{ i }}</a>
+                  </li>
+                {% endfor %}
+                
+                {% if pagination.currentPage < pagination.totalPages %}
+                  <li class="page-item">
+                    <a class="page-link" href="#" data-page="{{ pagination.currentPage + 1 }}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Rating Modal -->
+<div class="modal fade" id="rateModal" tabindex="-1" aria-labelledby="rateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="rateModalLabel">Rate Resource</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p class="resource-title mb-3"></p>
+        <div class="rating-input mb-3">
+          <label for="rating" class="form-label">Rating (0-10):</label>
+          <input type="number" class="form-control" id="rating" name="rating" min="0" max="10" step="1" required>
+        </div>
+        <div class="alert alert-danger d-none" id="ratingError"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="submitRating">Submit Rating</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+  .resource-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 1rem;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .resource-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Document Card Styles */
+  .document-card {
+    border-top: 4px solid #0d6efd;
+  }
+  .document-icon {
+    color: #0d6efd;
+    font-size: 3rem;
+  }
+
+  /* Video Card Styles */
+  .video-card {
+    border-top: 4px solid #dc3545;
+  }
+  .video-icon {
+    color: #dc3545;
+    font-size: 3rem;
+  }
+
+  /* Link Card Styles */
+  .link-card {
+    border-top: 4px solid #198754;
+  }
+  .link-icon {
+    color: #198754;
+    font-size: 3rem;
+  }
+
+  /* Other Card Styles */
+  .other-card {
+    border-top: 4px solid #6c757d;
+  }
+  .other-icon {
+    color: #6c757d;
+    font-size: 3rem;
+  }
+
+  .resource-icon {
+    text-align: center;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60px;
+  }
+
+  .card-title {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+  }
+
+  .card-text {
+    font-size: 0.9rem;
+    color: var(--text-light);
+  }
+
+  .resource-meta {
+    font-size: 0.85rem;
+  }
+
+  .rating {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .pagination .page-link {
+    color: var(--primary-color);
+    border: none;
+    margin: 0 0.25rem;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    color: white;
+  }
+
+  .pagination .page-link:hover {
+    background-color: var(--primary-hover);
+    color: white;
+  }
+
+  /* Loading spinner */
+  .loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .loading-spinner i {
+    font-size: 2rem;
+    color: var(--primary-color);
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  /* Star Rating Styles */
+  .star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+  }
+
+  .star-rating input {
+    display: none;
+  }
+
+  .star-rating label {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #ddd;
+    margin: 0 0.1rem;
+    transition: color 0.2s ease;
+  }
+
+  .star-rating label:hover,
+  .star-rating label:hover ~ label,
+  .star-rating input:checked ~ label {
+    color: #ffc107;
+  }
+
+  .star-rating label:hover i,
+  .star-rating label:hover ~ label i,
+  .star-rating input:checked ~ label i {
+    transform: scale(1.2);
+    transition: transform 0.2s ease;
+  }
+
+  /* Animation Keyframes */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-10px);
+    }
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Enhanced Card Animations */
+  .resource-card {
+    animation: fadeInUp 0.6s ease-out;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .resource-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+  }
+
+  /* Icon Animations */
+  .resource-icon i {
+    transition: all 0.3s ease;
+  }
+
+  .resource-card:hover .resource-icon i {
+    animation: pulse 1s infinite;
+  }
+
+  /* Button Animations */
+  .btn {
+    transition: all 0.3s ease;
+  }
+
+  .btn:hover {
+    transform: scale(1.05);
+  }
+
+  .btn:active {
+    transform: scale(0.95);
+  }
+
+  /* Badge Animations */
+  .badge {
+    transition: all 0.3s ease;
+  }
+
+  .resource-card:hover .badge {
+    animation: bounce 1s;
+  }
+
+  /* Loading Animation */
+  .loading-spinner i {
+    animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
+  }
+
+  /* Page Transition */
+  .section {
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  /* Alert Animations */
+  .alert {
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  /* Pagination Animation */
+  .pagination .page-link {
+    transition: all 0.3s ease;
+  }
+
+  .pagination .page-link:hover {
+    transform: scale(1.1);
+  }
+
+  /* Modal Animation */
+  .modal.fade .modal-dialog {
+    transform: scale(0.8);
+    transition: transform 0.3s ease-out;
+  }
+
+  .modal.show .modal-dialog {
+    transform: scale(1);
+  }
+
+  /* Shimmer Effect for Cards */
+  .resource-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+    pointer-events: none;
+  }
+
+  /* Star Rating Animation */
+  .star-rating label i {
+    transition: all 0.3s ease;
+  }
+
+  .star-rating label:hover i {
+    transform: scale(1.2) rotate(15deg);
+  }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const resourcesGrid = document.getElementById('resourcesGrid');
+    const paginationContainer = document.getElementById('paginationContainer');
+    let currentPage = 1;
+
+    // Function to update URL parameters without reloading the page
+    function updateURLParams(params) {
+        const url = new URL(window.location.href);
+        Object.keys(params).forEach(key => {
+            if (params[key]) {
+                url.searchParams.set(key, params[key]);
+            } else {
+                url.searchParams.delete(key);
+            }
+        });
+        window.history.pushState({}, '', url);
+    }
+
+    // Function to show loading spinner
+    function showLoading() {
+        resourcesGrid.innerHTML = `
+            <div class="col-12">
+                <div class="loading-spinner">
+                    <i class="bi bi-arrow-repeat"></i>
+                </div>
+            </div>
+        `;
+        document.querySelector('.loading-spinner').style.display = 'block';
+    }
+
+    // Function to hide loading spinner
+    function hideLoading() {
+        document.querySelector('.loading-spinner').style.display = 'none';
+    }
+
+    // Function to create resource card HTML
+    function createResourceCard(ressource) {
+        const typeClass = ressource.type === 'Document' ? 'document-card' :
+                         ressource.type === 'Video' ? 'video-card' :
+                         ressource.type === 'Link' ? 'link-card' : 'other-card';
+        
+        const typeIcon = ressource.type === 'Document' ? 'bi-journal-text' :
+                        ressource.type === 'Video' ? 'bi-play-circle' :
+                        ressource.type === 'Link' ? 'bi-globe' : 'bi-collection';
+        
+        const typeColor = ressource.type === 'Document' ? 'bg-primary' :
+                         ressource.type === 'Video' ? 'bg-danger' :
+                         ressource.type === 'Link' ? 'bg-success' : 'bg-secondary';
+
+        return `
+            <div class="col-md-6 col-lg-4">
+                <div class="card resource-card h-100 ${typeClass}">
+                    <div class="card-body">
+                        <div class="resource-icon mb-3">
+                            <i class="bi ${typeIcon} ${typeClass.replace('-card', '-icon')}"></i>
+                        </div>
+                        <h5 class="card-title">${ressource.titre}</h5>
+                        <p class="card-text text-muted">${ressource.description.length > 100 ? ressource.description.substring(0, 100) + '...' : ressource.description}</p>
+                        <div class="resource-meta d-flex justify-content-between align-items-center mt-3">
+                            <span class="badge ${typeColor}">${ressource.type}</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <div class="d-flex gap-2">
+                            <a href="/ressources/user/${ressource.id}" class="btn btn-outline-primary flex-grow-1">
+                                <i class="bi bi-eye me-1"></i> View Details
+                            </a>
+                            <button type="button" class="btn btn-outline-warning rate-btn" data-bs-toggle="modal" data-bs-target="#rateModal" data-resource-id="${ressource.id}" data-resource-title="${ressource.titre}">
+                                <i class="bi bi-star"></i>
+                            </button>
+                            <form method="post" action="/ressources/${ressource.id}/delete" onsubmit="return confirm('Are you sure you want to delete this resource?');" style="display: inline;">
+                                <input type="hidden" name="_method" value="DELETE">
+                                <input type="hidden" name="_token" value="${ressource.csrfToken}">
+                                <button class="btn btn-outline-danger">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to update pagination
+    function updatePagination(pagination) {
+        if (pagination.totalPages <= 1) {
+            paginationContainer.innerHTML = '';
+            return;
+        }
+
+        let paginationHTML = `
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+        `;
+
+        if (pagination.currentPage > 1) {
+            paginationHTML += `
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${pagination.currentPage - 1}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+            `;
+        }
+
+        for (let i = 1; i <= pagination.totalPages; i++) {
+            paginationHTML += `
+                <li class="page-item ${i === pagination.currentPage ? 'active' : ''}">
+                    <a class="page-link" href="#" data-page="${i}">${i}</a>
+                </li>
+            `;
+        }
+
+        if (pagination.currentPage < pagination.totalPages) {
+            paginationHTML += `
+                <li class="page-item">
+                    <a class="page-link" href="#" data-page="${pagination.currentPage + 1}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            `;
+        }
+
+        paginationHTML += `
+                </ul>
+            </nav>
+        `;
+
+        paginationContainer.innerHTML = paginationHTML;
+    }
+
+    // Function to fetch and update resources
+    async function fetchResources(page = 1) {
+        showLoading();
+        
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams();
+        
+        for (let [key, value] of formData.entries()) {
+            if (value) params.append(key, value);
+        }
+        params.append('page', page);
+
+        try {
+            const response = await fetch(`{{ path('app_user_ressources_index') }}?${params.toString()}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            const data = await response.json();
+            
+            if (data.ressources.length === 0) {
+                resourcesGrid.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-1"></i> No resources found.
+                        </div>
+                    </div>
+                `;
+            } else {
+                resourcesGrid.innerHTML = data.ressources.map(createResourceCard).join('');
+                // Animate new cards
+                animateNewCards();
+            }
+
+            updatePagination(data.pagination);
+            currentPage = data.pagination.currentPage;
+            
+            updateURLParams({
+                searchTitle: formData.get('searchTitle'),
+                type: formData.get('type'),
+                searchDescription: formData.get('searchDescription'),
+                page: page
+            });
+        } catch (error) {
+            console.error('Error:', error);
+            resourcesGrid.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-1"></i> An error occurred while fetching resources.
+                    </div>
+                </div>
+            `;
+        } finally {
+            hideLoading();
+        }
+    }
+
+    // Handle form submission
+    filterForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        fetchResources(1);
+    });
+
+    // Handle pagination clicks
+    paginationContainer.addEventListener('click', function(e) {
+        if (e.target.classList.contains('page-link')) {
+            e.preventDefault();
+            const page = parseInt(e.target.dataset.page);
+            if (page && page !== currentPage) {
+                fetchResources(page);
+            }
+        }
+    });
+
+    // Handle input changes for real-time filtering
+    const debounce = (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    };
+
+    const handleInputChange = debounce(() => {
+        fetchResources(1);
+    }, 500);
+
+    filterForm.querySelectorAll('input, select').forEach(input => {
+        input.addEventListener('change', handleInputChange);
+    });
+
+    // Rating functionality
+    const rateModal = document.getElementById('rateModal');
+    const resourceTitleElement = rateModal.querySelector('.resource-title');
+    const ratingErrorElement = document.getElementById('ratingError');
+    const submitRatingButton = document.getElementById('submitRating');
+    let currentResourceId = null;
+
+    // When the rating modal is opened
+    rateModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        currentResourceId = button.getAttribute('data-resource-id');
+        const resourceTitle = button.getAttribute('data-resource-title');
+        resourceTitleElement.textContent = `Rate "${resourceTitle}"`;
+        ratingErrorElement.classList.add('d-none');
+        // Reset the form
+        document.getElementById('rating').value = '';
+    });
+
+    // Handle rating submission
+    submitRatingButton.addEventListener('click', async function() {
+        const rating = document.getElementById('rating').value;
+        
+        if (!rating) {
+            ratingErrorElement.textContent = 'Please select a rating';
+            ratingErrorElement.classList.remove('d-none');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/ressources/${currentResourceId}/rate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `rating=${rating}`
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(rateModal);
+                modal.hide();
+                
+                // Show success message
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                alertDiv.innerHTML = `
+                    <i class="bi bi-check-circle me-1"></i> ${data.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.querySelector('.section').insertBefore(alertDiv, document.querySelector('.card'));
+                
+                // Refresh the resources to update the rating
+                fetchResources(currentPage);
+            } else {
+                ratingErrorElement.textContent = data.message;
+                ratingErrorElement.classList.remove('d-none');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            ratingErrorElement.textContent = 'An error occurred while submitting your rating. Please try again.';
+            ratingErrorElement.classList.remove('d-none');
+        }
+    });
+
+    // Add animation to new cards when they're added
+    function animateNewCards() {
+        const cards = document.querySelectorAll('.resource-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+    }
+
+    // Initialize animations
+    animateNewCards();
+});
+</script>
+{% endblock %} 

@@ -371,6 +371,23 @@
                   <li><a class="dropdown-item" href="{{ path('app_programmebienetre_index') }}">View Programs</a></li>
                 </ul>
               </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="FavorisDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Favorites
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="FavorisDropdown">
+                  <li><a class="dropdown-item" href="{{ path('app_favoris_index') }}">My Favorites</a></li>
+                  <li><a class="dropdown-item" href="{{ path('app_favoris_new') }}">Add to Favorites</a></li>
+                </ul>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="RessourcesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Ressources
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="RessourcesDropdown">
+                  <li><a class="dropdown-item" href="{{ user.role == 'ADMIN' ? path('app_ressources_index') : path('app_user_ressources_index') }}">List of Resources</a></li>
+                </ul>
+              </li>
               <li class="nav-item">
                 <a class="nav-link" href="{{ path('GestionUsers') }}">User Management</a>
               </li>

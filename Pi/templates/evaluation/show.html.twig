@@ -1,0 +1,409 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block title %}Evaluation Details{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1>Evaluation Details</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('app_evaluation_index') }}">Evaluations</a></li>
+          <li class="breadcrumb-item active">Details</li>
+        </ol>
+      </nav>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ path('app_evaluation_index') }}" class="btn btn-outline-primary rounded-pill px-4 back-btn">
+        <i class="bi bi-arrow-left me-2"></i> Back to List
+      </a>
+      <a href="{{ path('app_evaluation_export_pdf', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-primary rounded-pill px-4 pdf-btn">
+        <i class="bi bi-file-earmark-pdf me-2"></i> Export PDF
+      </a>
+      <a href="{{ path('app_evaluation_delete', {'idevaluation': evaluation.idEvaluation}) }}" 
+         onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ?');" 
+         class="btn btn-outline-danger rounded-pill px-4 delete-btn">
+        <i class="bi bi-trash me-2"></i> Delete
+      </a>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card evaluation-card">
+          <!-- Resource Title Header -->
+          <div class="card-header text-center py-4">
+            <div class="resource-icon mb-3">
+              <i class="bi bi-journal-text"></i>
+            </div>
+            <h4 class="card-title mb-0">{{ resourceTitle }}</h4>
+          </div>
+
+          <div class="card-body">
+            <!-- Rating Section -->
+            <div class="rating-section text-center">
+              <div class="rating-circle {% if evaluation.note >= 7 %}rating-high{% elseif evaluation.note >= 4 %}rating-medium{% else %}rating-low{% endif %}">
+                <div class="rating-inner">
+                  <span class="rating-number">{{ evaluation.note }}</span>
+                  <span class="rating-max">/10</span>
+                </div>
+              </div>
+              <div class="rating-label mt-3">
+                {% if evaluation.note >= 7 %}
+                  <span class="performance-badge success">
+                    <i class="bi bi-star-fill me-2"></i>Excellent Performance
+                  </span>
+                {% elseif evaluation.note >= 4 %}
+                  <span class="performance-badge warning">
+                    <i class="bi bi-star-half me-2"></i>Average Performance
+                  </span>
+                {% else %}
+                  <span class="performance-badge danger">
+                    <i class="bi bi-star me-2"></i>Needs Improvement
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Date Section -->
+            <div class="date-section text-center mt-4">
+              <div class="date-icon">
+                <i class="bi bi-calendar3"></i>
+              </div>
+              <div class="date-content">
+                <div class="date-label">Evaluated on</div>
+                <div class="date-value">
+                  {{ evaluation.dateEvaluation ? evaluation.dateEvaluation|date('F d, Y') : 'N/A' }}
+                </div>
+                <div class="time-value">
+                  <i class="bi bi-clock me-2"></i>
+                  {{ evaluation.dateEvaluation ? evaluation.dateEvaluation|date('h:i A') : '' }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+  /* Add new animations */
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  .evaluation-card {
+    animation: float 6s ease-in-out infinite;
+    border: none;
+    border-radius: 1.5rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .evaluation-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, #6C63FF 0%, #3F3D56 100%);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    padding: 3rem 1rem;
+  }
+
+  .card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    z-index: 0;
+  }
+
+  .resource-icon {
+    font-size: 3.5rem;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  .resource-icon i {
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  .card-title {
+    color: white;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 1.8rem;
+  }
+
+  .rating-section {
+    padding: 3rem 0;
+    position: relative;
+  }
+
+  .rating-circle {
+    animation: pulse 3s ease-in-out infinite;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .rating-circle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .rating-high {
+    background: linear-gradient(45deg, #00E676, #00C853);
+  }
+
+  .rating-medium {
+    background: linear-gradient(45deg, #FFD600, #FFAB00);
+  }
+
+  .rating-low {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+  }
+
+  .rating-inner {
+    background: rgba(255, 255, 255, 0.15);
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+  }
+
+  .rating-number {
+    font-size: 4.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .rating-max {
+    font-size: 1.8rem;
+    opacity: 0.9;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .performance-badge {
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .performance-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .performance-badge.success {
+    background: linear-gradient(45deg, #00E676, #00C853);
+    color: white;
+  }
+
+  .performance-badge.warning {
+    background: linear-gradient(45deg, #FFD600, #FFAB00);
+    color: white;
+  }
+
+  .performance-badge.danger {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+    color: white;
+  }
+
+  .date-section {
+    position: relative;
+    overflow: hidden;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(63, 61, 86, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 1.5rem;
+    margin-top: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .date-icon {
+    font-size: 3rem;
+    color: #6C63FF;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .date-label {
+    font-size: 1rem;
+    color: #6C63FF;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .date-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+
+  .time-value {
+    font-size: 1.1rem;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .back-btn {
+    background: linear-gradient(45deg, #6C63FF, #3F3D56);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+  }
+
+  .back-btn:hover {
+    background: linear-gradient(45deg, #3F3D56, #6C63FF);
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+  }
+
+  .delete-btn {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
+  }
+
+  .delete-btn:hover {
+    background: linear-gradient(45deg, #D50000, #FF5252);
+    color: white;
+    transform: translateX(5px);
+    box-shadow: 0 6px 20px rgba(255, 82, 82, 0.4);
+  }
+
+  .date-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.1) 100%
+    );
+    transform: rotate(30deg);
+    animation: shine 6s linear infinite;
+  }
+
+  @keyframes shine {
+    from {
+      transform: rotate(30deg) translateX(-100%);
+    }
+    to {
+      transform: rotate(30deg) translateX(100%);
+    }
+  }
+
+  /* Dark mode support */
+  @media (prefers-color-scheme: dark) {
+    .evaluation-card {
+      background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.85) 100%);
+    }
+    
+    .card-body {
+      background: rgba(30, 30, 30, 0.7);
+    }
+
+    .date-value {
+      color: #e2e8f0;
+    }
+
+    .date-section {
+      background: linear-gradient(135deg, rgba(108, 99, 255, 0.2) 0%, rgba(63, 61, 86, 0.2) 100%);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .rating-circle {
+      width: 160px;
+      height: 160px;
+    }
+
+    .rating-number {
+      font-size: 3.5rem;
+    }
+
+    .rating-max {
+      font-size: 1.5rem;
+    }
+
+    .date-section {
+      padding: 2rem;
+    }
+  }
+</style>
+{% endblock %}

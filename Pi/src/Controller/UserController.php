@@ -318,10 +318,8 @@ public function login(
     $form->handleRequest($request);
 
     if ($form->isSubmitted() && $form->isValid()) {
-        // Méthode 1: Accès direct aux champs (recommandée)
         $email = $form->get('email')->getData();
         $password = $form->get('password')->getData();
-
 
         $user = $entityManager->getRepository(User::class)
             ->findOneBy(['email' => $email]);
@@ -341,9 +339,10 @@ public function login(
             return $this->redirectToRoute('login');
         }
 
-    
-       $session->set('id', $user->getId());
-       $session->set('role', $user->getRole());
+        $session->set('id', $user->getId());
+        $session->set('role', $user->getRole());
+        
+        // Redirect all users to profile page
         return $this->redirectToRoute('profile');
     }
 
