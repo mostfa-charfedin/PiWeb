@@ -224,3 +224,10 @@ a47789,127.0.0.1,GET,http://127.0.0.1:8000/quiz,1746316136,,200,request
 415fac,127.0.0.1,GET,http://127.0.0.1:8000/GestionUsers,1746316139,,200,request
 068b9e,127.0.0.1,GET,http://127.0.0.1:8000/profile,1746316145,03d01e,500,request
 03d01e,127.0.0.1,GET,http://127.0.0.1:8000/profile,1746316145,,500,request
+7dfb7d,127.0.0.1,GET,http://127.0.0.1:8000/GestionUsers,1746318460,,200,request
+e4f427,127.0.0.1,GET,http://127.0.0.1:8000/score,1746318468,,200,request
+1a994b,127.0.0.1,GET,http://127.0.0.1:8000/programmebienetre,1746318473,,200,request
+0c7c77,127.0.0.1,GET,http://127.0.0.1:8000/projet,1746318476,,200,request
+e46f47,127.0.0.1,GET,http://127.0.0.1:8000/avis/,1746318480,92d84d,500,request
+92d84d,127.0.0.1,GET,http://127.0.0.1:8000/avis/,1746318480,,500,request
+e1be36,127.0.0.1,GET,http://127.0.0.1:8000/programmebienetre,1746318487,,200,request
