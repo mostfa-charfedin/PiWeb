@@ -140,9 +140,15 @@
                             </table>
                         </div>
 
-                        <div class="navigation">
-                            {{ knp_pagination_render(pagination) }}
-                        </div>
+                      <div class="navigation text-center mt-4">
+    {% for page in 1..pagination.pageCount %}
+        <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all | merge({'page': page})) }}" 
+           class="btn btn-outline-primary mx-1 {% if page == pagination.currentPageNumber %}active{% endif %}">
+            {{ page }}
+        </a>
+    {% endfor %}
+</div>
+
                     </div>
                 </div>
             </div>

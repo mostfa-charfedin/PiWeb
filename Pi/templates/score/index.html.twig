@@ -1,20 +1,153 @@
-<!DOCTYPE html>
+{% extends user.role == "ADMIN" ? 'sideBar.html.twig' : 'navBar.html.twig' %}
+{% block title %}Liste des Scores{% endblock %}
 
-<title>Hello ScoreController!</title>
+{% block content %}
 
-{% block body %}
+
+
+{% block stylesheets %}
 <style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+    .btn-group .btn {
+        border-radius: 0;
+    }
+    .btn-group .btn:first-child {
+        border-top-left-radius: 4px;
+        border-bottom-left-radius: 4px;
+    }
+    .btn-group .btn:last-child {
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+    }
+    .btn-outline-primary.active {
+        background-color: #0d6efd;
+        color: white;
+    }
 </style>
+{% endblock %}
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+<main id="main" class="main">
+    <div class="container">
+        <h1 class="my-4">Scores</h1>
+        
+        {# Filter Form #}
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="quiz" class="form-label">Quiz</label>
+                        <select name="quiz" id="quiz" class="form-select">
+                            <option value="">All Quizzes</option>
+                            {% for quiz in quizzes %}
+                                <option value="{{ quiz.idquiz }}" {{ selectedQuiz == quiz.idquiz ? 'selected' : '' }}>
+                                    {{ quiz.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="user" class="form-label">User</label>
+                        <select name="user" id="user" class="form-select">
+                            <option value="">All Users</option>
+                            {% for user in users %}
+                                <option value="{{ user.id }}" {{ selectedUser == user.id ? 'selected' : '' }}>
+                                    {{ user.nom }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Search</label>
+                        <div class="input-group">
+                            <input type="text" name="search" id="search" class="form-control" 
+                                   value="{{ searchTerm }}" placeholder="Search users...">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">Filter</button>
+                            </div>
+                        </div>
+                    </div>
+                    {% if selectedQuiz %}
+                    <div class="col-md-12">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" name="top5" id="top5" 
+                                  {{ showTop5 ? 'checked' : '' }}>
+                            <label class="form-check-label" for="top5">Show Top 5 Only</label>
+                        </div>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/Mostfa Charfedin/Desktop/PiWeb/Pi/src/Controller/ScoreController.php</code></li>
-        <li>Your template at <code>C:/Users/Mostfa Charfedin/Desktop/PiWeb/Pi/templates/score/index.html.twig</code></li>
-    </ul>
-</div>
+        {# Results Table #}
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>User</th>
+                                <th>Quiz</th>
+                                <th>Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if isPaginated %}
+                                {# Paginated results #}
+                                {% for score in pagination %}
+                                    <tr>
+                                        <td>{{ loop.index + (pagination.getCurrentPageNumber() - 1) * pagination.getItemNumberPerPage() }}</td>
+                                        <td>{{ score.user.nom }}</td>
+                                        <td>{{ score.quiz.nom }}</td>
+                                        <td>{{ score.score }}%</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">No scores found</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                {# Top 5 results #}
+                                {% for score in scores %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>{{ score.user.nom }}</td>
+                                        <td>{{ score.quiz.nom }}</td>
+                                        <td>{{ score.score }}%</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="4" class="text-center">No scores found</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {# Pagination - only show if not in Top 5 mode #}
+      {% if isPaginated %}
+    <div class="d-flex justify-content-center my-4">
+        <div class="btn-group" role="group" aria-label="Pagination">
+
+      
+
+            {# Numbered pages #}
+            {% for page in 1..pagination.pageCount %}
+                <a href="{{ path(app.request.attributes.get('_route'), app.request.query.all | merge({'page': page})) }}" 
+                   class="btn btn-outline-primary {% if page == pagination.currentPageNumber %}active{% endif %}">
+                    {{ page }}
+                </a>
+            {% endfor %}
+
+         
+
+        </div>
+    </div>
+{% endif %}
+
+            </div>
+        </div>
+    </div>
+</main>
 {% endblock %}

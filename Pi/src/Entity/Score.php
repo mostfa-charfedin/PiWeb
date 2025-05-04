@@ -10,45 +10,24 @@ use Doctrine\ORM\Mapping as ORM;
 class Score
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private ?int $idScore = null;
-
-    #[ORM\Column(type: 'integer')]
-    private int $score;
-
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: "idUser", referencedColumnName: "id", nullable: false, onDelete: "CASCADE")]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'scores')]
+    #[ORM\JoinColumn(name: "idUser", referencedColumnName: "id", nullable: false)]
     private ?User $user = null;
 
+    #[ORM\Id]
     #[ORM\ManyToOne(targetEntity: Quiz::class)]
-    #[ORM\JoinColumn(name: "idQuiz", referencedColumnName: "idQuiz", nullable: false, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(name: "idquiz", referencedColumnName: "idQuiz", nullable: false)]
     private ?Quiz $quiz = null;
 
-    // === Getters and Setters ===
-
-    public function getIdScore(): ?int
-    {
-        return $this->idScore;
-    }
-
-    public function getScore(): int
-    {
-        return $this->score;
-    }
-
-    public function setScore(int $score): self
-    {
-        $this->score = $score;
-        return $this;
-    }
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $score = null;
 
     public function getUser(): ?User
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    public function setUser(?User $user): static
     {
         $this->user = $user;
         return $this;
@@ -59,9 +38,20 @@ class Score
         return $this->quiz;
     }
 
-    public function setQuiz(?Quiz $quiz): self
+    public function setQuiz(?Quiz $quiz): static
     {
         $this->quiz = $quiz;
+        return $this;
+    }
+
+    public function getScore(): int
+    {
+        return $this->score;
+    }
+
+    public function setScore(int $score): self
+    {
+        $this->score = $score;
         return $this;
     }
 }

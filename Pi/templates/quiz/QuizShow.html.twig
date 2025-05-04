@@ -59,7 +59,7 @@
           <h5>Questions</h5>
           <!-- Add Question Button, visible only when less than 5 questions -->
           {% if questions|length < 5 %}
-            <a href="{{ path('question_new', {'quizId': quiz.idQuestion ?? quiz.idquiz}) }}" class="btn btn-primary">
+            <a href="{{ path('question_new', {'quizId': quiz.idquiz}) }}" class="btn btn-primary">
               <i class="bi bi-plus-circle"></i> Add Question
             </a>
           {% else %}

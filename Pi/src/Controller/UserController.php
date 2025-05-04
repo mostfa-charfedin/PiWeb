@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 use App\Entity\User;
+use App\Entity\Quiz;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -28,13 +29,31 @@ use App\Enum\UserRole;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
+use Symfony\UX\Chartjs\Model\Chart;
+use GuzzleHttp\Client;
 
+
+
+use Google\Cloud\AIPlatform\V1\Content;
+use Google\Cloud\AIPlatform\V1\Part;
+use Google\Cloud\AIPlatform\V1\SafetySetting;
+
+use Google\Cloud\AIPlatform\V1\SafetySetting\HarmBlockThreshold;
+use Google\Cloud\AIPlatform\V1\GenerationConfig;
+use Google\Cloud\AIPlatform\V1\HarmCategory; // Some versions use this path
+use Google\Cloud\AIPlatform\V1\GenerateContentRequest;
+use App\Service\GeminiService;
+use Google\Cloud\AIPlatform\V1\Client\PredictionServiceClient;
 class UserController extends AbstractController
 {
 
  
     #[Route('/profile', name: 'profile')]
-    public function profile(Request $request, SessionInterface $session, EntityManagerInterface $entityManager, ValidatorInterface $validator): Response
+    public function profile(Request $request, SessionInterface $session, 
+    EntityManagerInterface $entityManager, 
+    ChartBuilderInterface $chartBuilder,    GeminiService $geminiService ,
+    ValidatorInterface $validator): Response
     {
    
         if (!$session->get('id')) {
@@ -55,7 +74,46 @@ class UserController extends AbstractController
             $this->addFlash('error', 'Accès réservé aux administrateurs');
             return $this->render('user/admin/404.html.twig');
         }
-        
+         // Get all scores
+       
+         $scores = $user->getScores();
+    $quizzesPassed = count($scores);
+    $totalQuizzesAvailable = $entityManager->getRepository(Quiz::class)->count([]);
+    // dd($_SERVER['GOOGLE_APPLICATION_CREDENTIALS'] );
+    $top3Scores = $scores->toArray();
+    usort($top3Scores, fn ($a, $b) => $b->getScore() <=> $a->getScore());
+    $top3Scores = array_slice($top3Scores, 0, 3);
+
+    $quizCategories = [];
+    $userPerformanceData = [];
+    $averageScoresData = [];
+    foreach ($scores as $score) {
+        $quizCategories[] = ['name' => $score->getQuiz()->getNom(), 'max' => 100];
+        $userPerformanceData[] = $score->getScore();
+        $averageScoresData[] = $score->getScore() - rand(5, 15); // Simulated average
+    }
+
+    $passedQuizIds = $scores->map(fn ($score) => $score->getQuiz()->getIdquiz())->toArray();
+    $availableQuizzesNotPassed = $entityManager->getRepository(Quiz::class)
+        ->createQueryBuilder('q')
+        ->where('q.idquiz NOT IN (:ids)')
+        ->setParameter('ids', $passedQuizIds)
+        ->getQuery()
+        ->getResult();
+
+    $prompt = $this->generateGeminiPrompt(
+        $quizzesPassed,
+        $totalQuizzesAvailable,
+        $top3Scores,
+        $quizCategories,
+        $userPerformanceData,
+        $averageScoresData,
+        $availableQuizzesNotPassed
+    );
+
+    $geminiMessage = $geminiService->generateMessage($prompt);
+
+     
     
         $form = $this->createFormBuilder($user)
         ->add('nom', TextType::class, [
@@ -168,11 +226,49 @@ class UserController extends AbstractController
         return $this->render('user/profile.html.twig', [
             'user' => $user,
             'form' => $form->createView(),
+            'quizzesPassed' => $quizzesPassed,
+            'totalQuizzesAvailable' => $totalQuizzesAvailable,
+            'top3Scores' => $top3Scores,
+            'quizCategories' => $quizCategories,
+            'userPerformanceData' => $userPerformanceData,
+            'averageScoresData' => $averageScoresData,
+            'availableQuizzesNotPassed' => $availableQuizzesNotPassed,
+            'geminiMessage' => $geminiMessage,
         ]);
     }
     
+    private function generateGeminiPrompt(
+        int $quizzesPassed,
+        int $totalQuizzesAvailable,
+        array $top3Scores,
+        array $quizCategories,
+        array $userPerformanceData,
+        array $averageScoresData,
+        array $availableQuizzesNotPassed
+    ): string {
+        $top3QuizNames = array_map(fn($score) => $score->getQuiz()->getNom(), $top3Scores);
+        $notPassedQuizNames = array_map(fn($quiz) => $quiz->getNom(), $availableQuizzesNotPassed);
     
-
+        $prompt = "Based on the following quiz performance data:\n\n";
+        $prompt .= "Quizzes Passed: $quizzesPassed out of $totalQuizzesAvailable\n";
+        $prompt .= "Top 3 Quizzes (by score): " . implode(', ', $top3QuizNames) . "\n\n";
+    
+        $prompt .= "Performance in each quiz category (Quiz Name: Your Score vs. Average Score):\n";
+        foreach ($quizCategories as $index => $category) {
+            $prompt .= "- {$category['name']}: {$userPerformanceData[$index]} vs. {$averageScoresData[$index]}\n";
+        }
+        $prompt .= "\n";
+    
+        if (!empty($notPassedQuizNames)) {
+            $prompt .= "To improve your performance, consider attempting the following quizzes you haven't passed yet: " . implode(', ', $notPassedQuizNames) . "\n\n";
+        } else {
+            $prompt .= "Congratulations! You have passed all available quizzes.\n\n";
+        }
+    
+        $prompt .= "Please generate a concise and encouraging message for the user's profile page summarizing their performance and suggesting areas for improvement based on the data provided. The message should be friendly and motivating.";
+    
+        return $prompt;
+    }
 
 
 
@@ -303,8 +399,9 @@ public function login(
         $pagination = $paginator->paginate(
             $query,
             $request->query->getInt('page', 1),
-            2 
+            3
         );
+        
 
         return $this->render('user/admin/UsersManag.html.twig', [
             'user' => $user,

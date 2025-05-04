@@ -69,7 +69,7 @@ public function index(Request $request, QuizRepository $quizRepository, SessionI
     // Filter hidden quizzes if not admin
     $role = strtoupper($user->getRole() ?? '');
     if ($role !== 'ADMIN') {
-        $quizzes = array_filter($quizzes, fn($quiz) => !in_array($quiz->getIdQuiz(), $hiddenIds));
+        $quizzes = array_filter($quizzes, fn($quiz) => !in_array($quiz->getIdquiz(), $hiddenIds));
     }
 
     $quizResults = $session->get('quiz_result_history', []);
@@ -300,7 +300,7 @@ public function unhideQuiz(int $id, SessionInterface $session): Response
         ]);
     
         $quizResults = $session->get('quiz_result_history', []);
-        $quizResults[$quiz->getIdQuiz()] = [
+        $quizResults[$quiz->getIdquiz()] = [
             'score' => $score,
             'total' => count($questions),
         ];
@@ -319,7 +319,7 @@ public function unhideQuiz(int $id, SessionInterface $session): Response
         $dir = $this->getParameter('kernel.project_dir') . '/var/quiz_scores';
         if (!is_dir($dir)) mkdir($dir, 0777, true);
     
-        $filePath = $dir . "/quiz_{$quiz->getIdQuiz()}.json";
+        $filePath = $dir . "/quiz_{$quiz->getIdquiz()}.json";
         $existingData = [];
     
         if (file_exists($filePath)) {
@@ -329,7 +329,7 @@ public function unhideQuiz(int $id, SessionInterface $session): Response
         $existingData[] = $scoreData;
         file_put_contents($filePath, json_encode($existingData, JSON_PRETTY_PRINT));
     
-        return $this->redirectToRoute('user_quiz_result', ['id' => $quiz->getIdQuiz()]);
+        return $this->redirectToRoute('user_quiz_result', ['id' => $quiz->getIdquiz()]);
     }
 
     #[Route('/quiz/{id}/result', name: 'user_quiz_result')]

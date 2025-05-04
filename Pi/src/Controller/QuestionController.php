@@ -128,8 +128,8 @@ class QuestionController extends AbstractController
         if (!$question) {
             throw $this->createNotFoundException('Question not found');
         }
-
-        $quizId = $question->getQuiz()->getIdquiz();
+        $quiz = $question->getQuiz();
+        $quizId = $quiz->getIdquiz();
 
         $em->remove($question);
         $em->flush();
