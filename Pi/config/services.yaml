@@ -3,20 +3,28 @@ parameters:
     upload_directory: '%kernel.project_dir%/public/uploads/uploadposte'
     huggingface_api_key: '%env(HUGGINGFACE_API_KEY)%'
     categories: '%kernel.project_dir%/config/categories.yaml'
-    gemini_api_key: '%env(GOOGLE_API_KEY)%'
+    GOOGLE_API_KEY: '%env(GOOGLE_API_KEY)%'
 
 
 services:
+    # default configuration for services in *this* file
     _defaults:
-        autowire: true
-        autoconfigure: true
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        
 
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
     App\:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+   
     App\Service\GeminiService:
-            arguments:
-            $apiKey: '%gemini_api_key%'
+        arguments:
+            $apiKey: '%GOOGLE_API_KEY%'  
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones

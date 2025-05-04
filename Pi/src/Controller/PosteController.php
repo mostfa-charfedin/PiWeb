@@ -38,7 +38,7 @@ final class PosteController extends AbstractController
     $postes = $paginator->paginate(
         $all_postes,
         $request->query->getInt('page', 1), // Current page number
-        3 // Items per page
+        4 // Items per page
     );
 
         $likedPostes = [];
