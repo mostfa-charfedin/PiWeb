@@ -1,14 +1,8 @@
 knp_snappy:
     pdf:
-<<<<<<< HEAD
         enabled: true
         binary: '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"'
         options: []
-=======
-        enabled:    true
-        binary:     '"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"'
-        options:    []
->>>>>>> origin/ProgrammeBienetre
     image:
         enabled:    true
         binary:     '"C:\Program Files\wkhtmltopdf\bin\wkhtmltoimage.exe"'
