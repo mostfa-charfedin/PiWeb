@@ -463,24 +463,73 @@
 
     /* New Styles for Enhanced Statistics */
     .stats-card {
-        transition: transform 0.2s;
-        border: 1px solid rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(20px);
     }
 
-    .stats-card:hover {
-        transform: translateY(-5px);
+    .stats-card.animate {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .chart-bar {
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 1s ease-out, background-color 0.3s ease;
+    }
+
+    .chart-bar.animate {
+        transform: scaleX(1);
+    }
+
+    .chart-row {
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: all 0.5s ease;
+    }
+
+    .chart-row.animate {
+        opacity: 1;
+        transform: translateX(0);
     }
 
     .performance-category {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.4s ease;
     }
 
-    .performance-category .count {
-        font-size: 1.2rem;
-        font-weight: 600;
+    .performance-category.animate {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Staggered animation delays for chart rows */
+    .chart-row:nth-child(1) { transition-delay: 0.1s; }
+    .chart-row:nth-child(2) { transition-delay: 0.2s; }
+    .chart-row:nth-child(3) { transition-delay: 0.3s; }
+    .chart-row:nth-child(4) { transition-delay: 0.4s; }
+    .chart-row:nth-child(5) { transition-delay: 0.5s; }
+
+    /* Staggered animation delays for performance categories */
+    .performance-category:nth-child(1) { transition-delay: 0.2s; }
+    .performance-category:nth-child(2) { transition-delay: 0.3s; }
+    .performance-category:nth-child(3) { transition-delay: 0.4s; }
+    .performance-category:nth-child(4) { transition-delay: 0.5s; }
+
+    /* Hover effects */
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .chart-bar:hover {
+        filter: brightness(1.1);
+    }
+
+    .performance-category:hover {
+        transform: scale(1.05);
     }
 
     .trend-indicator {
@@ -566,56 +615,58 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  // On attend que tout le contenu de la page soit chargé avant d’exécuter le code
-  document.addEventListener('DOMContentLoaded', function() {
-    // On récupère le contexte du canvas où le graphique sera dessiné
-    const ctx = document.getElementById('categoryChart').getContext('2d');
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to check if element is in viewport
+    function isInViewport(element) {
+        const rect = element.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    }
 
-    // On crée un nouveau graphique Chart.js de type "doughnut" (diagramme en anneau)
-    new Chart(ctx, {
-      type: 'doughnut', // Type de graphique
+    // Function to animate elements when they come into view
+    function animateOnScroll() {
+        const statsCards = document.querySelectorAll('.stats-card');
+        const chartRows = document.querySelectorAll('.chart-row');
+        const chartBars = document.querySelectorAll('.chart-bar');
+        const performanceCategories = document.querySelectorAll('.performance-category');
 
-      // Données à afficher (labels, valeurs, couleurs), transmises depuis le backend
-      data: categoryData,
-
-      // Options de personnalisation du graphique
-      options: {
-        responsive: true, // Le graphique s’adapte à la taille de l’écran
-
-        plugins: {
-          legend: { display: false }, // On masque la légende (peut être affichée si besoin)
-
-          // Personnalisation des info-bulles (tooltips) au survol d’un segment
-          tooltip: {
-            callbacks: {
-              label: function(context) {
-                // Récupère le label (nom de la catégorie)
-                const label = context.label || '';
-                // Récupère la valeur (nombre de ressources)
-                const value = context.raw || 0;
-                // Calcule le total de toutes les valeurs
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                // Calcule le pourcentage de la catégorie courante
-                const percentage = Math.round((value / total) * 100);
-                // Retourne le texte affiché dans l’info-bulle
-                return `${label}: ${value} resources (${percentage}%)`;
-              }
+        statsCards.forEach(card => {
+            if (isInViewport(card)) {
+                card.classList.add('animate');
             }
-          }
-        },
+        });
 
-        // Animation à l’affichage du graphique
-        animation: {
-          animateScale: true,   // Animation sur la taille
-          animateRotate: true,  // Animation sur la rotation
-          duration: 2000,       // Durée de l’animation en ms
-          easing: 'easeOutQuart'// Type d’animation
-        },
+        chartRows.forEach(row => {
+            if (isInViewport(row)) {
+                row.classList.add('animate');
+            }
+        });
 
-        // Taille du trou central du doughnut (pour l’esthétique)
-        cutout: '65%'
-      }
-    });
-  });
+        chartBars.forEach(bar => {
+            if (isInViewport(bar)) {
+                bar.classList.add('animate');
+            }
+        });
+
+        performanceCategories.forEach(category => {
+            if (isInViewport(category)) {
+                category.classList.add('animate');
+            }
+        });
+    }
+
+    // Initial animation check
+    animateOnScroll();
+
+    // Add scroll event listener
+    window.addEventListener('scroll', animateOnScroll);
+
+    // Add resize event listener to handle window resizing
+    window.addEventListener('resize', animateOnScroll);
+});
 </script>
 {% endblock %}
