@@ -43,7 +43,7 @@ use Google\Cloud\AIPlatform\V1\SafetySetting\HarmBlockThreshold;
 use Google\Cloud\AIPlatform\V1\GenerationConfig;
 use Google\Cloud\AIPlatform\V1\HarmCategory; // Some versions use this path
 use Google\Cloud\AIPlatform\V1\GenerateContentRequest;
-use App\Service\GeminiService;
+use App\Service\ChatGPTService;
 use Google\Cloud\AIPlatform\V1\Client\PredictionServiceClient;
 class UserController extends AbstractController
 {
@@ -52,7 +52,7 @@ class UserController extends AbstractController
     #[Route('/profile', name: 'profile')]
     public function profile(Request $request, SessionInterface $session, 
     EntityManagerInterface $entityManager, 
-    ChartBuilderInterface $chartBuilder,    GeminiService $geminiService ,
+    ChartBuilderInterface $chartBuilder,    ChatGPTService $chatGptService ,
     ValidatorInterface $validator): Response
     {
    
@@ -76,42 +76,51 @@ class UserController extends AbstractController
         }
          // Get all scores
        
+        
+ 
          $scores = $user->getScores();
-    $quizzesPassed = count($scores);
-    $totalQuizzesAvailable = $entityManager->getRepository(Quiz::class)->count([]);
-    // dd($_SERVER['GOOGLE_APPLICATION_CREDENTIALS'] );
-    $top3Scores = $scores->toArray();
-    usort($top3Scores, fn ($a, $b) => $b->getScore() <=> $a->getScore());
-    $top3Scores = array_slice($top3Scores, 0, 3);
+         $quizzesPassed = count($scores);
+         $totalQuizzesAvailable = $entityManager->getRepository(Quiz::class)->count([]);
+ 
+         // Récupère les scores triés
+         $top3Scores = $scores->toArray();
+         usort($top3Scores, fn($a, $b) => $b->getScore() <=> $a->getScore());
+         $top3Scores = array_slice($top3Scores, 0, 3);
+ 
+         // Crée les données pour les catégories de quiz
+         $quizCategories = [];
+         $userPerformanceData = [];
+         $averageScoresData = [];
+         foreach ($scores as $score) {
+             $quizCategories[] = ['name' => $score->getQuiz()->getNom(), 'max' => 100];
+             $userPerformanceData[] = $score->getScore();
+             $averageScoresData[] = $score->getScore() - rand(5, 15); // Moyenne simulée
+         }
+ 
+         // Récupère les quizzes non réussis
+         $passedQuizIds = $scores->map(fn($score) => $score->getQuiz()->getIdquiz())->toArray();
+         $availableQuizzesNotPassed = $entityManager->getRepository(Quiz::class)
+             ->createQueryBuilder('q')
+             ->where('q.idquiz NOT IN (:ids)')
+             ->setParameter('ids', $passedQuizIds)
+             ->getQuery()
+             ->getResult();
+ 
+         // Génère le prompt pour ChatGPT
+         $prompt = $this->generateChatGptPrompt(
+             $quizzesPassed,
+             $totalQuizzesAvailable,
+             $top3Scores,
+             $quizCategories,
+             $userPerformanceData,
+             $averageScoresData,
+             $availableQuizzesNotPassed
+         );
+ 
+         // Utilise le service ChatGPT pour générer un message
 
-    $quizCategories = [];
-    $userPerformanceData = [];
-    $averageScoresData = [];
-    foreach ($scores as $score) {
-        $quizCategories[] = ['name' => $score->getQuiz()->getNom(), 'max' => 100];
-        $userPerformanceData[] = $score->getScore();
-        $averageScoresData[] = $score->getScore() - rand(5, 15); // Simulated average
-    }
 
-    $passedQuizIds = $scores->map(fn ($score) => $score->getQuiz()->getIdquiz())->toArray();
-    $availableQuizzesNotPassed = $entityManager->getRepository(Quiz::class)
-        ->createQueryBuilder('q')
-        ->where('q.idquiz NOT IN (:ids)')
-        ->setParameter('ids', $passedQuizIds)
-        ->getQuery()
-        ->getResult();
-
-    $prompt = $this->generateGeminiPrompt(
-        $quizzesPassed,
-        $totalQuizzesAvailable,
-        $top3Scores,
-        $quizCategories,
-        $userPerformanceData,
-        $averageScoresData,
-        $availableQuizzesNotPassed
-    );
-
-    $geminiMessage = $geminiService->generateMessage($prompt);
+         $chatGptMessage = $chatGptService->generateMessage($prompt);
 
      
     
@@ -233,11 +242,11 @@ class UserController extends AbstractController
             'userPerformanceData' => $userPerformanceData,
             'averageScoresData' => $averageScoresData,
             'availableQuizzesNotPassed' => $availableQuizzesNotPassed,
-            'geminiMessage' => $geminiMessage,
+            'chatGptMessage' => $chatGptMessage,
         ]);
     }
     
-    private function generateGeminiPrompt(
+    private function generateChatGptPrompt(
         int $quizzesPassed,
         int $totalQuizzesAvailable,
         array $top3Scores,
@@ -246,30 +255,30 @@ class UserController extends AbstractController
         array $averageScoresData,
         array $availableQuizzesNotPassed
     ): string {
+        // Prépare le prompt
         $top3QuizNames = array_map(fn($score) => $score->getQuiz()->getNom(), $top3Scores);
         $notPassedQuizNames = array_map(fn($quiz) => $quiz->getNom(), $availableQuizzesNotPassed);
-    
+
         $prompt = "Based on the following quiz performance data:\n\n";
         $prompt .= "Quizzes Passed: $quizzesPassed out of $totalQuizzesAvailable\n";
         $prompt .= "Top 3 Quizzes (by score): " . implode(', ', $top3QuizNames) . "\n\n";
-    
+
         $prompt .= "Performance in each quiz category (Quiz Name: Your Score vs. Average Score):\n";
         foreach ($quizCategories as $index => $category) {
             $prompt .= "- {$category['name']}: {$userPerformanceData[$index]} vs. {$averageScoresData[$index]}\n";
         }
         $prompt .= "\n";
-    
+
         if (!empty($notPassedQuizNames)) {
             $prompt .= "To improve your performance, consider attempting the following quizzes you haven't passed yet: " . implode(', ', $notPassedQuizNames) . "\n\n";
         } else {
             $prompt .= "Congratulations! You have passed all available quizzes.\n\n";
         }
-    
+
         $prompt .= "Please generate a concise and encouraging message for the user's profile page summarizing their performance and suggesting areas for improvement based on the data provided. The message should be friendly and motivating.";
-    
+
         return $prompt;
     }
-
 
 
 
