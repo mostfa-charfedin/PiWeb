@@ -274,26 +274,35 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
+                        <!-- Zone du graphique Chart.js -->
                         <div class="col-md-8">
                             <div class="chart-container" style="position: relative; height: 400px;">
+                                {# Canvas où le graphique doughnut sera affiché par Chart.js #}
                                 <canvas id="categoryDistributionChart"></canvas>
                             </div>
                         </div>
+                        <!-- Légende détaillée des catégories -->
                         <div class="col-md-4 d-flex align-items-center justify-content-center">
                             <div class="category-legend p-4 bg-light rounded w-100" style="max-width: 350px;">
                                 <h6 class="mb-4 text-center">
                                     <i class="bi bi-info-circle me-2"></i>Category Breakdown
                                 </h6>
                                 <div class="category-list">
+                                    {# On parcourt chaque catégorie pour afficher ses infos #}
                                     {% for category, count in categoryDistribution %}
                                         <div class="category-item d-flex align-items-center mb-3 p-2 rounded" 
+                                             {# Couleur de fond légèrement teintée selon la catégorie #}
                                              style="background-color: {{ categoryColors[category] }}20;">
+                                            {# Badge coloré correspondant à la couleur du segment du graphique #}
                                             <span class="badge me-3" style="background-color: {{ categoryColors[category] }}; width: 20px; height: 20px;"></span>
                                             <div class="flex-grow-1">
                                                 <div class="d-flex justify-content-between align-items-center">
+                                                    {# Nom de la catégorie #}
                                                     <span class="category-name">{{ category }}</span>
+                                                    {# Nombre de ressources dans cette catégorie #}
                                                     <span class="category-count">{{ count }}</span>
                                                 </div>
+                                                {# Barre de progression représentant la proportion de cette catégorie #}
                                                 <div class="progress mt-1" style="height: 5px;">
                                                     <div class="progress-bar" role="progressbar" 
                                                          style="width: {{ (count / evaluations|length * 100)|round }}%; background-color: {{ categoryColors[category] }}"
@@ -308,6 +317,7 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Fin de la légende -->
                     </div>
                 </div>
             </div>
@@ -552,78 +562,60 @@
 {% endblock %}
 
 {% block javascripts %}
+{# On charge la bibliothèque Chart.js depuis un CDN #}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl)
-        });
+  // On attend que tout le contenu de la page soit chargé avant d’exécuter le code
+  document.addEventListener('DOMContentLoaded', function() {
+    // On récupère le contexte du canvas où le graphique sera dessiné
+    const ctx = document.getElementById('categoryChart').getContext('2d');
 
-        // Add animation to chart bars
-        document.querySelectorAll('.chart-bar').forEach((bar, index) => {
-            setTimeout(() => {
-                bar.style.width = bar.style.width;
-                bar.style.opacity = '1';
-            }, index * 100);
-        });
+    // On crée un nouveau graphique Chart.js de type "doughnut" (diagramme en anneau)
+    new Chart(ctx, {
+      type: 'doughnut', // Type de graphique
 
-        // Initialize Category Distribution Chart
-        const ctx = document.getElementById('categoryDistributionChart').getContext('2d');
-        const categoryData = {
-            labels: {{ categoryLabels|json_encode|raw }},
-            datasets: [{
-                data: {{ categoryCounts|json_encode|raw }},
-                backgroundColor: {{ categoryColors|json_encode|raw }},
-                borderWidth: 2,
-                borderColor: '#fff',
-                hoverOffset: 15,
-                borderRadius: 5
-            }]
-        };
+      // Données à afficher (labels, valeurs, couleurs), transmises depuis le backend
+      data: categoryData,
 
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: categoryData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const label = context.label || '';
-                                const value = context.raw || 0;
-                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = Math.round((value / total) * 100);
-                                return `${label}: ${value} resources (${percentage}%)`;
-                            }
-                        },
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        titleFont: {
-                            size: 14,
-                            weight: 'bold'
-                        },
-                        bodyFont: {
-                            size: 13
-                        },
-                        padding: 12,
-                        cornerRadius: 8
-                    }
-                },
-                animation: {
-                    animateScale: true,
-                    animateRotate: true,
-                    duration: 2000,
-                    easing: 'easeOutQuart'
-                },
-                cutout: '65%'
+      // Options de personnalisation du graphique
+      options: {
+        responsive: true, // Le graphique s’adapte à la taille de l’écran
+
+        plugins: {
+          legend: { display: false }, // On masque la légende (peut être affichée si besoin)
+
+          // Personnalisation des info-bulles (tooltips) au survol d’un segment
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                // Récupère le label (nom de la catégorie)
+                const label = context.label || '';
+                // Récupère la valeur (nombre de ressources)
+                const value = context.raw || 0;
+                // Calcule le total de toutes les valeurs
+                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                // Calcule le pourcentage de la catégorie courante
+                const percentage = Math.round((value / total) * 100);
+                // Retourne le texte affiché dans l’info-bulle
+                return `${label}: ${value} resources (${percentage}%)`;
+              }
             }
-        });
+          }
+        },
+
+        // Animation à l’affichage du graphique
+        animation: {
+          animateScale: true,   // Animation sur la taille
+          animateRotate: true,  // Animation sur la rotation
+          duration: 2000,       // Durée de l’animation en ms
+          easing: 'easeOutQuart'// Type d’animation
+        },
+
+        // Taille du trou central du doughnut (pour l’esthétique)
+        cutout: '65%'
+      }
     });
+  });
 </script>
 {% endblock %}

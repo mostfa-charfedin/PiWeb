@@ -35,7 +35,7 @@ class RessourcesController extends AbstractController
         }
 
         // Get search filter criteria from query parameters
-        $searchTitle = $request->query->get('searchTitle');
+        $searchTitle = $request->query->get('searchTitles');
         $type = $request->query->get('type');
         $searchDescription = $request->query->get('searchDescription');
         
@@ -76,7 +76,7 @@ class RessourcesController extends AbstractController
         // Execute the query
         $ressources = $queryBuilder->getQuery()->getResult();
 
-        // Check if it's an AJAX request
+        // Check if it's an AJAX request Si la requête est une requête AJAX (ex
         if ($request->isXmlHttpRequest()) {
             $ressourcesArray = [];
             foreach ($ressources as $ressource) {
@@ -89,6 +89,7 @@ class RessourcesController extends AbstractController
                     'csrfToken' => $this->container->get('security.csrf.token_manager')->getToken('delete' . $ressource->getIdresource())->getValue(),
                 ];
             }
+            // Retourne les données en format JSON
             return $this->json([
                 'ressources' => $ressourcesArray,
                 'count' => count($ressources),
