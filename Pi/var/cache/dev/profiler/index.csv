@@ -484,3 +484,7 @@ e99fc9,127.0.0.1,GET,https://127.0.0.1:8000/assets/css/custom.css,1746362707,247
 2841a1,127.0.0.1,GET,https://127.0.0.1:8000/assets/vendor/jquery/jquery.min.js,1746362709,,404,request
 93574e,127.0.0.1,GET,https://127.0.0.1:8000/quiz,1746362768,,200,request
 7db1fd,127.0.0.1,GET,https://127.0.0.1:8000/admin/quiz/76/stats,1746362771,,200,request
+91b59f,127.0.0.1,GET,https://127.0.0.1:8000/quiz/76,1746364759,216eba,500,request
+216eba,127.0.0.1,GET,https://127.0.0.1:8000/quiz/76,1746364759,,500,request
+146ad1,127.0.0.1,GET,https://127.0.0.1:8000/,1746364896,,404,request
+05040f,127.0.0.1,GET,https://127.0.0.1:8000/quiz,1746364900,,200,request
