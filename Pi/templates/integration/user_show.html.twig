@@ -1,0 +1,56 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}User Tasks for {{ projet.titre }}{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1>Tasks for Project: {{ projet.titre }}</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('user_projet_list') }}">My Projects</a></li>
+        <li class="breadcrumb-item active">{{ projet.titre }}</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+
+  <section class="section">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Tasks Assigned to You</h5>
+
+        {% if tasks is not empty %}
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Due In (weeks)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for task in tasks %}
+                <tr>
+                  <td>{{ loop.index }}</td>
+                  <td>{{ task.titre }}</td>
+                  <td>{{ task.status }}</td>
+                  <td>{{ task.createdAt ? task.createdAt|date('Y-m-d') : '-' }}</td>
+                  <td>{{ task.date }}</td>
+                  <td>
+        <a href="{{ path('user_task_show', { id: task.idtache }) }}" class="btn btn-primary btn-sm">View Details</a>
+
+      </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p>You have no tasks assigned for this project.</p>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

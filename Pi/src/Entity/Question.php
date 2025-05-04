@@ -2,45 +2,42 @@
 
 namespace App\Entity;
 
-use App\Repository\QuestionRepository;
+use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
-use App\Entity\Reponse;
-use App\Entity\Quiz;
+use Symfony\Component\Validator\Constraints as Assert;
 
-
-
-#[ORM\Entity(repositoryClass: "App\Repository\QuestionRepository")]
-#[ORM\Table(name: "question")]
+/**
+ * @ORM\Entity(repositoryClass="App\Repository\QuestionRepository")
+ * @ORM\Table(name="question")
+ */
 class Question
 {
-
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(name: "idQuestion",type: "integer")]
-    
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(name="idQuestion", type="integer")
+     */
     private $idQuestion;
 
     /**
      * @ORM\Column(name="Question", type="string", length=255, nullable=true)
-     
-     *      max = 80,
-     *      maxMessage = "The question can't be more than {{ limit }} characters"
+     * @Assert\Length(
+     *      max=80,
+     *      maxMessage="The question can't be more than {{ limit }} characters"
      * )
      */
     private $question;
 
-  
-  
-    #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: "questions", cascade: ["remove"])]
-    #[ORM\JoinColumn(name: "idQuiz", referencedColumnName: "idQuiz", nullable: false)]
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Quiz", inversedBy="questions")
+     * @ORM\JoinColumn(name="idQuiz", referencedColumnName="idQuiz", nullable=false)
+     */
     private $quiz;
 
-   
-
     /**
-     * @ORM\OneToMany(targetEntity=Reponse::class, mappedBy="question", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="App\Entity\Reponse", mappedBy="question", cascade={"persist", "remove"}, orphanRemoval=true)
+     * @var Collection|Reponse[]
      */
     private $reponses;
 
@@ -97,7 +94,6 @@ class Question
     public function removeReponse(Reponse $reponse): self
     {
         if ($this->reponses->removeElement($reponse)) {
-            // Set the owning side to null (unless already changed)
             if ($reponse->getQuestion() === $this) {
                 $reponse->setQuestion(null);
             }

@@ -1,0 +1,80 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}Task Details{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1>Task: {{ task.titre }}</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{{ path('user_projet_list') }}">My Projects</a>
+        </li>
+        <li class="breadcrumb-item active">{{ task.titre }}</li>
+      </ol>
+    </nav>
+  </div><!-- End Page Title -->
+<div class="pagetitle d-flex align-items-center">
+  <a href="{{ path('user_projet_list') }}" class="btn btn-link p-0 me-2">
+    <i class="bi bi-arrow-left"></i> <!-- Bootstrap Icon for back arrow -->
+  </a>
+  
+</div><!-- End Page Title -->
+
+  <section class="section">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Task Details</h5>
+
+        <ul class="list-group">
+          <li class="list-group-item">
+            <strong>Title:</strong> {{ task.titre }}
+          </li>
+          <li class="list-group-item">
+            <strong>Status:</strong> {{ task.status }}
+          </li>
+          <li class="list-group-item">
+            <strong>Description:</strong> {{ task.description }}
+          </li>
+          <li class="list-group-item">
+            <strong>Priority:</strong> {{ task.priority ?? '-' }}
+          </li>
+          <li class="list-group-item">
+            <strong>Created At:</strong> {{ task.createdAt ? task.createdAt|date('Y-m-d H:i') : '-' }}
+          </li>
+          <li class="list-group-item">
+            <strong>Deadline (Due Date):</strong> 
+            {% if task.date %}
+              {{ task.createdAt ? (task.createdAt|date_modify('+' ~ task.date ~ ' weeks'))|date('Y-m-d') : '-' }}
+            {% else %}
+              -
+            {% endif %}
+          </li>
+          <li class="list-group-item">
+            <strong>Completed At:</strong> {{ task.completedAt ? task.completedAt|date('Y-m-d H:i') : '-' }}
+          </li>
+          <li class="list-group-item">
+            <strong>Overdue:</strong> {{ task.isOverdue() ? 'Yes' : 'No' }}
+          </li>
+          <li class="list-group-item">
+            <strong>Completed Early:</strong> {{ task.isCompletedEarly() ? 'Yes' : 'No' }}
+          </li>
+        </ul>
+
+        {% if task.status != 'done' %}
+          <form method="post" action="{{ path('task_mark_done', { id: task.idtache }) }}" class="mt-4">
+            <input type="hidden" name="_token" value="{{ csrf_token('mark_done' ~ task.idtache) }}">
+            <button type="submit" class="btn btn-success">Mark as Done</button>
+          </form>
+        {% else %}
+          <div class="alert alert-success mt-4">
+            This task is done.
+          </div>
+        {% endif %}
+        
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}

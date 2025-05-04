@@ -7,9 +7,11 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\Callback;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use App\Form\ReponseType;
 
 class QuestionType extends AbstractType
@@ -34,6 +36,9 @@ class QuestionType extends AbstractType
                 'allow_add' => true,
                 'by_reference' => false,
                 'label' => 'Responses',
+                'constraints' => [
+                    new Callback([$this, 'validateAtLeastOneCorrect'])
+                ],
             ]);
     }
 
@@ -42,5 +47,24 @@ class QuestionType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Question::class,
         ]);
+    }
+
+    // Validation function to check at least one correct response
+    public function validateAtLeastOneCorrect($reponses, ExecutionContextInterface $context): void
+    {
+        $hasCorrect = false;
+
+        foreach ($reponses as $reponse) {
+            if ($reponse->getStatus() === 'correct') {
+                $hasCorrect = true;
+                break;
+            }
+        }
+
+        if (!$hasCorrect) {
+            $context->buildViolation('At least one response must be marked as correct.')
+                ->atPath('[0].status') // highlight the first checkbox
+                ->addViolation();
+        }
     }
 }

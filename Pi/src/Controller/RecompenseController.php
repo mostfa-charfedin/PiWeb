@@ -61,7 +61,7 @@ class RecompenseController extends AbstractController
     }
 
     #[Route('/new', name: 'app_recompense_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, SessionInterface $session, RecompenseRepository $recompenseRepository): Response
     {
         // Check if user is logged in
         if (!$session->get('id')) {
@@ -85,6 +85,12 @@ class RecompenseController extends AbstractController
         if (!$programme) {
             $this->addFlash('error', 'Program not found.');
             return $this->redirectToRoute('app_programmebienetre_index');
+        }
+
+        // Vérifier si le programme a déjà une récompense
+        if ($recompenseRepository->hasProgrammeRecompense($idprogramme)) {
+            $this->addFlash('error', 'This program already has a reward.');
+            return $this->redirectToRoute('app_programmebienetre_show', ['idprogramme' => $idprogramme]);
         }
         
         $recompense->setIdprogramme($programme);

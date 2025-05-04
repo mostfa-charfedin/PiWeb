@@ -15,6 +15,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 class AvisType extends AbstractType
 {
@@ -31,10 +33,10 @@ class AvisType extends AbstractType
                     'placeholder' => 'Enter a rating from 1 to 5'
                 ],
                 'constraints' => [
-                    new NotBlank([
+                    new Assert\NotBlank([
                         'message' => 'Please enter a rating'
                     ]),
-                    new Range([
+                    new Assert\Range([
                         'min' => 1,
                         'max' => 5,
                         'notInRangeMessage' => 'Rating must be between {{ min }} and {{ max }}',
@@ -52,10 +54,10 @@ class AvisType extends AbstractType
                     'maxlength' => 1000,
                 ],
                 'constraints' => [
-                    new NotBlank([
+                    new Assert\NotBlank([
                         'message' => 'Please enter a comment'
                     ]),
-                    new Length([
+                    new Assert\Length([
                         'min' => 10,
                         'max' => 1000,
                         'minMessage' => 'Your comment must be at least {{ limit }} characters long',

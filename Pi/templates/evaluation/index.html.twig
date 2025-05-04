@@ -1,0 +1,670 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block content %}
+<main id="main" class="main">
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
+<section class="section">
+    <div class="row">
+        <!-- Statistics Chart -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-primary bg-opacity-10">
+                    <h5 class="card-title mb-0 text-center">
+                        <i class="bi bi-bar-chart-fill text-primary me-2"></i>
+                        Resource Performance Statistics
+                    </h5>
+                    <div class="position-absolute end-0 top-0 p-4">
+                        <form method="post" action="{{ path('app_evaluation_send_stats') }}">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-envelope-fill me-1"></i>Email Statistics
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Summary Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stats-card bg-light p-3 rounded text-center">
+                                <h6 class="text-muted mb-2">Average Score</h6>
+                                <h3 class="mb-0 text-primary">
+                                    {% set avgScore = evaluations|reduce((sum, eval) => sum + eval.note, 0) / evaluations|length %}
+                                    {{ avgScore|number_format(1) }}/10
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card bg-light p-3 rounded text-center">
+                                <h6 class="text-muted mb-2">Highest Score</h6>
+                                <h3 class="mb-0 text-success">
+                                    {{ evaluations|sort((a, b) => b.note <=> a.note)|first.note }}/10
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card bg-light p-3 rounded text-center">
+                                <h6 class="text-muted mb-2">Lowest Score</h6>
+                                <h3 class="mb-0 text-danger">
+                                    {{ evaluations|sort((a, b) => a.note <=> b.note)|first.note }}/10
+                                </h3>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card bg-light p-3 rounded text-center">
+                                <h6 class="text-muted mb-2">Total Resources</h6>
+                                <h3 class="mb-0 text-info">{{ evaluations|length }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Distribution -->
+                    <div class="chart-container" style="min-height: 300px;">
+                        {% for evaluation in evaluations|sort((a, b) => b.note <=> a.note) %}
+                            {% set resourceId = evaluation.idResource %}
+                            <div class="chart-row mb-3" data-bs-toggle="tooltip" data-bs-placement="top" 
+                                 title="Resource: {{ resourceTitles[resourceId]|default('Resource #' ~ resourceId) }}&#10;Score: {{ evaluation.note }}/10">
+                                <div class="chart-label" style="width: 200px; overflow: hidden; text-overflow: ellipsis;">
+                                    {% if resourceTitles[resourceId] is defined %}
+                                        {{ resourceTitles[resourceId] }}
+                                    {% else %}
+                                        Resource #{{ resourceId }}
+                                    {% endif %}
+                                </div>
+
+                                <!-- Bar representing the rating with trend indicator -->
+                                <div class="chart-bar-container" style="flex-grow: 1;">
+                                    <div class="chart-bar {% if evaluation.note >= 8 %}bg-success{% elseif evaluation.note >= 5 %}bg-info{% elseif evaluation.note >= 2 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                         style="width: {{ (evaluation.note/10 * 100)|round }}%;">
+                                        <span class="chart-value">{{ evaluation.note }}/10</span>
+                                        {% if evaluation.note >= 8 %}
+                                            <i class="bi bi-arrow-up-circle-fill trend-indicator"></i>
+                                        {% elseif evaluation.note <= 3 %}
+                                            <i class="bi bi-arrow-down-circle-fill trend-indicator"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Performance Categories -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-3">Performance Categories</h6>
+                            <div class="d-flex gap-3">
+                                <div class="performance-category">
+                                    <span class="badge bg-success">Excellent (8-10)</span>
+                                    <span class="count">{{ evaluations|filter(e => e.note >= 8)|length }}</span>
+                                </div>
+                                <div class="performance-category">
+                                    <span class="badge bg-info">Good (5-7.9)</span>
+                                    <span class="count">{{ evaluations|filter(e => e.note >= 5 and e.note < 8)|length }}</span>
+                                </div>
+                                <div class="performance-category">
+                                    <span class="badge bg-warning">Fair (2-4.9)</span>
+                                    <span class="count">{{ evaluations|filter(e => e.note >= 2 and e.note < 5)|length }}</span>
+                                </div>
+                                <div class="performance-category">
+                                    <span class="badge bg-danger">Poor (0-1.9)</span>
+                                    <span class="count">{{ evaluations|filter(e => e.note < 2)|length }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Outstanding Resources Table -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-success bg-opacity-10">
+                    <h5 class="card-title mb-0 text-center">
+                        <i class="bi bi-trophy-fill text-success me-2"></i>
+                        Outstanding Resources
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Resource Title</th>
+                                <th>Performance Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set sortedEvaluations = evaluations|sort((a, b) => b.note <=> a.note) %}
+                            {% for evaluation in sortedEvaluations|slice(0, 4) %}
+                                <tr>
+                                    <td>
+                                        {% set resourceId = evaluation.idResource %}
+                                        {% if resourceTitles[resourceId] is defined %}
+                                            <strong>{{ resourceTitles[resourceId] }}</strong>
+                                        {% else %}
+                                            <span class="text-muted">Resource #{{ resourceId }} (Title not found)</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success rounded-pill">
+                                            <i class="bi bi-star-fill me-1"></i>
+                                            {{ evaluation.note }}/10
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_evaluation_show', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_evaluation_delete', {'idevaluation': evaluation.idEvaluation}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ?');" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evaluation.idEvaluation) }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">
+                                        <i class="bi bi-info-circle me-2"></i>No evaluations available
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources Needing Improvement Table -->
+        <div class="col-lg-12">
+            <div class="card shadow-sm rounded-3">
+                <div class="card-header bg-danger bg-opacity-10">
+                    <h5 class="card-title mb-0 text-center">
+                        <i class="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+                        Resources Needing Improvement
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Resource Title</th>
+                                <th>Performance Score</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set sortedEvaluations = evaluations|sort((a, b) => a.note <=> b.note) %}
+                            {% for evaluation in sortedEvaluations|slice(0, 4) %}
+                                <tr>
+                                    <td>
+                                        {% set resourceId = evaluation.idResource %}
+                                        {% if resourceTitles[resourceId] is defined %}
+                                            <strong>{{ resourceTitles[resourceId] }}</strong>
+                                        {% else %}
+                                            <span class="text-muted">Resource #{{ resourceId }} (Title not found)</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger rounded-pill">
+                                            <i class="bi bi-exclamation-circle-fill me-1"></i>
+                                            {{ evaluation.note }}/10
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ path('app_evaluation_show', {'idevaluation': evaluation.idEvaluation}) }}" class="btn btn-outline-info btn-sm">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_evaluation_delete', {'idevaluation': evaluation.idEvaluation}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette évaluation ?');" style="display: inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evaluation.idEvaluation) }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">
+                                        <i class="bi bi-info-circle me-2"></i>No evaluations available
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Resource Category Distribution Chart -->
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card shadow-sm rounded-3 mb-4">
+                <div class="card-header bg-info bg-opacity-10">
+                    <h5 class="card-title mb-0 text-center">
+                        <i class="bi bi-pie-chart-fill text-info me-2"></i>
+                        Resource Category Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Zone du graphique Chart.js -->
+                        <div class="col-md-8">
+                            <div class="chart-container" style="position: relative; height: 400px;">
+                                {# Canvas où le graphique doughnut sera affiché par Chart.js #}
+                                <canvas id="categoryDistributionChart"></canvas>
+                            </div>
+                        </div>
+                        <!-- Légende détaillée des catégories -->
+                        <div class="col-md-4 d-flex align-items-center justify-content-center">
+                            <div class="category-legend p-4 bg-light rounded w-100" style="max-width: 350px;">
+                                <h6 class="mb-4 text-center">
+                                    <i class="bi bi-info-circle me-2"></i>Category Breakdown
+                                </h6>
+                                <div class="category-list">
+                                    {# On parcourt chaque catégorie pour afficher ses infos #}
+                                    {% for category, count in categoryDistribution %}
+                                        <div class="category-item d-flex align-items-center mb-3 p-2 rounded" 
+                                             {# Couleur de fond légèrement teintée selon la catégorie #}
+                                             style="background-color: {{ categoryColors[category] }}20;">
+                                            {# Badge coloré correspondant à la couleur du segment du graphique #}
+                                            <span class="badge me-3" style="background-color: {{ categoryColors[category] }}; width: 20px; height: 20px;"></span>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    {# Nom de la catégorie #}
+                                                    <span class="category-name">{{ category }}</span>
+                                                    {# Nombre de ressources dans cette catégorie #}
+                                                    <span class="category-count">{{ count }}</span>
+                                                </div>
+                                                {# Barre de progression représentant la proportion de cette catégorie #}
+                                                <div class="progress mt-1" style="height: 5px;">
+                                                    <div class="progress-bar" role="progressbar" 
+                                                         style="width: {{ (count / evaluations|length * 100)|round }}%; background-color: {{ categoryColors[category] }}"
+                                                         aria-valuenow="{{ (count / evaluations|length * 100)|round }}" 
+                                                         aria-valuemin="0" 
+                                                         aria-valuemax="100">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Fin de la légende -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .card-header {
+        border-bottom: none;
+        padding: 1rem 1.25rem;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+    }
+
+    .table tbody tr {
+        transition: all 0.2s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .badge {
+        padding: 0.5em 0.8em;
+        font-weight: 500;
+    }
+
+    .btn-group {
+        box-shadow: none;
+    }
+
+    .btn-outline-info, .btn-outline-warning {
+        border-width: 1px;
+    }
+
+    .btn-outline-info:hover {
+        background-color: #17a2b8;
+        border-color: #17a2b8;
+    }
+
+    .btn-outline-warning:hover {
+        background-color: #ffc107;
+        border-color: #ffc107;
+    }
+
+    /* Chart Styles */
+    .chart-container {
+        padding: 1rem 0;
+    }
+
+    .chart-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .chart-label {
+        font-weight: 500;
+        white-space: nowrap;
+    }
+
+    .chart-bar-container {
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        height: 30px;
+        overflow: hidden;
+    }
+
+    .chart-bar {
+        height: 100%;
+        border-radius: 4px;
+        transition: all 0.6s ease;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 0 1rem;
+    }
+
+    .chart-bar.bg-success {
+        background-color: #28a745;
+    }
+
+    .chart-bar.bg-info {
+        background-color: #17a2b8;
+    }
+
+    .chart-bar.bg-warning {
+        background-color: #ffc107;
+    }
+
+    .chart-bar.bg-danger {
+        background-color: #dc3545;
+    }
+
+    .chart-value {
+        color: white;
+        font-weight: 500;
+        font-size: 0.875rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* Make warning text darker for better readability */
+    .bg-warning .chart-value {
+        color: #212529;
+    }
+
+    @media (max-width: 767px) {
+        .card-header {
+            padding: 0.75rem 1rem;
+        }
+
+        .table th, .table td {
+            padding: 0.75rem;
+        }
+
+        .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+        }
+
+        .chart-label {
+            width: 120px !important;
+        }
+    }
+
+    /* New Styles for Enhanced Statistics */
+    .stats-card {
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    .stats-card.animate {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .chart-bar {
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 1s ease-out, background-color 0.3s ease;
+    }
+
+    .chart-bar.animate {
+        transform: scaleX(1);
+    }
+
+    .chart-row {
+        opacity: 0;
+        transform: translateX(-20px);
+        transition: all 0.5s ease;
+    }
+
+    .chart-row.animate {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .performance-category {
+        opacity: 0;
+        transform: scale(0.8);
+        transition: all 0.4s ease;
+    }
+
+    .performance-category.animate {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Staggered animation delays for chart rows */
+    .chart-row:nth-child(1) { transition-delay: 0.1s; }
+    .chart-row:nth-child(2) { transition-delay: 0.2s; }
+    .chart-row:nth-child(3) { transition-delay: 0.3s; }
+    .chart-row:nth-child(4) { transition-delay: 0.4s; }
+    .chart-row:nth-child(5) { transition-delay: 0.5s; }
+
+    /* Staggered animation delays for performance categories */
+    .performance-category:nth-child(1) { transition-delay: 0.2s; }
+    .performance-category:nth-child(2) { transition-delay: 0.3s; }
+    .performance-category:nth-child(3) { transition-delay: 0.4s; }
+    .performance-category:nth-child(4) { transition-delay: 0.5s; }
+
+    /* Hover effects */
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    .chart-bar:hover {
+        filter: brightness(1.1);
+    }
+
+    .performance-category:hover {
+        transform: scale(1.05);
+    }
+
+    .trend-indicator {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2rem;
+    }
+
+    .chart-bar {
+        position: relative;
+        overflow: visible;
+    }
+
+    .chart-bar:hover {
+        filter: brightness(1.1);
+    }
+
+    /* Tooltip customization */
+    .tooltip {
+        font-size: 0.875rem;
+    }
+
+    .tooltip-inner {
+        max-width: 200px;
+        padding: 0.5rem;
+        text-align: left;
+        white-space: pre-line;
+    }
+
+    /* Category Distribution Chart Styles */
+    .category-legend {
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+
+    .category-item {
+        transition: transform 0.2s ease;
+    }
+
+    .category-item:hover {
+        transform: translateX(5px);
+    }
+
+    .category-name {
+        font-weight: 500;
+        color: #2c3e50;
+    }
+
+    .category-count {
+        font-weight: 600;
+        color: #2c3e50;
+        background-color: rgba(255, 255, 255, 0.8);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+    }
+
+    .progress {
+        background-color: rgba(0, 0, 0, 0.05);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        transition: width 0.6s ease;
+    }
+
+    @media (max-width: 767px) {
+        .chart-container {
+            height: 300px !important;
+        }
+        
+        .category-legend {
+            margin-top: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{# On charge la bibliothèque Chart.js depuis un CDN #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to check if element is in viewport
+    function isInViewport(element) {
+        const rect = element.getBoundingClientRect();
+        return (
+            rect.top >= 0 &&
+            rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+        );
+    }
+
+    // Function to animate elements when they come into view
+    function animateOnScroll() {
+        const statsCards = document.querySelectorAll('.stats-card');
+        const chartRows = document.querySelectorAll('.chart-row');
+        const chartBars = document.querySelectorAll('.chart-bar');
+        const performanceCategories = document.querySelectorAll('.performance-category');
+
+        statsCards.forEach(card => {
+            if (isInViewport(card)) {
+                card.classList.add('animate');
+            }
+        });
+
+        chartRows.forEach(row => {
+            if (isInViewport(row)) {
+                row.classList.add('animate');
+            }
+        });
+
+        chartBars.forEach(bar => {
+            if (isInViewport(bar)) {
+                bar.classList.add('animate');
+            }
+        });
+
+        performanceCategories.forEach(category => {
+            if (isInViewport(category)) {
+                category.classList.add('animate');
+            }
+        });
+    }
+
+    // Initial animation check
+    animateOnScroll();
+
+    // Add scroll event listener
+    window.addEventListener('scroll', animateOnScroll);
+
+    // Add resize event listener to handle window resizing
+    window.addEventListener('resize', animateOnScroll);
+});
+</script> 
+
+{% endblock %}

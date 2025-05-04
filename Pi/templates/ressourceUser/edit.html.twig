@@ -1,0 +1,132 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}Edit Ressources{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center">
+    <div>
+      <h1>Edit Ressources</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('app_user_ressources_index') }}">Ressources</a></li>
+          <li class="breadcrumb-item active">Edit</li>
+        </ol>
+      </nav>
+    </div>
+    <a href="{{ path('app_user_ressources_index') }}" class="btn btn-secondary">
+      <i class="bi bi-arrow-left"></i> Back to List
+    </a>
+  </div>
+
+  <section class="section">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8">
+        <!-- Flash Messages -->
+        {% for message in app.flashes('success') %}
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle me-1"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+
+        {% for message in app.flashes('error') %}
+          <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-octagon me-1"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+
+        <!-- Edit Ressource Form Card -->
+        <div class="card shadow-lg mb-4 rounded-3 hover-card">
+          <div class="card-body">
+            <h5 class="card-title mb-4"><i class="bi bi-pencil-square"></i> Edit Ressource</h5>
+
+            <!-- Form Start -->
+            {{ form_start(form) }}
+              <!-- Titre Field -->
+              <div class="mb-3">
+                {{ form_label(form.titre, 'Title', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.titre, {'attr': {'class': 'text-danger'}}) }}
+              </div>
+
+              <!-- Type Field -->
+              <div class="mb-3">
+                {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.type, {'attr': {'class': 'text-danger'}}) }}
+              </div>
+
+              <!-- Description Field -->
+              <div class="mb-3">
+                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                {{ form_errors(form.description, {'attr': {'class': 'text-danger'}}) }}
+              </div>
+
+              <!-- Lien Field -->
+              <div class="mb-3">
+                {{ form_label(form.lien, 'Link', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                {{ form_widget(form.lien, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.lien, {'attr': {'class': 'text-danger'}}) }}
+              </div>
+
+              <!-- Submit Button -->
+              <div class="d-flex justify-content-between mt-4">
+                <a href="{{ path('app_user_ressources_index') }}" class="btn btn-outline-secondary">
+                  <i class="bi bi-x-circle me-1"></i> Cancel
+                </a>
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-check-circle me-1"></i> Save Changes
+                </button>
+              </div>
+            {{ form_end(form) }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+  .hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-label {
+    color: #6C63FF;
+  }
+  
+  .form-control:focus, .form-select:focus {
+    border-color: #6C63FF;
+    box-shadow: 0 0 0 0.25rem rgba(108, 99, 255, 0.25);
+  }
+  
+  .btn-primary {
+    background-color: #6C63FF;
+    border-color: #6C63FF;
+  }
+  
+  .btn-primary:hover {
+    background-color: #5a52d5;
+    border-color: #5a52d5;
+  }
+  
+  .btn-outline-secondary:hover {
+    background-color: #6C63FF;
+    border-color: #6C63FF;
+    color: white;
+  }
+</style>
+{% endblock %} 

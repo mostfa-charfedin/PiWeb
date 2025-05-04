@@ -42,11 +42,12 @@
                   <td>{{ projet.description|length > 50 ? projet.description|slice(0, 50) ~ '...' : projet.description }}</td>
                   <td>{{ projet.iduser.nom }} {{ projet.iduser.prenom }}</td>
                   
-                  <td>
-                    <a href="{{ path('projet_show', {'idProjet': projet.idProjet}) }}" class="btn btn-sm btn-primary">
-                      <i class="bi bi-eye"></i> View
-                    </a>
-                  </td>
+               <td>
+  <a href="{{ path('user_projet_tasks', {'idProjet': projet.idProjet}) }}" class="btn btn-sm btn-primary">
+    <i class="bi bi-eye"></i> View Tasks
+  </a>
+</td>
+
                 </tr>
                 {% else %}
                 <tr>

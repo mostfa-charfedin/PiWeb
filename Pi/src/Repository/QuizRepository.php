@@ -16,5 +16,18 @@ class QuizRepository extends ServiceEntityRepository
         parent::__construct($registry, Quiz::class);
     }
 
-    // Add your custom repository methods here
+    /**
+     * @param string|null $search Quiz title or quizzer name
+     * @return Quiz[]
+     */
+    public function searchByTitle(string $title): array
+    {
+        return $this->createQueryBuilder('q')
+            ->andWhere('q.nom LIKE :title')
+            ->setParameter('title', '%' . $title . '%')
+            ->orderBy('q.datecreation', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+    
 } 

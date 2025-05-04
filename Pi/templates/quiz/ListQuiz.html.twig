@@ -1,4 +1,3 @@
-{# templates/quiz/ListQuiz.html.twig #}
 {% extends 'sideBar.html.twig' %}
 
 {% block title %}Quiz List{% endblock %}
@@ -19,6 +18,7 @@
       <i class="bi bi-plus-circle"></i> Create New Quiz
     </a>
   </div>
+  
 
   <section class="section">
     <div class="row">
@@ -27,8 +27,15 @@
           <div class="card-body">
             <h5 class="card-title">All Quizzes</h5>
 
+            <!-- Search Bar -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <input type="text" id="quizSearchInput" class="form-control" placeholder="Search quizzes by title...">
+              </div>
+            </div>
+
             <div class="table-responsive">
-              <table class="table table-striped align-middle">
+              <table class="table table-striped align-middle" id="quizTable">
                 <thead>
                   <tr>
                     <th scope="col">#</th>
@@ -37,7 +44,7 @@
                     <th scope="col" class="text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="quizTableBody">
                   {% for quiz in quizzes %}
                     <tr>
                       <th scope="row">{{ loop.index }}</th>
@@ -50,12 +57,30 @@
                         <a href="{{ path('quiz_edit', {'id': quiz.idquiz}) }}" class="btn btn-sm btn-warning me-1" title="Edit">
                           <i class="bi bi-pencil-square"></i>
                         </a>
+
+                        {# Toggle Hide/Unhide #}
+                        {% if quiz.idquiz in hiddenIds %}
+                          <form method="post" action="{{ path('quiz_unhide', {'id': quiz.idquiz}) }}" class="d-inline">
+                            <button class="btn btn-sm btn-success me-1" title="Unhide"><i class="bi bi-file-lock"></i></button>
+                          </form>
+                        {% else %}
+                          <form method="post" action="{{ path('quiz_hide', {'id': quiz.idquiz}) }}" class="d-inline">
+                            <button class="btn btn-sm btn-secondary me-1" title="Hide"> <i class="bi bi-file-lock"></i></button>
+                          </form>
+                        {% endif %}
+
                         <form method="post" action="{{ path('quiz_delete', {'id': quiz.idquiz}) }}" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this quiz?');">
                           <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ quiz.idquiz) }}">
                           <button class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                         </form>
+
+                        {# Button to View Stats #}
+                        <a href="{{ path('admin_quiz_stats', { id: quiz.idquiz }) }}" class="btn btn-sm btn-info me-1" title="View Stats">
+                          <i class="bi bi-bar-chart"></i> Stats
+                        </a>
                       </td>
                     </tr>
+                    
                   {% else %}
                     <tr>
                       <td colspan="4" class="text-center text-muted">No quizzes found.</td>
@@ -71,4 +96,42 @@
     </div>
   </section>
 </main>
+
+<script>
+  document.getElementById('quizSearchInput').addEventListener('input', function () {
+    const searchTerm = this.value;
+    fetch(`{{ path('quiz_search') }}?search=${encodeURIComponent(searchTerm)}`)
+      .then(response => response.json())
+      .then(data => {
+        const tableBody = document.getElementById('quizTableBody');
+        tableBody.innerHTML = '';
+
+        if (data.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No quizzes found.</td></tr>`;
+          return;
+        }
+
+        data.forEach((quiz, index) => {
+          tableBody.innerHTML += `
+            <tr>
+              <th scope="row">${index + 1}</th>
+              <td>${quiz.nom}</td>
+              <td>${quiz.datecreation}</td>
+              <td class="text-center">
+                <a href="/quiz/${quiz.idquiz}" class="btn btn-sm btn-primary me-1" title="View"><i class="bi bi-eye"></i></a>
+                <a href="/quiz/${quiz.idquiz}/edit" class="btn btn-sm btn-warning me-1" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                <form method="post" action="/quiz/${quiz.idquiz}/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this quiz?');">
+                  <input type="hidden" name="_token" value="${quiz.csrf_token}">
+                  <button class="btn btn-sm btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
+                </form>
+                <a href="/admin/quiz/${quiz.idquiz}/stats" class="btn btn-sm btn-info me-1" title="View Stats">
+                  <i class="bi bi-bar-chart"></i> Stats
+                </a>
+              </td>
+            </tr>
+          `;
+        });
+      });
+  });
+</script>
 {% endblock %}

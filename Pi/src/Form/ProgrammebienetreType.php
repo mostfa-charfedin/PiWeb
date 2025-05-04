@@ -116,7 +116,7 @@ class ProgrammebienetreType extends AbstractType
                 ],
                 'constraints' => [
                     new Assert\NotBlank([
-                        'message' => 'Veuillez sélectionner une date et une heure pour le programme!'
+                        'message' => 'Select program Date!'
                     ]),
                     new Assert\GreaterThanOrEqual([
                         'value' => 'now',

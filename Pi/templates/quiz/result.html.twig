@@ -1,0 +1,127 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}Quiz Result{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <style>
+    .result-container {
+      max-width: 900px;
+      margin: auto;
+    }
+
+    .result-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .question-block {
+      margin-bottom: 2rem;
+    }
+
+    .correct {
+      background-color: #d4edda;
+      border-left: 5px solid #28a745;
+    }
+
+    .incorrect {
+      background-color: #f8d7da;
+      border-left: 5px solid #dc3545;
+    }
+
+    .neutral {
+      background-color: #f0f0f0;
+      border-left: 5px solid #ccc;
+    }
+
+    .user-score {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #2c3e50;
+    }
+
+    .answer-label {
+      font-weight: 500;
+    }
+
+    .return-home-btn {
+      margin-top: 1.5rem;
+      padding: 10px 30px;
+      font-size: 1rem;
+      border-radius: 30px;
+    }
+
+    .download-pdf-btn {
+      margin-top: 1rem;
+      padding: 10px 30px;
+      font-size: 1rem;
+      border-radius: 30px;
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+    }
+  </style>
+{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle">
+    <h1>{{ quiz.nom }} - Results</h1>
+    <nav>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Home</a></li>
+        <li class="breadcrumb-item active">Results</li>
+      </ol>
+    </nav>
+  </div>
+
+  <section class="section result-container">
+    <div class="result-header">
+      <p class="user-score">Your score: {{ score }}/{{ total }}</p>
+
+      <!-- Button to download the PDF -->
+      <a href="{{ path('quiz_download_certificate', {id: quiz.idquiz}) }}" class="btn btn-success mt-3">
+  📄 Download Certificate (PDF)
+</a>
+
+      <a href="{{ path('app_home') }}" class="btn btn-outline-primary return-home-btn">
+        ⬅ Return to Home
+      </a>
+    </div>
+
+    {% if questions is defined %}
+      {% for question in questions %}
+        <div class="card question-block shadow-sm">
+          <div class="card-body">
+            <h5 class="question-title mb-3">{{ loop.index }}. {{ question.question }}</h5>
+            {% for reponse in question.reponses %}
+              {% set isCorrect = reponse.status == 'correct' %}
+              {% set isSelected = selectedAnswersMap[question.idQuestion] is defined and selectedAnswersMap[question.idQuestion] == reponse.idReponse %}
+              <div class="p-2 mb-2 
+                {% if isCorrect %}
+                  correct
+                {% elseif isSelected %}
+                  incorrect
+                {% else %}
+                  neutral
+                {% endif %}
+              ">
+                <span class="answer-label">{{ reponse.response }}</span>
+                {% if isCorrect %}
+                  <span class="text-success ms-2">✔ Correct</span>
+                {% elseif isSelected %}
+                  <span class="text-danger ms-2">✘ Your Answer</span>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="alert alert-warning text-center">
+        No question data available to display the result.
+      </div>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}

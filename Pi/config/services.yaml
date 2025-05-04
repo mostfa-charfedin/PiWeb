@@ -18,7 +18,6 @@ services:
         resource: '../src/'
         exclude:
             - '../src/DependencyInjection/'
-            - '../src/Entity/'
             - '../src/Kernel.php'
 
     App\Service\GeminiService:
@@ -33,4 +32,11 @@ services:
 
             
     # add more service definitions when explicit configuration is needed
+ 
+
     # please note that last definitions always *replace* previous ones
+    App\Service\TranslatorService:
+        arguments:
+            $googleApiKeyPath: '%kernel.project_dir%/config/keys/google-translate-key.json'
+   
+    

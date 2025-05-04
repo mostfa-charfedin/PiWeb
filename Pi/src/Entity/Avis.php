@@ -37,10 +37,12 @@ class Avis
     private $commentaire = 'NULL';
 
     /**
-     * @var Programmebienetre|null
+     * @var Programmebienetre
      * 
-     * @ORM\ManyToOne(targetEntity="App\Entity\Programmebienetre")
-     * @ORM\JoinColumn(name="idProgramme", referencedColumnName="idProgramme", nullable=false)
+     * @ORM\ManyToOne(targetEntity="App\Entity\Programmebienetre", fetch="EAGER")
+     * @ORM\JoinColumns({
+     *   @ORM\JoinColumn(name="idProgramme", referencedColumnName="idProgramme", onDelete="CASCADE", nullable=true)
+     * })
      */
     private $programme;
 

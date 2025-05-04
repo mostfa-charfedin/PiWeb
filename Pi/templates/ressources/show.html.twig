@@ -1,0 +1,665 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block title %}Ressource Details{% endblock %}
+
+{% block content %}
+<main id="main" class="main">
+  <div class="pagetitle d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1>Ressource Details</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="#">Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('app_ressources_index') }}">Ressources</a></li>
+          <li class="breadcrumb-item active">Details</li>
+        </ol>
+      </nav>
+    </div>
+    <a href="{{ path('app_ressources_index') }}" class="btn btn-outline-primary rounded-pill px-4 back-btn">
+      <i class="bi bi-arrow-left me-2"></i> Back to List
+    </a>
+  </div>
+
+  <section class="section">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card evaluation-card">
+          <!-- Resource Title Header -->
+          <div class="card-header text-center py-4">
+            <div class="resource-icon mb-3">
+              <i class="bi bi-journal-text"></i>
+            </div>
+            <h4 class="card-title mb-0">{{ ressource.titre }}</h4>
+          </div>
+
+          <div class="card-body">
+            <!-- Rating Section -->
+            <div class="rating-section text-center">
+              <div class="rating-circle {% if ressource.noteaverage >= 7 %}rating-high{% elseif ressource.noteaverage >= 4 %}rating-medium{% else %}rating-low{% endif %}">
+                <div class="rating-inner">
+                  <span class="rating-number">{{ ressource.noteaverage }}</span>
+                  <span class="rating-max">/10</span>
+                </div>
+              </div>
+              <div class="rating-label mt-3">
+                {% if ressource.noteaverage >= 7 %}
+                  <span class="performance-badge success">
+                    <i class="bi bi-star-fill me-2"></i>Excellent Resource
+                  </span>
+                {% elseif ressource.noteaverage >= 4 %}
+                  <span class="performance-badge warning">
+                    <i class="bi bi-star-half me-2"></i>Average Resource
+                  </span>
+                {% else %}
+                  <span class="performance-badge danger">
+                    <i class="bi bi-star me-2"></i>Needs Improvement
+                  </span>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- Type Section -->
+            <div class="date-section text-center mt-4">
+              <div class="date-icon">
+                <i class="bi bi-tag-fill"></i>
+              </div>
+              <div class="date-content">
+                <div class="date-label">Resource Type</div>
+                <div class="date-value">
+                  {{ ressource.type }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Description Section -->
+            <div class="date-section text-center mt-4">
+              <div class="date-icon">
+                <i class="bi bi-card-text"></i>
+              </div>
+              <div class="date-content">
+                <div class="date-label">Description</div>
+                <div class="date-value">
+                  {{ ressource.description }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Link Section -->
+            <div class="date-section text-center mt-4">
+              <div class="date-icon">
+                <i class="bi bi-link-45deg"></i>
+              </div>
+              <div class="date-content">
+                <div class="date-label">Resource Link</div>
+                <div class="date-value">
+                  {% if ressource.lien %}
+                    <a href="{{ ressource.lien }}" target="_blank" class="text-decoration-none resource-link">
+                      {{ ressource.lien }}
+                    </a>
+                  {% else %}
+                    <span class="text-muted">No link provided</span>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-end gap-3 action-buttons">
+          <button type="button" class="btn btn-success btn-lg rounded-circle shadow-sm translate-btn" data-bs-toggle="modal" data-bs-target="#translateModal">
+            <i class="bi bi-translate"></i>
+          </button>
+          <button type="button" class="btn btn-info btn-lg rounded-circle shadow-sm qr-btn" data-bs-toggle="modal" data-bs-target="#qrCodeModal">
+            <i class="bi bi-qr-code"></i>
+          </button>
+          <a href="{{ path('app_ressources_export_pdf', {'idresource': ressource.idresource}) }}" class="btn btn-primary btn-lg rounded-circle shadow-sm pdf-btn">
+            <i class="bi bi-file-earmark-pdf"></i>
+          </a>
+          <a href="{{ path('app_ressources_edit', {'idresource': ressource.idresource}) }}" class="btn btn-warning btn-lg rounded-circle shadow-sm edit-btn">
+            <i class="bi bi-pencil"></i>
+          </a>
+          {{ include('ressources/_delete_form.html.twig') }}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Translation Modal -->
+  <div class="modal fade" id="translateModal" tabindex="-1" aria-labelledby="translateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="translateModalLabel">Translate Resource</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="sourceLanguage" class="form-label">Source Language</label>
+              <select class="form-select" id="sourceLanguage">
+                <option value="auto">Auto Detect</option>
+                <option value="en">English</option>
+                <option value="fr">French</option>
+                <option value="es">Spanish</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="targetLanguage" class="form-label">Target Language</label>
+              <select class="form-select" id="targetLanguage">
+                <option value="en">English</option>
+                <option value="fr">French</option>
+                <option value="es">Spanish</option>
+                <option value="de">German</option>
+                <option value="it">Italian</option>
+                <option value="ar">Arabic</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="translation-content">
+            <div class="original-text mb-3">
+              <h6>Original Text</h6>
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">{{ ressource.titre }}</h5>
+                  <p class="card-text">{{ ressource.description }}</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="translated-text">
+              <h6>Translated Text</h6>
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title" id="translatedTitle"></h5>
+                  <p class="card-text" id="translatedDescription"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="translateBtn">Translate</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR Code Modal -->
+  <div class="modal fade" id="qrCodeModal" tabindex="-1" aria-labelledby="qrCodeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="qrCodeModalLabel">Resource QR Code</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <div class="qr-code-container">
+            <img src="{{ qr_code_data_uri(resource_data) }}" alt="Resource QR Code" class="img-fluid">
+          </div>
+          <p class="mt-3 text-muted">Scan this QR code to access this resource</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <a href="{{ qr_code_data_uri(resource_data) }}" download="resource-{{ ressource.idresource }}-qr.png" class="btn btn-primary">
+            <i class="bi bi-download me-2"></i>Download QR Code
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}
+
+{% block stylesheets %}
+<style>
+  .evaluation-card {
+    border: none;
+    border-radius: 1.5rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .evaluation-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  }
+
+  .card-header {
+    background: linear-gradient(135deg, #6C63FF 0%, #3F3D56 100%);
+    border: none;
+    position: relative;
+    overflow: hidden;
+    padding: 3rem 1rem;
+  }
+
+  .card-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    z-index: 0;
+  }
+
+  .resource-icon {
+    font-size: 3.5rem;
+    position: relative;
+    z-index: 1;
+    margin-bottom: 1.5rem;
+  }
+
+  .resource-icon i {
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  .card-title {
+    color: white;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    font-size: 1.8rem;
+  }
+
+  .rating-section {
+    padding: 3rem 0;
+    position: relative;
+  }
+
+  .rating-circle {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .rating-circle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(45deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.2));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  .rating-high {
+    background: linear-gradient(45deg, #00E676, #00C853);
+  }
+
+  .rating-medium {
+    background: linear-gradient(45deg, #FFD600, #FFAB00);
+  }
+
+  .rating-low {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+  }
+
+  .rating-inner {
+    background: rgba(255, 255, 255, 0.15);
+    width: 90%;
+    height: 90%;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(5px);
+  }
+
+  .rating-number {
+    font-size: 4.5rem;
+    font-weight: 800;
+    line-height: 1;
+    color: white;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .rating-max {
+    font-size: 1.8rem;
+    opacity: 0.9;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  .performance-badge {
+    display: inline-block;
+    padding: 0.8rem 2rem;
+    border-radius: 2rem;
+    font-weight: 600;
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .performance-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .performance-badge.success {
+    background: linear-gradient(45deg, #00E676, #00C853);
+    color: white;
+  }
+
+  .performance-badge.warning {
+    background: linear-gradient(45deg, #FFD600, #FFAB00);
+    color: white;
+  }
+
+  .performance-badge.danger {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+    color: white;
+  }
+
+  .date-section {
+    padding: 2.5rem;
+    background: linear-gradient(135deg, rgba(108, 99, 255, 0.1) 0%, rgba(63, 61, 86, 0.1) 100%);
+    backdrop-filter: blur(10px);
+    border-radius: 1.5rem;
+    margin-top: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  }
+
+  .date-icon {
+    font-size: 3rem;
+    color: #6C63FF;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .date-label {
+    font-size: 1rem;
+    color: #6C63FF;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .date-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+  }
+
+  .back-btn {
+    background: linear-gradient(45deg, #6C63FF, #3F3D56);
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+  }
+
+  .back-btn:hover {
+    background: linear-gradient(45deg, #3F3D56, #6C63FF);
+    color: white;
+    transform: translateX(-5px);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+  }
+
+  .resource-link-btn {
+    background: linear-gradient(45deg, #6C63FF, #3F3D56);
+    border: none;
+    color: white;
+    padding: 1.2rem;
+    font-weight: 500;
+    border-radius: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+  }
+
+  .resource-link-btn:hover {
+    background: linear-gradient(45deg, #3F3D56, #6C63FF);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(108, 99, 255, 0.4);
+  }
+
+  .edit-btn {
+    background: linear-gradient(45deg, #FFD600, #FFAB00);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(255, 214, 0, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .edit-btn:hover {
+    background: linear-gradient(45deg, #FFAB00, #FFD600);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(255, 214, 0, 0.4);
+  }
+
+  .action-buttons {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 10;
+  }
+
+  .pdf-btn {
+    background: linear-gradient(45deg, #FF5252, #D50000);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(255, 82, 82, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .pdf-btn:hover {
+    background: linear-gradient(45deg, #D50000, #FF5252);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(255, 82, 82, 0.4);
+    color: white;
+  }
+
+  .qr-btn {
+    background: linear-gradient(45deg, #2196F3, #1976D2);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .qr-btn:hover {
+    background: linear-gradient(45deg, #1976D2, #2196F3);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+    color: white;
+  }
+
+  .qr-code-container {
+    padding: 1rem;
+    background: white;
+    border-radius: 0.5rem;
+    display: inline-block;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-content {
+    border-radius: 1rem;
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-header {
+    border-bottom: none;
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    border-top: none;
+    padding: 1.5rem;
+  }
+
+  .translate-btn {
+    background: linear-gradient(45deg, #4CAF50, #2E7D32);
+    color: white;
+    border: none;
+    padding: 1.2rem;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .translate-btn:hover {
+    background: linear-gradient(45deg, #2E7D32, #4CAF50);
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+    color: white;
+  }
+
+  .translation-content .card {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .translation-content h6 {
+    color: #6C63FF;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  @media (max-width: 767px) {
+    .rating-circle {
+      width: 160px;
+      height: 160px;
+    }
+
+    .rating-number {
+      font-size: 3.5rem;
+    }
+
+    .rating-max {
+      font-size: 1.5rem;
+    }
+
+    .date-section {
+      padding: 2rem;
+    }
+
+    .date-value {
+      font-size: 1.4rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const translateBtn = document.getElementById('translateBtn');
+    const sourceLanguage = document.getElementById('sourceLanguage');
+    const targetLanguage = document.getElementById('targetLanguage');
+    const translatedTitle = document.getElementById('translatedTitle');
+    const translatedDescription = document.getElementById('translatedDescription');
+
+    translateBtn.addEventListener('click', async function() {
+        // Show loading state
+        translateBtn.disabled = true;
+        translateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Translating...';
+
+        const title = '{{ ressource.titre|escape('js') }}';
+        const description = '{{ ressource.description|escape('js') }}';
+        
+        try {
+            console.log('Starting translation...');
+            console.log('Source language:', sourceLanguage.value);
+            console.log('Target language:', targetLanguage.value);
+            
+            // Translate title
+            console.log('Translating title:', title);
+            const titleResponse = await fetch('/api/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: title,
+                    target: targetLanguage.value,
+                    source: sourceLanguage.value === 'auto' ? null : sourceLanguage.value
+                })
+            });
+            
+            if (!titleResponse.ok) {
+                throw new Error(`Title translation failed: ${titleResponse.status} ${titleResponse.statusText}`);
+            }
+            
+            const titleData = await titleResponse.json();
+            console.log('Title translation result:', titleData);
+            translatedTitle.textContent = titleData.translation;
+
+            // Translate description
+            console.log('Translating description:', description);
+            const descResponse = await fetch('/api/translate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: description,
+                    target: targetLanguage.value,
+                    source: sourceLanguage.value === 'auto' ? null : sourceLanguage.value
+                })
+            });
+            
+            if (!descResponse.ok) {
+                throw new Error(`Description translation failed: ${descResponse.status} ${descResponse.statusText}`);
+            }
+            
+            const descData = await descResponse.json();
+            console.log('Description translation result:', descData);
+            translatedDescription.textContent = descData.translation;
+
+        } catch (error) {
+            console.error('Translation error:', error);
+            alert('Translation error: ' + error.message);
+        } finally {
+            // Reset button state
+            translateBtn.disabled = false;
+            translateBtn.innerHTML = 'Translate';
+        }
+    });
+
+    // Add event listener to show/hide source language based on auto-detect
+    sourceLanguage.addEventListener('change', function() {
+        const targetSelect = document.getElementById('targetLanguage');
+        if (this.value === 'auto') {
+            targetSelect.disabled = false;
+        } else {
+            // Disable target language if it matches source
+            Array.from(targetSelect.options).forEach(option => {
+                option.disabled = option.value === this.value;
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

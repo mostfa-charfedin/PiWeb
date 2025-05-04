@@ -4,6 +4,8 @@
 
 .env
 
+
+.env
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
@@ -15,3 +17,7 @@
 ###> symfony/phpunit-bridge ###
 
 ###< symfony/phpunit-bridge ###
+/node_modules/
+/public/build/
+npm-debug.log
+yarn-error.log

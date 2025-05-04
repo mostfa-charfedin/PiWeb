@@ -35,6 +35,18 @@ class QuestionController extends AbstractController
             throw $this->createNotFoundException('Quiz not found');
         }
 
+        // Count existing questions
+        $existingQuestions = $em->getRepository(Question::class)->findBy(['quiz' => $quiz]);
+        $questionCount = count($existingQuestions);
+        $remaining = max(0, 5 - $questionCount); // Max 5 questions for the quiz
+
+        // Display message if there are remaining questions to be added
+        if ($remaining > 0) {
+            $this->addFlash('info', "You’ve added $questionCount question(s). You still need to add $remaining more question(s) to complete the quiz.");
+        } else {
+            $this->addFlash('success', "All 5 questions have been added. The quiz is now complete!");
+        }
+
         $question = new Question();
         $question->setQuiz($quiz);
 
@@ -57,7 +69,8 @@ class QuestionController extends AbstractController
             'form' => $form->createView(),
             'user' => $user,
             'quiz' => $quiz,
-            'question' => $question, // ✅ Fix added here
+            'question' => $question,
+            'remainingQuestions' => $remaining, // Pass remaining questions to the view
         ]);
     }
 
@@ -142,7 +155,7 @@ class QuestionController extends AbstractController
             throw $this->createNotFoundException('Question not found');
         }
 
-        return $this->render('quiz/question_show.html.twig', [
+        return $this->render('quiz/QuizShow.html.twig', [
             'question' => $question,
             'reponses' => $question->getReponses(),
             'user' => $user,

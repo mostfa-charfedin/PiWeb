@@ -120,7 +120,27 @@
         <span>View Reviews</span>
       </a>
     </li>
+        <li>
+      <a class="nav-link collapsed" href="{{ path('app_avis_stats') }}">
+        <i class="bi bi-star"></i>
+        <span>View Stats</span>
+      </a>
+   
+    </li>
     </ul>
+    <!-- Resources Section -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="{{ path('app_ressources_index') }}">
+          <i class="bi bi-file-earmark-text"></i><span>Resources</span>
+        </a>
+    </li>
+    <!-- Evaluation Section -->
+    <li class="nav-item">
+        <a class="nav-link" href="{{ path('app_evaluation_index') }}">
+            <i class="bi bi-clipboard-check"></i>
+            <span>Evaluation</span>
+        </a>
+    </li>
     <!-- ✅ Quizzes moved up with updated icon -->
       <li class="nav-item">
         <a class="nav-link" href="{{ path('app_home') }}">
@@ -133,6 +153,7 @@
             <i class="bi bi-question-circle"></i>
           <span>Scores list</span>
         </a>
+      </li>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ path('profile') }}">
@@ -165,7 +186,7 @@
   <a  class="back-to-top d-flex align-items-center justify-content-center">
     <i class="bi bi-arrow-up-short"></i>
   </a>
-
+{% block javascripts %}
  <!-- Vendor JS Files -->
   <script src="{{ asset('assets/vendor/apexcharts/apexcharts.min.js') }}"></script>
   <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -191,8 +212,8 @@
   });
 </script>
 
+{% endblock %}
 
-</body>
         
 
 </html>
