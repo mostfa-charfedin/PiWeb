@@ -1,10 +1,7 @@
 {% extends 'sideBar.html.twig' %}
 
 {% block content %}
-<div class="pagetitle">
-    <h1>Resource Performance Overview</h1>
-</div>
-
+<main id="main" class="main">
 {% for message in app.flashes('success') %}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         <i class="bi bi-check-circle me-2"></i>
@@ -324,7 +321,7 @@
         </div>
     </div>
 </section>
-
+</main>
 {% endblock %}
 
 {% block stylesheets %}
@@ -668,5 +665,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add resize event listener to handle window resizing
     window.addEventListener('resize', animateOnScroll);
 });
-</script>
+</script> 
+
 {% endblock %}

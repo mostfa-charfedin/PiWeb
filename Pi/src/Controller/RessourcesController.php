@@ -197,7 +197,7 @@ class RessourcesController extends AbstractController
         }
 
         // Return the filtered results to the user-specific view
-        return $this->render('user/ressources/index.html.twig', [
+        return $this->render('ressourceUser/index.html.twig', [
             'ressources' => $ressources,
             'user' => $user,
             'pagination' => [
@@ -283,7 +283,7 @@ class RessourcesController extends AbstractController
             }
         }
 
-        return $this->render('user/ressources/new.html.twig', [
+        return $this->render('ressourceUser/new.html.twig', [
             'form' => $form->createView(),
             'user' => $user
         ]);
@@ -345,7 +345,7 @@ class RessourcesController extends AbstractController
             'url' => $this->generateUrl('app_user_ressources_show', ['idresource' => $ressource->getIdresource()], UrlGeneratorInterface::ABSOLUTE_URL)
         ];
 
-        return $this->render('user/ressources/show.html.twig', [
+        return $this->render('ressourceUser/show.html.twig', [
             'ressource' => $ressource,
             'user' => $user,
             'resource_data' => json_encode($resourceData)
@@ -573,7 +573,7 @@ class RessourcesController extends AbstractController
             $dompdf->set_option('isRemoteEnabled', true);
 
             // Generate the HTML for the PDF
-            $html = $this->renderView('user/ressources/pdf_template.html.twig', [
+            $html = $this->renderView('ressourceUser/pdf_template.html.twig', [
                 'ressource' => $ressource,
             ]);
 
