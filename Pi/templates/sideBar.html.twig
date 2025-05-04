@@ -120,13 +120,21 @@
         <span>View Reviews</span>
       </a>
     </li>
+        <li>
+      <a class="nav-link collapsed" href="{{ path('app_avis_stats') }}">
+        <i class="bi bi-star"></i>
+        <span>View Stats</span>
+      </a>
+   
+    </li>
     </ul>
     <!-- ✅ Quizzes moved up with updated icon -->
-      <li class="nav-item">
+     <!-- <li class="nav-item">
         <a class="nav-link" href="{{ path('app_home') }}">
             <i class="bi bi-question-circle"></i>
           <span>Quizzes</span>
         </a>
+<<<<<<< HEAD
       </li>
        <li class="nav-item">
         <a class="nav-link" href="{{ path('app_score') }}">
@@ -134,6 +142,9 @@
           <span>Scores list</span>
         </a>
       </li>
+=======
+      </li>-->
+>>>>>>> origin/ProgrammeBienetre
       <li class="nav-item">
         <a class="nav-link" href="{{ path('profile') }}">
           <i class="bi bi-person"></i>
@@ -165,7 +176,7 @@
   <a  class="back-to-top d-flex align-items-center justify-content-center">
     <i class="bi bi-arrow-up-short"></i>
   </a>
-
+{% block javascripts %}
  <!-- Vendor JS Files -->
   <script src="{{ asset('assets/vendor/apexcharts/apexcharts.min.js') }}"></script>
   <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -191,8 +202,8 @@
   });
 </script>
 
+{% endblock %}
 
-</body>
         
 
 </html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>New Wellness Program Available</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            padding: 30px 20px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .content {
+            padding: 30px;
+        }
+        .program-card {
+            background: #f9fafc;
+            border-left: 4px solid #4b6cb7;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .program-title {
+            color:rgb(44, 70, 80);
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+        .program-detail {
+            margin: 8px 0;
+            color: #4a5568;
+        }
+        .program-detail strong {
+            color: #2d3748;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: linear-gradient(135deg,#f5f7fa 0%, #182848 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(75, 108, 183, 0.3);
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #718096;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .greeting {
+            color: #2d3748;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>New Wellness Program Available!</h1>
+        </div>
+        <div class="content">
+            <p class="greeting">Hello {{ recipientName }},</p>
+            <p>We're excited to inform you that {{ creatorName }} has created a new wellness program:</p>
+            
+            <div class="program-card">
+                <h2 class="program-title">{{ programTitle }}</h2>
+                <p class="program-detail"><strong>Type:</strong> {{ programType }}</p>
+                <p class="program-detail"><strong>Description:</strong> {{ programDescription }}</p>
+            </div>
+            
+            <p>Click the button below to view the full program details and get started:</p>
+            
+            <div class="button-container">
+                <a href="{{ programUrl }}" class="button">View Program</a>
+            </div>
+            
+            <p>Wishing you health and wellness,</p>
+            <p>The Wellness Team</p>
+        </div>
+        <div class="footer">
+            <p>This email was sent automatically. Please do not reply directly to this message.</p>
+            <p>© 2025 OnBoardify Platform. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

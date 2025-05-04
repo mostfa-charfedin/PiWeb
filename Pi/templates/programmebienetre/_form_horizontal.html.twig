@@ -5,11 +5,15 @@
   <div class="col-sm-10">
     {{ form_widget(form.titre, {
       'attr': {
-        'class': 'form-control',
+        'class': 'form-control' ~ (form_errors(form.titre) ? ' is-invalid' : ''),
         'placeholder': 'Enter program title'
       }
     }) }}
-    {{ form_errors(form.titre) }}
+    {% if form_errors(form.titre) %}
+      <div class="invalid-feedback d-block">
+        {{ form_errors(form.titre) }}
+      </div>
+    {% endif %}
   </div>
 </div>
 
@@ -18,11 +22,15 @@
   <div class="col-sm-10">
     {{ form_widget(form.type, {
       'attr': {
-        'class': 'form-control',
+        'class': 'form-control' ~ (form_errors(form.type) ? ' is-invalid' : ''),
         'placeholder': 'Select program type'
       }
     }) }}
-    {{ form_errors(form.type) }}
+    {% if form_errors(form.type) %}
+      <div class="invalid-feedback d-block">
+        {{ form_errors(form.type) }}
+      </div>
+    {% endif %}
   </div>
 </div>
 
@@ -31,12 +39,16 @@
   <div class="col-sm-10">
     {{ form_widget(form.description, {
       'attr': {
-        'class': 'form-control',
+        'class': 'form-control' ~ (form_errors(form.description) ? ' is-invalid' : ''),
         'placeholder': 'Enter program description',
         'rows': '5'
       }
     }) }}
-    {{ form_errors(form.description) }}
+    {% if form_errors(form.description) %}
+      <div class="invalid-feedback d-block">
+        {{ form_errors(form.description) }}
+      </div>
+    {% endif %}
   </div>
 </div>
 
@@ -45,11 +57,15 @@
   <div class="col-sm-10">
     {{ form_widget(form.iduser, {
       'attr': {
-        'class': 'form-control',
+        'class': 'form-control' ~ (form_errors(form.iduser) ? ' is-invalid' : ''),
         'placeholder': 'Select program manager'
       }
     }) }}
-    {{ form_errors(form.iduser) }}
+    {% if form_errors(form.iduser) %}
+      <div class="invalid-feedback d-block">
+        {{ form_errors(form.iduser) }}
+      </div>
+    {% endif %}
   </div>
 </div>
 
@@ -58,21 +74,29 @@
   <div class="col-sm-10">
     {{ form_widget(form.date_programme, {
       'attr': {
-        'class': 'form-control',
+        'class': 'form-control' ~ (form_errors(form.date_programme) ? ' is-invalid' : ''),
         'placeholder': 'Select program date'
       }
     }) }}
-    {{ form_errors(form.date_programme) }}
+    {% if form_errors(form.date_programme) %}
+      <div class="invalid-feedback d-block">
+        {{ form_errors(form.date_programme) }}
+      </div>
+    {% endif %}
   </div>
 </div>
 
 <div class="row mb-3">
   <div class="col-sm-10 offset-sm-2">
     <button type="submit" class="btn btn-primary">
+      <i class="bi bi-check-circle me-1"></i>
       {% if edit_mode %}Update Program{% else %}Create Program{% endif %}
     </button>
-    <a href="{{ path('app_programmebienetre_index') }}" class="btn btn-secondary">Cancel</a>
+    <a href="{{ path('app_programmebienetre_index') }}" class="btn btn-secondary">
+      <i class="bi bi-x-circle me-1"></i>
+      Cancel
+    </a>
   </div>
 </div>
 
-{{ form_end(form) }} 
+{{ form_end(form) }}

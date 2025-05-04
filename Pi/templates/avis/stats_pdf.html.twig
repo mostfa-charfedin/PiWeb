@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Reviews Statistics Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 8px;
+        }
+        .header h1 {
+            margin: 0;
+            padding: 10px 0;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 5px 0;
+            color: #ecf0f1;
+        }
+        .stats-container {
+            margin-bottom: 30px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stats-title {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 20px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .stat-card {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .stat-card h3 {
+            color: #2c3e50;
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #3498db;
+            margin: 0;
+        }
+        .stat-label {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin: 5px 0 0 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #2c3e50;
+            color: white;
+            border-radius: 8px;
+        }
+        .footer p {
+            margin: 0;
+            font-size: 12px;
+        }
+        .rating-stars {
+            color: #f1c40f;
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        .program-name {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .chart-title {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .rating-distribution {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .rating-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .rating-label {
+            width: 80px;
+            text-align: right;
+        }
+        .rating-progress {
+            flex-grow: 1;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .rating-fill {
+            height: 100%;
+            background: #3498db;
+            border-radius: 10px;
+        }
+        .rating-count {
+            width: 60px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Reviews Statistics Report</h1>
+        <p>Generated on {{ "now"|date("Y-m-d H:i:s") }}</p>
+    </div>
+
+    <div class="stats-container">
+        <h2 class="stats-title">Overall Statistics</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Total Reviews</h3>
+                <p class="stat-value">{{ totalReviewers }}</p>
+                <p class="stat-label">Unique reviewers</p>
+            </div>
+            <div class="stat-card">
+                <h3>Average Rating</h3>
+                <p class="stat-value">{{ averageRating|number_format(1) }}</p>
+                <div class="rating-stars">
+                    {% set rating = averageRating|round %}
+                    {% for i in 1..5 %}
+                        {% if i <= rating %}
+                            ★
+                        {% else %}
+                            ☆
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-container">
+        <h2 class="stats-title">Rating Distribution</h2>
+        <div class="rating-distribution">
+            {% for i in 4..0 %}
+                <div class="rating-bar">
+                    <div class="rating-label">{{ 5 - i }} Stars</div>
+                    <div class="rating-progress">
+                        <div class="rating-fill" style="width: {{ (ratingData[i] / totalReviewers * 100)|round }}%"></div>
+                    </div>
+                    <div class="rating-count">{{ ratingData[i] ?? 0 }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="stats-container">
+        <h2 class="stats-title">Program Performance Overview</h2>
+        <div class="stats-grid">
+            {% for program in programStats %}
+                <div class="stat-card">
+                    <h3 class="program-name">{{ program.programName }}</h3>
+                    <div class="rating-stars">
+                        {% set rating = program.averageRating|round %}
+                        {% for i in 1..5 %}
+                            {% if i <= rating %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="stat-value">{{ program.averageRating|number_format(1) }}</p>
+                    <p class="stat-label">Average Rating</p>
+                    <p class="stat-value">{{ program.reviewCount }}</p>
+                    <p class="stat-label">Total Reviews</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>© {{ "now"|date("Y") }} Onboardify. All rights reserved.</p>
+        <p>This report was automatically generated by the system.</p>
+    </div>
+</body>
+</html> 

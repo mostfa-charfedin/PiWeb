@@ -1,6 +1,6 @@
-{% extends 'sideBar.html.twig' %}
+{% extends 'navBar.html.twig' %}
 
-{% block title %}Reviews{% endblock %}
+{% block title %}My Reviews{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -27,11 +27,11 @@
     {% endfor %}
     
     <div class="pagetitle">
-        <h1>Reviews</h1>
+        <h1>My Reviews</h1>
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ path('app_programmebienetre_index') }}">Home</a></li>
-                <li class="breadcrumb-item active">Reviews</li>
+                <li class="breadcrumb-item active">My Reviews</li>
             </ol>
         </nav>
     </div>
@@ -42,7 +42,11 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h5 class="card-title">Reviews List</h5>
+                            <h5 class="card-title">My Reviews List</h5>
+                            <a href="{{ path('app_programmebienetre_index') }}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>
+                                Write a Review
+                            </a>
                         </div>
 
                         <div class="table-responsive">
@@ -50,13 +54,12 @@
                                 <thead>
                                     <tr>
                                         <th>Program</th>
-                                        <th>User</th>
                                         <th>Rating</th>
                                         <th>Comment</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody id="reviewsTableBody">
                                     {% for avi in avis %}
                                     <tr class="fade-in">
                                         <td>
@@ -64,13 +67,6 @@
                                                 {{ avi.programme.titre }}
                                             {% else %}
                                                 <span class="text-muted">Programme supprimé</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if avi.user %}
-                                                {{ avi.user.prenom }} {{ avi.user.nom }}
-                                            {% else %}
-                                                <span class="text-muted">User deleted</span>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -85,11 +81,24 @@
                                             </div>
                                         </td>
                                         <td>{{ avi.commentaire }}</td>
-                                        
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ path('app_avis_edit', {'id': avi.id}) }}" class="btn btn-primary btn-sm" title="Edit">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form method="post" action="{{ path('app_avis_delete', {'id': avi.id}) }}" style="display: inline-block;"
+                                                      onsubmit="return confirm('Are you sure you want to delete this review?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ avi.id) }}">
+                                                    <button class="btn btn-danger btn-sm" title="Delete">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
                                     </tr>
                                     {% else %}
                                         <tr>
-                                            <td colspan="5" class="text-center">No reviews found</td>
+                                            <td colspan="4" class="text-center">No reviews found</td>
                                         </tr>
                                     {% endfor %}
                                 </tbody>
@@ -101,4 +110,8 @@
         </div>
     </section>
 </main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
 {% endblock %}
