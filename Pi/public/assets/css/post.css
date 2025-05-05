@@ -1,0 +1,334 @@
+/* Conteneur principal */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 0 1rem;
+}
+
+/* Carte */
+.tour-box {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 420px;
+    display: flex;
+    flex-direction: column;
+}
+
+.tour-box:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.tour-box-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.tour-box-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.inner-box {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.entry-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0.5rem 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.entry-content {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+/* Catégories */
+.categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.categories .badge {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+}
+
+.categories .more-indicator {
+    font-size: 0.8rem;
+    color: #007bff;
+    align-self: center;
+    cursor: default;
+}
+
+/* Styles des boutons */
+.btn {
+    cursor: pointer;
+    border: none;
+    border-radius: 20px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.9rem;
+    transition: background 0.3s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.btn-like {
+    background: transparent;
+    padding: 0.4rem;
+}
+
+.btn-like i {
+    font-size: 1.4rem;
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-like.liked i {
+    color: #dc3545;
+    transform: scale(1.1);
+}
+
+.btn-like:not(.liked) i {
+    color: #6c757d;
+}
+
+.btn-like:hover i {
+    color: #c82333;
+    transform: scale(1.2);
+}
+
+.btn-like .like-count {
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.btn-comment {
+    background: #e9ecef;
+    color: #333;
+}
+
+.btn-comment:hover {
+    background: #d3d3d3;
+    transform: scale(1.05);
+}
+
+.btn-modifier {
+    background: #007bff;
+    color: white;
+}
+
+.btn-modifier:hover {
+    background: #0056b3;
+    transform: scale(1.05);
+}
+
+.btn-supprimer {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-supprimer:hover {
+    background: #c82333;
+    transform: scale(1.05);
+}
+
+.d-flex {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* Notification styles */
+#notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 3000;
+}
+
+.notification {
+    padding: 15px 25px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    animation: fadeIn 0.5s, fadeOut 0.5s 4.5s;
+    animation-fill-mode: forwards;
+}
+
+.notification.success {
+    background-color: #28a745;
+}
+
+.notification.error {
+    background-color: #dc3545;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-20px); }
+}
+
+/* Modal backdrop personnalisé */
+.modal-backdrop.custom-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+}
+
+/* Modal styles */
+.modal-dialog {
+    max-width: 600px;
+    z-index: 2100;
+}
+
+#modal-post-image {
+    max-height: 200px;
+    object-fit: cover;
+}
+
+#modal-categories .badge {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+/* Toxic comments */
+#modal-comments-list li.toxic {
+    background-color: #ffebee;
+    border-left: 4px solid #f44336;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+#modal-comments-list li.toxic .comment-content {
+    display: none;
+}
+
+#modal-comments-list li.toxic::after {
+    content: "This comment has been hidden due to inappropriate content.";
+    color: #f44336;
+    font-style: italic;
+    display: block;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
+#modal-comments-list .rounded-circle {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+/* Comment actions */
+.comment-actions .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+    margin-right: 5px;
+}
+
+.edit-comment-textarea {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.edit-comment-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-comment-buttons button {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+}
+
+#comment-form button[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Media Queries pour responsivité */
+@media (max-width: 992px) {
+    .tour-box {
+        height: 400px;
+    }
+    .tour-box-image {
+        height: 180px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        max-width: 100%;
+    }
+    .tour-box {
+        height: 380px;
+    }
+    .tour-box-image {
+        height: 160px;
+    }
+    .entry-title {
+        font-size: 1.1rem;
+    }
+    .entry-content {
+        font-size: 0.85rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .tour-box {
+        height: 360px;
+    }
+    .tour-box-image {
+        height: 140px;
+    }
+    .btn {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.8rem;
+    }
+    .btn-like i {
+        font-size: 1.2rem;
+    }
+}

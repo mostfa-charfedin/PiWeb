@@ -1,0 +1,616 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}Post Index{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('css/post.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Style pour la section de recherche/filtre/tri */
+        .search-filter-sort-section {
+            margin-bottom: 2rem;
+        }
+        .search-filter-sort-section .form-control,
+        .search-filter-sort-section .form-select {
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+        /* Style pour les commentaires toxiques */
+        #modal-comments-list li.toxic {
+            background-color: #ffcccc;
+            border-left: 4px solid #ff0000;
+        }
+        #modal-comments-list li.toxic .comment-content {
+            display: none;
+        }
+        #modal-comments-list li.toxic::after {
+            content: "This comment is hidden due to toxicity.";
+            color: #ff0000;
+            font-style: italic;
+            display: block;
+            margin-top: 10px;
+        }
+        #modal-comments-list .rounded-circle {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+        }
+        #modal-post-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        #modal-categories {
+            margin-bottom: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .comment-count {
+            margin-left: 5px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        /* Style pour le bouton Report */
+        .report-btn {
+            background-color: #ffc107;
+            color: #000;
+            border: none;
+            margin-left: 5px;
+        }
+        .report-btn:hover {
+            background-color: #e0a800;
+            color: #000;
+        }
+
+        .pagination-container {
+    margin-top: 2rem;
+    padding: 1rem 0;
+}
+.pagination-container {
+    margin: 2rem 0;
+    padding: 1rem 0;
+    width: 100%;
+}
+
+/* Pagination item styling */
+.page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.page-link {
+    color: #0d6efd;
+}
+    </style>
+{% endblock %}
+
+
+{% block content %}
+    <section class="search-filter-sort-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <input type="text" id="search-input" class="form-control" placeholder="🔍 Search for a post...">
+                </div>
+                <div class="col-md-4">
+                    <select id="filter-category" class="form-select">
+                        <option value="">All categories</option>
+                        {% for category in [
+                            'Information Request',
+                            'Technical Support',
+                            'HR Inquiry',
+                            'Announcement',
+                            'Feedback & Suggestions',
+                            'Document Request',
+                            'Training & Development',
+                            'Meeting Request',
+                            'Policy Clarification',
+                            'Facilities Issue',
+                            'Project Collaboration',
+                            'General Discussion',
+                            'Job Posting/Internal Mobility',
+                            'Event Participation',
+                            'Lost and Found'
+                        ] %}
+                            <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select id="sort-options" class="form-select">
+                        <option value="default">Sort by...</option>
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                        <option value="likes">Number of Likes</option>
+                        <option value="comments">Number of Comments</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+            {# Pagination controls at the top #}
+<div class="pagination-container">
+    <div class="row">
+        <div class="col-12 d-flex justify-content-center">
+{{ knp_pagination_render(postes, 'poste/pagination.html.twig') }}        </div>
+    </div>
+        </div>
+    </section>
+    <section>
+        <div class="container">
+            <div class="row">
+                {% for poste in postes %}
+                    <div class="col-lg-6 col-md-6">
+                        <article class="tour-box list-style" data-poste-id="{{ poste.id }}" data-contenu-complet="{{ poste.contenu|e('html_attr') }}" data-title-complet="{{ poste.title|e('html_attr') }}">
+                            <div class="tour-box-image">
+                                {% if poste.image %}
+                                    <img src="{{ asset('Uploads/uploadposte/' ~ poste.image) }}" alt="{{ poste.title }}" class="img-fluid">
+                                {% else %}
+                                    <img src="{{ asset('images/default-placeholder.jpg') }}" alt="Default image" class="img-fluid">
+                                {% endif %}
+                            </div>
+                            <div class="inner-box">
+                                <h3 class="entry-title">
+                                    <a>{{ poste.title }}</a>
+                                </h3>
+                                <div class="entry-content">
+                                    <p>{{ poste.contenu|length > 100 ? poste.contenu|slice(0, 100) ~ '...' : poste.contenu }}</p>
+                                </div>
+                                <div class="categories">
+                                    {% set maxCategories = 3 %}
+                                    {% for category in poste.categories|slice(0, maxCategories) %}
+                                        <span class="badge bg-primary">{{ category }}</span>
+                                    {% endfor %}
+                                    {% if poste.categories|length > maxCategories %}
+                                        <span class="more-indicator">...</span>
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex">
+                                    {% set isLiked = poste.id in likedPostes %}
+                                    <button class="btn btn-like {{ isLiked ? 'liked' : '' }}" data-poste-id="{{ poste.id }}">
+                                        <i class="{{ isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart' }}"></i>
+                                        <span class="like-count">{{ poste.getLikeCount() }}</span>
+                                    </button>
+                                    <button class="btn btn-comment">
+                                        <i class="fa-regular fa-comment"></i> Comment
+                                        <span class="comment-count">{{ poste.comments|length }}</span>
+                                    </button>
+                                    <button class="btn report-btn" data-id="{{ poste.id }}" title="Report">
+                                        <i class="fas fa-exclamation-triangle"></i> Report
+                                    </button>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                {% endfor %}
+            </div>
+                       {# Pagination controls #}
+<div class="pagination-container">
+    <div class="row">
+        <div class="col-12 d-flex justify-content-center">
+{{ knp_pagination_render(postes, 'poste/pagination.html.twig') }}        </div>
+    </div>
+        </div>
+        {# Debugging - remove after testing #}
+<div class="debug-info" style="display: none;">
+    Page Count: {{ postes.getPageCount() }}<br>
+    Total Items: {{ postes.getTotalItemCount() }}<br>
+    Current Page: {{ postes.getCurrentPageNumber() }}<br>
+    Items Per Page: {{ postes.getItemNumberPerPage() }}
+</div>
+        </div>
+    </section>
+
+    <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentModalLabel">Comments</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-4">
+                        <h3 id="modal-post-title"></h3>
+                        <div id="modal-categories"></div>
+                        <img id="modal-post-image" src="" class="img-fluid rounded" alt="Post Image">
+                        <p id="modal-post-content" class="mt-3"></p>
+                    </div>
+                    <h5>Comments:</h5>
+                    <div id="modal-comments-container">
+                        <ul id="modal-comments-list" class="list-unstyled"></ul>
+                    </div>
+                    <form id="comment-form" class="mt-3">
+                        <input type="hidden" id="modal-post-id">
+                        <div class="mb-3">
+                            <textarea id="comment-text" class="form-control" placeholder="Write a comment..." rows="3" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Publish</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const currentUserId = {{ user ? user.id|json_encode|raw : 'null' }};
+
+            {% for type, messages in app.flashes %}
+            {% for message in messages %}
+            showNotification('{{ message }}', '{{ type }}');
+            {% endfor %}
+            {% endfor %}
+
+            async function checkToxicity(commentText) {
+                try {
+                    const response = await fetch(`/poste/comment/check-toxicity`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ content: commentText }),
+                    });
+                    const data = await response.json();
+                    if (data.error) {
+                        console.error("Toxicity check error:", data.error);
+                        return false;
+                    }
+                    return data.isToxic || false;
+                } catch (error) {
+                    console.error("Error checking toxicity:", error);
+                    return false;
+                }
+            }
+
+            async function loadComments(postId) {
+                try {
+                    const response = await fetch(`/poste/comments/${postId}`);
+                    const data = await response.json();
+                    const commentsList = document.getElementById("modal-comments-list");
+                    commentsList.innerHTML = "";
+
+                    for (const comment of data.comments) {
+                        const isToxic = await checkToxicity(comment.content);
+                        const li = document.createElement("li");
+                        li.classList.add("mb-3", "p-3", "rounded");
+                        li.dataset.id = comment.id;
+
+                        if (isToxic) {
+                            li.classList.add("toxic");
+                        } else {
+                            li.classList.add("bg-light");
+                        }
+
+                        li.innerHTML = `
+                            <div class="d-flex align-items-center mb-2">
+                                <div class="flex-shrink-0">
+                                    ${comment.user.profilePicture
+                            ? `<img src="${comment.user.profilePicture}" alt="${comment.user.firstName}" class="rounded-circle">`
+                            : `<div class="rounded-circle bg-secondary"><span class="text-white">No photo</span></div>`
+                        }
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <strong>${comment.user.firstName} ${comment.user.lastName}</strong>
+                                        <small class="text-muted">${new Date(comment.createdAt).toLocaleString('en-US', {
+                            year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })}</small>
+                                    </div>
+                                    <p class="mb-0 comment-content">${comment.content}</p>
+                                    <div class="mt-2">
+                                        ${comment.user.id === currentUserId && !isToxic
+                            ? `<button class="btn btn-edit-comment" data-comment-id="${comment.id}">
+                                                <i class="fas fa-edit"></i> Edit
+                                            </button>
+                                            <button class="btn btn-delete-comment" data-comment-id="${comment.id}">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>`
+                            : ''
+                        }
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        commentsList.appendChild(li);
+                    }
+                    
+                    // Mettre à jour le nombre de commentaires sur le bouton du post
+                    const commentCountElement = document.querySelector(`.tour-box[data-poste-id="${postId}"] .comment-count`);
+                    if (commentCountElement) {
+                        commentCountElement.textContent = data.comments.length;
+                    }
+                    
+                    attachCommentEventListeners();
+                } catch (error) {
+                    console.error("Error loading comments:", error);
+                }
+            }
+
+            function attachCommentEventListeners() {
+                document.querySelectorAll(".btn-delete-comment").forEach(button => {
+                    button.addEventListener("click", function () {
+                        const commentId = this.dataset.commentId;
+                        if (confirm("Are you sure you want to delete this comment?")) {
+                            fetch(`/poste/comment/delete/${commentId}`, {
+                                method: "POST",
+                            })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        showNotification("Comment deleted successfully!", "success");
+                                        loadComments(document.getElementById("modal-post-id").value);
+                                    } else {
+                                        showNotification("Failed to delete comment!", "error");
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Error deleting comment:", error);
+                                    showNotification("Error deleting comment!", "error");
+                                });
+                        }
+                    });
+                });
+
+                document.querySelectorAll(".btn-edit-comment").forEach(button => {
+                    button.addEventListener("click", function () {
+                        const commentId = this.dataset.commentId;
+                        const commentElement = document.querySelector(`li[data-id="${commentId}"]`);
+                        const commentContent = commentElement.querySelector(".comment-content");
+                        const currentContent = commentContent.textContent;
+
+                        const textarea = document.createElement("textarea");
+                        textarea.classList.add("form-control", "mb-2");
+                        textarea.value = currentContent;
+
+                        const buttonsDiv = document.createElement("div");
+                        buttonsDiv.classList.add("edit-comment-buttons");
+                        buttonsDiv.innerHTML = `
+                            <button class="save">Save</button>
+                            <button class="cancel">Cancel</button>
+                        `;
+
+                        commentContent.replaceWith(textarea);
+                        commentElement.querySelector("div.mt-2").replaceWith(buttonsDiv);
+
+                        buttonsDiv.querySelector(".cancel").addEventListener("click", function () {
+                            textarea.replaceWith(commentContent);
+                            const originalButtons = document.createElement("div");
+                            originalButtons.classList.add("mt-2");
+                            originalButtons.innerHTML = `
+                                <button class="btn btn-edit-comment" data-comment-id="${commentId}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </button>
+                                <button class="btn btn-delete-comment" data-comment-id="${commentId}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            `;
+                            buttonsDiv.replaceWith(originalButtons);
+                            attachCommentEventListeners();
+                        });
+
+                        buttonsDiv.querySelector(".save").addEventListener("click", async function () {
+                            const newContent = textarea.value.trim();
+                            if (newContent) {
+                                const isToxic = await checkToxicity(newContent);
+                                if (isToxic) {
+                                    showNotification("Your comment appears toxic. Please revise it.", "error");
+                                    return;
+                                }
+                                fetch(`/poste/comment/edit/${commentId}`, {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ content: newContent }),
+                                })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            showNotification("Comment updated successfully!", "success");
+                                            loadComments(document.getElementById("modal-post-id").value);
+                                        } else {
+                                            showNotification("Failed to update comment!", "error");
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("Error editing comment:", error);
+                                        showNotification("Error updating comment!", "error");
+                                    });
+                            }
+                        });
+                    });
+                });
+            }
+
+            document.querySelectorAll(".tour-box").forEach(box => {
+                box.addEventListener("click", function (e) {
+                    if (e.target.closest('.btn-like') || e.target.closest('.report-btn')) return;
+                    const postId = this.getAttribute("data-poste-id");
+                    document.getElementById("modal-post-id").value = postId;
+                    document.getElementById("modal-post-image").src = this.querySelector("img").src;
+                    document.getElementById("modal-post-content").textContent = this.getAttribute("data-contenu-complet");
+                    document.getElementById("modal-post-title").textContent = this.getAttribute("data-title-complet");
+                    const categoriesContainer = document.getElementById("modal-categories");
+                    categoriesContainer.innerHTML = "";
+                    const categories = this.querySelectorAll(".categories .badge");
+                    categories.forEach(category => {
+                        const badge = document.createElement("span");
+                        badge.className = "badge bg-primary";
+                        badge.textContent = category.textContent;
+                        categoriesContainer.appendChild(badge);
+                    });
+                    loadComments(postId);
+                    const commentModal = new bootstrap.Modal(document.getElementById("commentModal"));
+                    commentModal.show();
+                });
+            });
+
+            document.getElementById("comment-form").addEventListener("submit", async function (event) {
+                event.preventDefault();
+                const postId = document.getElementById("modal-post-id").value;
+                const commentText = document.getElementById("comment-text").value.trim();
+
+                if (!commentText) return;
+
+                const isToxic = await checkToxicity(commentText);
+                if (isToxic) {
+                    showNotification("Your comment appears toxic. Please revise it.", "error");
+                    return;
+                }
+
+                fetch(`/poste/comment/add/${postId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ content: commentText }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showNotification("Comment added successfully!", "success");
+                            document.getElementById("comment-text").value = "";
+                            loadComments(postId);
+                        } else {
+                            showNotification("Failed to add comment!", "error");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error adding comment:", error);
+                        showNotification("Error adding comment!", "error");
+                    });
+            });
+
+            // Débouncing pour éviter les clics multiples
+            function debounce(func, wait) {
+                let timeout;
+                return function (...args) {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => func.apply(this, args), wait);
+                };
+            }
+
+            document.querySelectorAll(".btn-like").forEach(button => {
+                const debouncedToggleLike = debounce(async function (event) {
+                    event.stopPropagation();
+                    if (button.disabled) return; // Ignorer si le bouton est désactivé
+
+                    const postId = button.getAttribute("data-poste-id");
+                    const isLiked = button.classList.contains("liked");
+                    const likeIcon = button.querySelector("i");
+                    const likeCount = button.querySelector(".like-count");
+
+                    // Désactiver le bouton pendant la requête
+                    button.disabled = true;
+
+                    try {
+                        const response = await fetch(`/like/toggle/${postId}`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-Requested-With": "XMLHttpRequest",
+                            },
+                            body: JSON.stringify({ like: !isLiked }),
+                            credentials: 'include',
+                        });
+                        const data = await response.json();
+
+                        if (data.success) {
+                            likeCount.textContent = data.likesCount;
+                            button.classList.toggle("liked", data.liked);
+                            if (data.liked) {
+                                likeIcon.classList.remove("fa-regular");
+                                likeIcon.classList.add("fa-solid");
+                            } else {
+                                likeIcon.classList.remove("fa-solid");
+                                likeIcon.classList.add("fa-regular");
+                            }
+                            showNotification(data.liked ? "Post liked!" : "Post unliked!", "success");
+                        } else {
+                            showNotification("Failed to toggle like!", "error");
+                        }
+                    } catch (error) {
+                        console.error("Error handling like:", error);
+                        showNotification("Error toggling like!", "error");
+                    } finally {
+                        // Réactiver le bouton après la requête
+                        button.disabled = false;
+                    }
+                }, 300); // Délai de 300ms pour le débouncing
+
+                button.addEventListener("click", debouncedToggleLike);
+            });
+
+            document.querySelectorAll(".report-btn").forEach(button => {
+                button.addEventListener("click", function (event) {
+                    event.stopPropagation();
+                    const postId = this.getAttribute("data-id");
+                    if (confirm("Are you sure you want to report this post?")) {
+                        fetch(`/poste/report/${postId}`, {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-Requested-With": "XMLHttpRequest",
+                            },
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    showNotification("Post reported successfully!", "success");
+                                } else {
+                                    showNotification("Error: " + data.message, "error");
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error reporting post:", error);
+                                showNotification("Error reporting post!", "error");
+                            });
+                    }
+                });
+            });
+
+            const posts = document.querySelectorAll(".tour-box.list-style");
+            const searchInput = document.getElementById("search-input");
+            const categorySelect = document.getElementById("filter-category");
+            const sortSelect = document.getElementById("sort-options");
+
+            function filterPosts() {
+                const searchValue = searchInput.value.toLowerCase();
+                const selectedCategory = categorySelect.value;
+                posts.forEach(post => {
+                    const title = post.querySelector(".entry-title a").textContent.toLowerCase();
+                    const content = post.querySelector(".entry-content p").textContent.toLowerCase();
+                    const categories = Array.from(post.querySelectorAll(".categories .badge")).map(badge => badge.textContent);
+                    const matchesSearch = title.includes(searchValue) || content.includes(searchValue);
+                    const matchesCategory = !selectedCategory || categories.includes(selectedCategory);
+                    post.parentElement.style.display = matchesSearch && matchesCategory ? "block" : "none";
+                });
+            }
+
+            function sortPosts() {
+                const sortValue = sortSelect.value;
+                let sortedPosts = Array.from(posts);
+                if (sortValue === "title-asc") {
+                    sortedPosts.sort((a, b) => a.querySelector(".entry-title a").textContent.localeCompare(b.querySelector(".entry-title a").textContent));
+                } else if (sortValue === "title-desc") {
+                    sortedPosts.sort((a, b) => b.querySelector(".entry-title a").textContent.localeCompare(a.querySelector(".entry-title a").textContent));
+                } else if (sortValue === "likes") {
+                    sortedPosts.sort((a, b) => {
+                        const likesA = parseInt(a.querySelector(".like-count").textContent, 10) || 0;
+                        const likesB = parseInt(b.querySelector(".like-count").textContent, 10) || 0;
+                        return likesB - likesA;
+                    });
+                } else if (sortValue === "comments") {
+                    sortedPosts.sort((a, b) => {
+                        const commentsA = parseInt(a.querySelector(".comment-count").textContent, 10) || 0;
+                        const commentsB = parseInt(b.querySelector(".comment-count").textContent, 10) || 0;
+                        return commentsB - commentsA;
+                    });
+                }
+                sortedPosts.forEach(post => post.parentElement.parentElement.appendChild(post.parentElement));
+            }
+
+            searchInput.addEventListener("input", filterPosts);
+            categorySelect.addEventListener("change", filterPosts);
+            sortSelect.addEventListener("change", sortPosts);
+        });
+    </script>
+{% endblock %}

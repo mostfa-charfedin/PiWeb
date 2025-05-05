@@ -1,0 +1,261 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}Edit Complaint{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .complaint-edit-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 240, 240, 0.9));
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            margin: 30px auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-title {
+            text-align: center;
+            color: #2c3e50;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 600;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        .form-label {
+            font-size: 1rem;
+            color: #34495e;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            padding: 12px 15px;
+            border: 1px solid #dfe6e9;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            font-size: 1rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.2);
+            background-color: #fff;
+            outline: none;
+        }
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .status-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status-badge {
+            font-size: 1rem;
+            padding: 8px 12px;
+            border-radius: 20px;
+        }
+        .bg-pending {
+            background-color: #ffca2c;
+            color: #212529;
+        }
+        .bg-resolved {
+            background-color: #28a745;
+            color: white;
+        }
+        .bg-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 10px;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #28a745, #218838);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease, background 0.3s ease;
+        }
+        .btn-submit:hover {
+            background: linear-gradient(90deg, #218838, #1e7e34);
+            transform: translateY(-2px);
+        }
+        .btn-cancel {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(90deg, #6c757d, #5a6268);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: transform 0.2s ease, background 0.3s ease;
+        }
+        .btn-cancel:hover {
+            background: linear-gradient(90deg, #5a6268, #4b5257);
+            transform: translateY(-2px);
+        }
+        .char-counter {
+            font-size: 0.85rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .delete-section {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="complaint-edit-container">
+            <h1 class="form-title">Edit Complaint #{{ complaint.id }}</h1>
+
+            {{ form_start(form) }}
+
+            <div class="form-group">
+                {{ form_label(form.subject, 'Subject', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.subject, {
+                    'attr': {
+                        'class': 'form-control',
+                        'placeholder': 'Enter complaint subject...',
+                        'maxlength': 150
+                    }
+                }) }}
+                <div class="char-counter">
+                    <span id="subject-counter">{{ complaint.subject|length }}</span>/150 characters
+                </div>
+                {{ form_errors(form.subject) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.content, 'Content', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.content, {
+                    'attr': {
+                        'class': 'form-control',
+                        'placeholder': 'Describe your complaint in detail...',
+                        'maxlength': 2000
+                    }
+                }) }}
+                <div class="char-counter">
+                    <span id="content-counter">{{ complaint.content|length }}</span>/2000 characters
+                </div>
+                {{ form_errors(form.content) }}
+            </div>
+
+            {% if is_granted('ROLE_ADMIN') and form.status is defined %}
+                <div class="status-section">
+                    <h5>Admin Management</h5>
+
+                    <div class="form-group">
+                        {{ form_label(form.status, 'Status', {'label_attr': {'class': 'form-label'}}) }}
+                        <div class="d-flex align-items-center">
+                            {{ form_widget(form.status, {
+                                'attr': {'class': 'form-select'}
+                            }) }}
+                            <span class="badge status-badge bg-{{ complaint.status is null ? 'pending' : (complaint.status ? 'resolved' : 'rejected') }} ms-3">
+                                Current: {{ complaint.status is null ? 'Pending' : (complaint.status ? 'Resolved' : 'Rejected') }}
+                            </span>
+                        </div>
+                        {{ form_errors(form.status) }}
+                    </div>
+
+                    {% if form.response is defined %}
+                        <div class="form-group">
+                            {{ form_label(form.response, 'Response', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.response, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'placeholder': 'Enter your response...',
+                                    'rows': 5
+                                }
+                            }) }}
+                            {{ form_errors(form.response) }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="action-buttons">
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i> Update Complaint
+                </button>
+
+                <a href="{{ path('app_complaint_my_complaints') }}" class="btn btn-cancel">
+                    <i class="fas fa-arrow-left"></i> Cancel
+                </a>
+            </div>
+
+            {{ form_end(form) }}
+
+            <div class="delete-section">
+                {{ include('complaint/_delete_form.html.twig') }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Character counters
+            const subjectInput = document.getElementById('{{ form.subject.vars.id }}');
+            const subjectCounter = document.getElementById('subject-counter');
+
+            if (subjectInput && subjectCounter) {
+                subjectInput.addEventListener('input', function() {
+                    subjectCounter.textContent = this.value.length;
+                });
+            }
+
+            const contentInput = document.getElementById('{{ form.content.vars.id }}');
+            const contentCounter = document.getElementById('content-counter');
+
+            if (contentInput && contentCounter) {
+                contentInput.addEventListener('input', function() {
+                    contentCounter.textContent = this.value.length;
+                });
+            }
+
+            // Status change effect
+            const statusSelect = document.getElementById('{{ form.status.vars.id|default('') }}');
+            if (statusSelect) {
+                statusSelect.addEventListener('change', function() {
+                    const badge = document.querySelector('.status-badge');
+                    if (!badge) return;
+
+                    if (this.value === '') {
+                        badge.className = 'badge status-badge bg-pending ms-3';
+                        badge.textContent = 'Will be: Pending';
+                    } else if (this.value === '1') {
+                        badge.className = 'badge status-badge bg-resolved ms-3';
+                        badge.textContent = 'Will be: Resolved';
+                    } else {
+                        badge.className = 'badge status-badge bg-rejected ms-3';
+                        badge.textContent = 'Will be: Rejected';
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}

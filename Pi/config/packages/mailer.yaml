@@ -1,4 +1,9 @@
 framework:
     mailer:
         dsn: '%env(MAILER_DSN)%'
+<<<<<<< HEAD
         message_bus: null  # Désactive l'envoi asynchrone
+=======
+        envelope:
+            sender: 'souhir.krizi@isimg.tn'
+>>>>>>> posts-claim

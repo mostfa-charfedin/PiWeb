@@ -1,0 +1,381 @@
+{% extends 'navBar.html.twig' %}
+
+{% block title %}Edit Post{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Conteneur principal */
+        .background-image {
+            position: relative;
+            min-height: 100vh;
+            background-image: url('{{ asset('images/img.png') }}');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        /* Conteneur du formulaire */
+        .form-container {
+            max-width: 90%;
+            width: 100%;
+            max-width: 700px; /* Réduit pour éviter un contenu trop large */
+            padding: 1.5rem;
+            background-color: rgba(249, 249, 249, 0.9);
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(12px);
+        }
+
+        /* Style des champs de formulaire */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control.is-invalid {
+            border-color: #dc3545;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        /* Zone de drag-and-drop */
+        .drag-drop-area {
+            border: 2px dashed #ccc;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            background-color: #fff;
+            border-radius: 8px;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+        }
+
+        .drag-drop-area.invalid {
+            border-color: #dc3545;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        /* Boutons de catégorie */
+        .category-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: flex-start;
+            padding: 0.5rem;
+        }
+
+        .category-container.invalid {
+            outline: 1px solid #dc3545;
+            border-radius: 8px;
+        }
+
+        .category-button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #007bff;
+            border-radius: 20px;
+            cursor: pointer;
+            background-color: #f0f8ff;
+            color: #007bff;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .category-button.active {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .category-button:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        /* Bouton de soumission */
+        .submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Lien de retour */
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .back-link:hover {
+            color: #0056b3;
+        }
+
+        /* Alerte pour les erreurs */
+        .alert-danger {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* Media Queries pour la responsivité */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .form-control {
+                padding: 0.5rem;
+            }
+
+            .submit-btn {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .category-button {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .form-container {
+                max-width: 100%;
+                padding: 0.75rem;
+            }
+
+            .drag-drop-area {
+                padding: 1rem;
+            }
+
+            .category-container {
+                gap: 0.5rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'id': 'post-form', 'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+    <div class="background-image">
+        <div class="form-container">
+            <h1 style="text-align: center; color: #333; margin-bottom: 1.5rem;">Update Your Post</h1>
+
+            <div class="form-group">
+                {{ form_label(form.title, 'Title', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.title, {'attr': {
+                    'class': 'form-control' ~ (form.title.vars.errors|length ? ' is-invalid' : ''),
+                    'placeholder': 'Enter post title...'
+                }}) }}
+                <div class="error-message">
+                    {{ form_errors(form.title) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.contenu, 'Content', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.contenu, {'attr': {
+                    'class': 'form-control' ~ (form.contenu.vars.errors|length ? ' is-invalid' : ''),
+                    'placeholder': 'Enter post content...',
+                    'rows': '5'
+                }}) }}
+                <div class="error-message">
+                    {{ form_errors(form.contenu) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.imageFile, 'Image (JPG, PNG, max 2MB)', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="drag-drop-area {{ form.imageFile.vars.errors|length ? 'invalid' : '' }}" id="drag-drop-area">
+                    <p>Drag and drop an image here or click to select a file.</p>
+                    {% if poste.image %}
+                        <img src="{{ asset('Uploads/posts/' ~ poste.image) }}" alt="Current image" class="preview-image" id="preview-image">
+                    {% else %}
+                        <img src="" alt="Preview" class="preview-image" id="preview-image" style="display: none;">
+                    {% endif %}
+                    {{ form_widget(form.imageFile, {'id': 'image-file-input', 'attr': {'style': 'display: none;'}}) }}
+                </div>
+                <div class="error-message">
+                    {{ form_errors(form.imageFile) }}
+                </div>
+            </div>
+
+            <div class="form-group">
+                {{ form_label(form.categories, 'Categories (select at least one)', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="category-container {{ form.categories.vars.errors|length ? 'invalid' : '' }}">
+                    {% for category in form.categories %}
+                        <div class="category-button {{ category.vars.checked ? 'active' : '' }}" data-category-id="{{ category.vars.value }}">
+                            {{ form_widget(category, {'attr': {'style': 'display: none;'}}) }}
+                            {{ form_label(category, null, {'label_attr': {'style': 'cursor: pointer; margin: 0;'}}) }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="error-message">
+                    {{ form_errors(form.categories) }}
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">Update</button>
+
+            {% if form.vars.errors|length > 0 %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for error in form.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <a href="{{ path('app_poste_my_posts') }}" class="back-link">Back to list</a>
+        </div>
+    </div>
+    {{ form_end(form) }}
+
+    {% block javascripts %}
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                {% for message in app.flashes('success') %}
+                showNotification('{{ message }}', 'success');
+                {% endfor %}
+                {% for message in app.flashes('error') %}
+                showNotification('{{ message }}', 'error');
+                {% endfor %}
+
+                // Gestion des boutons de catégorie
+                document.querySelectorAll('.category-button').forEach(button => {
+                    const checkbox = button.querySelector('input[type="checkbox"]');
+                    button.addEventListener('click', () => {
+                        checkbox.checked = !checkbox.checked;
+                        button.classList.toggle('active', checkbox.checked);
+                    });
+                });
+
+                // Gestion du drag-and-drop
+                const dragDropArea = document.getElementById('drag-drop-area');
+                const fileInput = document.getElementById('image-file-input');
+                const previewImage = document.getElementById('preview-image');
+
+                dragDropArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dragDropArea.style.borderColor = '#007bff';
+                    dragDropArea.style.backgroundColor = '#f0f8ff';
+                });
+
+                dragDropArea.addEventListener('dragleave', () => {
+                    dragDropArea.style.borderColor = dragDropArea.classList.contains('invalid') ? '#dc3545' : '#ccc';
+                    dragDropArea.style.backgroundColor = '#fff';
+                });
+
+                dragDropArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dragDropArea.style.borderColor = dragDropArea.classList.contains('invalid') ? '#dc3545' : '#ccc';
+                    dragDropArea.style.backgroundColor = '#fff';
+                    const file = e.dataTransfer.files[0];
+                    handleFile(file);
+                });
+
+                dragDropArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    handleFile(file);
+                });
+
+                function handleFile(file) {
+                    if (file && file.type.startsWith('image/')) {
+                        const validTypes = ['image/jpeg', 'image/png'];
+                        if (!validTypes.includes(file.type)) {
+                            showNotification('Please select a valid image file (JPG or PNG).', 'error');
+                            return;
+                        }
+
+                        if (file.size > 2 * 1024 * 1024) {
+                            showNotification('Image size must be less than 2MB.', 'error');
+                            return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            previewImage.src = e.target.result;
+                            previewImage.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                        const dataTransfer = new DataTransfer();
+                        dataTransfer.items.add(file);
+                        fileInput.files = dataTransfer.files;
+                    } else {
+                        showNotification('Please select a valid image file (JPG or PNG).', 'error');
+                    }
+                }
+
+                // Validation du formulaire
+                const form = document.getElementById('post-form');
+                form.addEventListener('submit', function(event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+
+                        const categoryChecked = document.querySelectorAll('.category-button input[type="checkbox"]:checked').length > 0;
+                        const categoryContainer = document.querySelector('.category-container');
+                        if (!categoryChecked) {
+                            categoryContainer.classList.add('invalid');
+                            const errorDiv = categoryContainer.nextElementSibling;
+                            if (!errorDiv.querySelector('.invalid-feedback')) {
+                                errorDiv.innerHTML = '<div class="invalid-feedback" style="color: #dc3545; font-size: 0.875em; margin-top: 0.25rem;">Please select at least one category</div>';
+                            }
+                        } else {
+                            categoryContainer.classList.remove('invalid');
+                            const errorDiv = categoryContainer.nextElementSibling;
+                            errorDiv.innerHTML = '';
+                        }
+                    }
+
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        </script>
+    {% endblock %}
+{% endblock %}

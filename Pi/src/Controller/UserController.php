@@ -23,6 +23,7 @@ use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Csrf\CsrfToken;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
+<<<<<<< HEAD
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use App\Enum\UserStatus;
 use App\Enum\UserRole;
@@ -32,6 +33,8 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
 use GuzzleHttp\Client;
+=======
+>>>>>>> posts-claim
 
 
 
@@ -59,9 +62,10 @@ class UserController extends AbstractController
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
-    
+
         $userId = $session->get('id');
         $user = $entityManager->getRepository(User::class)->find($userId);
+<<<<<<< HEAD
         if (!$user) {
             throw $this->createNotFoundException('User not found');
         }
@@ -191,16 +195,44 @@ class UserController extends AbstractController
         $form->handleRequest($request);
     
         if ($form->isSubmitted() && $form->isValid()) {
+=======
+
+        if (!$user) {
+            throw $this->createNotFoundException('User not found');
+        }
+
+        $form = $this->createFormBuilder($user)
+            ->add('nom', TextType::class, ['label' => false])
+            ->add('prenom', TextType::class, ['label' => false])
+            ->add('email', EmailType::class, ['label' => false]) // Correction : utiliser EmailType pour validation auto
+            ->add('numPhone', TextType::class, ['label' => false])
+            ->add('dateNaissance', DateType::class, ['widget' => 'single_text', 'required' => false])
+            ->add('image_url', FileType::class, [
+                'label' => 'Image (JPEG/PNG)',
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+>>>>>>> posts-claim
             $errors = $validator->validate($user);
         
             $imageFile = $form->get('image_url')->getData();
             $imageErrors = [];
+<<<<<<< HEAD
         
+=======
+
+>>>>>>> posts-claim
             if ($imageFile) {
                 $imageErrors = $validator->validate($imageFile, [
                     new Assert\Image(['mimeTypes' => ['image/jpeg', 'image/png']]),
                     new Assert\File(['maxSize' => '5M', 'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPEG/PNG).']),
                 ]);
+<<<<<<< HEAD
         
                 foreach ($imageErrors as $error) {
                     $form->get('image_url')->addError(new FormError($error->getMessage()));
@@ -209,18 +241,35 @@ class UserController extends AbstractController
         
             
             if (count($errors) === 0 && count($imageErrors) === 0) {
+=======
+
+                foreach ($imageErrors as $error) {
+                    $form->get('image_url')->addError(new FormError($error->getMessage()));
+                }
+
+            }
+
+            // Empêcher la soumission en cas d'erreurs
+            if (count($errors) === 0 && count($imageErrors) === 0 && $form->isValid()) {
+>>>>>>> posts-claim
                 if ($imageFile) {
                     $newFilename = uniqid() . '.' . $imageFile->guessExtension();
                     $imageFile->move($this->getParameter('kernel.project_dir') . '/public/images', $newFilename);
                     $user->setImageUrl('images/' . $newFilename);
+<<<<<<< HEAD
                 }
         
+=======
+
+
+>>>>>>> posts-claim
                 $entityManager->persist($user);
                 $entityManager->flush();
                 $this->addFlash('success', 'Your profile has been updated successfully.');
              
             }
         }
+<<<<<<< HEAD
         
     
         return $this->render('user/profile.html.twig', [
@@ -269,12 +318,24 @@ class UserController extends AbstractController
     
         return $prompt;
     }
+=======
+
+        return $this->render('user/profile.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+
+        ]);
+    }
+
+>>>>>>> posts-claim
 
 
 
 
-    
-        
+
+
+
+
     #[Route('/inscrit', name: 'inscrit')]
     public function ajouter(Request $request, EntityManagerInterface $entityManager)
     {
@@ -283,27 +344,27 @@ class UserController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-           
+
             $entityManager->persist($user);
             $entityManager->flush();
 
             return $this->redirectToRoute('login');
         }
         else {
-      
+
             $errors = [];
             foreach ($form->getErrors(true) as $error) {
                 $errors[] = $error->getMessage();
             }
-            
+
         }
 
         return $this->render('user/inscrit.html.twig', [
             'formB' => $form->createView(),
         ]);
     }
-        
 
+<<<<<<< HEAD
     
 /**
  * @Route("/login", name="login", methods={"GET", "POST"})
@@ -353,6 +414,45 @@ public function login(
 }
 
 
+=======
+
+
+    /**
+     * @Route("/login", name="login", methods={"GET", "POST"})
+     */
+    public function login(Request $request, SessionInterface $session, EntityManagerInterface $entityManager): Response
+    {
+        $error = $request->getSession()->get('login_error');
+
+        $user = new User();
+        $form = $this->createForm(LoginformType::class, $user);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Fetch user by email
+            $user = $entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
+
+            // If user doesn't exist or password is incorrect, show error
+            if (!$user || $user->getPassword() !== $form->get('password')->getData()) {
+                $this->addFlash('error', 'Invalid email or password.');
+                return $this->redirectToRoute('login');  // Optional: keep the user on the login page after an error
+            }
+
+            // Store user info in session
+            $session->set('id', $user->getId());
+            $session->set('role', $user->getRoles());
+
+
+                return $this->redirectToRoute('profile');
+
+        }
+
+        return $this->render('user/login.html.twig', [
+            'form' => $form->createView(),
+            'error' => $error,
+        ]);
+    }
+>>>>>>> posts-claim
     /**
      * @Route("/logout", name="logout")
      */
@@ -360,8 +460,8 @@ public function login(
     {
         // Détruire la session manuellement (facultatif)
         $session = $request->getSession();
-        $session->invalidate();  
-        $session->clear();       
+        $session->invalidate();
+        $session->clear();
 
         // Une fois la session détruite, tu peux rediriger l'utilisateur
         return $this->redirectToRoute('login');
@@ -369,18 +469,28 @@ public function login(
 
 
 
-  
+    /**
+     * @Route("/user/{id}", name="user_page")
+     */
+    public function userPage(EntityManagerInterface $entityManager,int $id, SessionInterface $session): Response
+    {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');  // Redirect to login if not logged in
+        }
+        $element = $entityManager->getRepository(User::class)->find($id);
+        return $this->render('user/profile.html.twig',[
+            'element'=>$element,
+        ]);
+    }
 
     #[Route('/GestionUsers', name: 'GestionUsers', methods: ['GET'])]
     public function index(
         UserRepository $userRepository,
         PaginatorInterface $paginator,
-        SessionInterface $session,
-        EntityManagerInterface $entityManager,
         Request $request
     ): Response {
-        
         $query = $userRepository->createQueryBuilder('u')->getQuery();
+<<<<<<< HEAD
         if (!$session->get('id')) {
             return $this->redirectToRoute('login');
         }
@@ -399,16 +509,22 @@ public function login(
             $query,
             $request->query->getInt('page', 1),
             3
+=======
+
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            10 // Items par page
+>>>>>>> posts-claim
         );
         
 
         return $this->render('user/admin/UsersManag.html.twig', [
-            'user' => $user,
             'pagination' => $pagination
         ]);
     }
 
-    
+
 
     #[Route('admin/user/{id}/details', name: 'admin_user_details', methods: ['GET'])]
     public function details(User $user): Response
@@ -418,6 +534,7 @@ public function login(
         ]);
     }
 
+<<<<<<< HEAD
 /**
  * @Route("/admin/user/{id}/edit-modal", name="admin_user_edit_modal", methods={"GET"})
  */
@@ -616,18 +733,72 @@ public function update(int $id, Request $request, SessionInterface $session,
         $roleString = $form->get('role')->getData();
         if (is_string($roleString)) {
             $user->setRole(UserRole::tryFrom($roleString));
+=======
+   /**
+     * @Route("/admin/user/{id}/edit-modal", name="admin_user_edit_modal", methods={"GET"})
+     */
+    public function editModal(int $id, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $user = $entityManager->getRepository(User::class)->find($id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+>>>>>>> posts-claim
         }
 
-        $statusString = $form->get('status')->getData();
-        if (is_string($statusString)) {
-            $user->setStatus(UserStatus::tryFrom($statusString));
-        }
+        $form = $this->createFormBuilder($user)
+            ->add('nom', TextType::class, ['label' => false])
+            ->add('prenom', TextType::class, ['label' => false])
+            ->add('email', EmailType::class, ['label' => false])
+            ->add('numPhone', TextType::class, ['label' => false])
+            ->add('dateNaissance', DateType::class, ['widget' => 'single_text', 'required' => false])
+            ->getForm();
 
-        $entityManager->flush();
+        $formView = $form->createView();
 
-        return new JsonResponse(['success' => true]);
+        return new JsonResponse([
+            'form' => $this->renderView('user/admin/_edit_form.html.twig', ['form' => $formView]),
+        ]);
     }
 
+    /**
+     * @Route("/admin/user/{id}/update", name="admin_user_update", methods={"POST"})
+     */
+    public function update(int $id, Request $request, EntityManagerInterface $entityManager, ValidatorInterface $validator): JsonResponse
+    {
+        $user = $entityManager->getRepository(User::class)->find($id);
+
+        if (!$user) {
+            return new JsonResponse(['error' => 'User not found'], Response::HTTP_NOT_FOUND);
+        }
+
+        $form = $this->createFormBuilder($user)
+            ->add('nom', TextType::class, ['label' => false])
+            ->add('prenom', TextType::class, ['label' => false])
+            ->add('email', EmailType::class, ['label' => false])
+            ->add('numPhone', TextType::class, ['label' => false])
+            ->add('dateNaissance', DateType::class, ['widget' => 'single_text', 'required' => false])
+            ->getForm();
+
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $errors = $validator->validate($user);
+
+            if (count($errors) === 0) {
+                $entityManager->persist($user);
+                $entityManager->flush();
+
+                return new JsonResponse(['success' => 'User updated successfully!']);
+            } else {
+                return new JsonResponse(['errors' => (string) $errors], Response::HTTP_BAD_REQUEST);
+            }
+        }
+
+        return new JsonResponse(['errors' => (string) $form->getErrors(true)], Response::HTTP_BAD_REQUEST);
+    }
+
+<<<<<<< HEAD
     return new JsonResponse([
         'success' => false,
         'errors' => $this->getAllFormErrors($form),
@@ -649,6 +820,8 @@ private function getAllFormErrors($form): array
 
 
 
+=======
+>>>>>>> posts-claim
   /**
      * @Route("/admin/user/{id}/delete", name="admin_user_delete", methods={"POST"})
      */
@@ -682,5 +855,10 @@ private function getAllFormErrors($form): array
 
         return $this->redirectToRoute('GestionUsers');
     }
+<<<<<<< HEAD
   
 }
+=======
+
+}
+>>>>>>> posts-claim

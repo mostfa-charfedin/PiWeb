@@ -1,15 +1,21 @@
-# This file is the entry point to configure your own services.
-# Files in the packages/ subdirectory configure your dependencies.
-
-# Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+# config/services.yaml
 parameters:
+<<<<<<< HEAD
     env(GOOGLE_APPLICATION_CREDENTIALS): '%kernel.project_dir%/valiant-azimuth-402115-0dcd3dfce8ef.json'
+=======
+    upload_directory: '%kernel.project_dir%/public/uploads/uploadposte'
+    huggingface_api_key: '%env(HUGGINGFACE_API_KEY)%'
+    categories: '%kernel.project_dir%/config/categories.yaml'
+    GOOGLE_API_KEY: '%env(GOOGLE_API_KEY)%'
+
+
+>>>>>>> posts-claim
 services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -18,6 +24,10 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Kernel.php'
+   
+    App\Service\GeminiService:
+        arguments:
+            $apiKey: '%GOOGLE_API_KEY%'  
 
     App\Service\GeminiService:
         arguments:
@@ -25,6 +35,7 @@ services:
             $geminiModelName: 'projects/valiant-azimuth-402115/locations/us-central1/publishers/google/models/gemini-pro' 
             
     # add more service definitions when explicit configuration is needed
+<<<<<<< HEAD
  
 
     # please note that last definitions always *replace* previous ones
@@ -33,3 +44,6 @@ services:
             $googleApiKeyPath: '%kernel.project_dir%/config/keys/google-translate-key.json'
    
     
+=======
+    # please note that last definitions always *replace* previous ones
+>>>>>>> posts-claim
