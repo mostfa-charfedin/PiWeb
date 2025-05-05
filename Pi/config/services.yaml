@@ -20,11 +20,7 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Kernel.php'
 
-    App\Service\GeminiService:
-        arguments:
-            $apiEndpoint: '%env(GEMINI_API_ENDPOINT)%' # Facultatif si vous gardez la valeur par défaut dans la classe
-            $geminiModelName: 'projects/valiant-azimuth-402115/locations/us-central1/publishers/google/models/gemini-pro' 
-
+    
    
     App\Service\ChatGPTService:
         arguments:
