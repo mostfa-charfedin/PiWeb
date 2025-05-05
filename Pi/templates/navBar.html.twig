@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-<<<<<<< HEAD
 
   <title>{% block title %}Onboardify{% endblock %}</title>
   <meta content="Streamline your team's workflow with Onboardify's comprehensive project management solution" name="description">
@@ -17,28 +16,14 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   
   <!-- Vendor CSS Files -->
-=======
-  <title>{% block title %}Onboardify{% endblock %}</title>
-  <meta content="Streamline your team's workflow with Onboardify's comprehensive project management solution" name="description">
-  <meta content="project management, team collaboration, productivity tools" name="keywords">
-  <link href="{{ asset('assets/imgP/logo2.png') }}" rel="icon">
-  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
->>>>>>> posts-claim
   <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
   <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
-<<<<<<< HEAD
   
   <!-- Custom CSS -->
   <link href="{{ asset('assets/css/custom.css') }}" rel="stylesheet">
 
-=======
-  <link href="{{ asset('assets/css/custom.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/css/post.css') }}" rel="stylesheet">
-  <link href="{{ asset('assets/css/complaint.css') }}" rel="stylesheet">
->>>>>>> posts-claim
   <style>
     :root {
       --primary-color: #4f46e5;
@@ -53,11 +38,8 @@
       --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-<<<<<<< HEAD
 
     /* Base Styles */
-=======
->>>>>>> posts-claim
     html, body {
       height: 100%;
       margin: 0;
@@ -65,21 +47,15 @@
       color: var(--text-dark);
       line-height: 1.6;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     body {
       display: flex;
       flex-direction: column;
       min-height: 100vh;
       background-color: var(--light-bg);
     }
-<<<<<<< HEAD
 
     /* Header Styles */
-=======
->>>>>>> posts-claim
     .header {
       transition: var(--transition);
       box-shadow: var(--shadow-sm);
@@ -89,17 +65,11 @@
       top: 0;
       z-index: 1020;
     }
-<<<<<<< HEAD
     
     .header.scrolled {
       box-shadow: var(--shadow-md);
     }
     
-=======
-    .header.scrolled {
-      box-shadow: var(--shadow-md);
-    }
->>>>>>> posts-claim
     .logo {
       font-weight: 700;
       font-size: 1.5rem;
@@ -108,35 +78,23 @@
       display: flex;
       align-items: center;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .logo img {
       transition: var(--transition);
       height: 40px;
     }
-<<<<<<< HEAD
     
     .logo:hover img {
       transform: rotate(-5deg);
     }
     
-=======
-    .logo:hover img {
-      transform: rotate(-5deg);
-    }
->>>>>>> posts-claim
     .navbar-nav .nav-link {
       font-weight: 500;
       padding: 0.5rem 1rem;
       color: var(--text-dark);
       position: relative;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .navbar-nav .nav-link:before {
       content: '';
       position: absolute;
@@ -148,60 +106,41 @@
       visibility: hidden;
       transition: var(--transition);
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .navbar-nav .nav-link:hover:before,
     .navbar-nav .nav-link.active:before {
       visibility: visible;
       width: 100%;
     }
-<<<<<<< HEAD
     
     .navbar-nav .nav-link.active {
       color: var(--primary-color);
     }
     
-=======
-    .navbar-nav .nav-link.active {
-      color: var(--primary-color);
-    }
->>>>>>> posts-claim
     .dropdown-menu {
       border: none;
       box-shadow: var(--shadow-lg);
       border-radius: 0.5rem;
       padding: 0.5rem 0;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .dropdown-item {
       padding: 0.5rem 1.5rem;
       font-weight: 500;
       transition: var(--transition);
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .dropdown-item:hover {
       background-color: var(--light-bg);
       color: var(--primary-color);
     }
-<<<<<<< HEAD
 
     /* Main Content */
-=======
->>>>>>> posts-claim
     .main-content {
       flex: 1 0 auto;
       min-height: calc(100vh - 120px);
       padding: 2rem 0;
       width: 100%;
-<<<<<<< HEAD
     }
     
     .main-container {
@@ -209,46 +148,6 @@
     }
 
     /* Footer Styles */
-=======
-      overflow-y: auto;
-    }
-    .main-container {
-      height: 100%;
-    }
-    #notification-container {
-      z-index: 1030;
-      position: fixed;
-      top: 80px;
-      right: 20px;
-      max-width: 300px;
-    }
-    .notification {
-      padding: 15px 25px;
-      border-radius: 8px;
-      color: white;
-      font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      margin-bottom: 10px;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      animation: fadeIn 0.5s, fadeOut 0.5s 4.5s;
-      animation-fill-mode: forwards;
-    }
-    .notification.success {
-      background-color: #28a745;
-    }
-    .notification.error {
-      background-color: #dc3545;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeOut {
-      from { opacity: 1; transform: translateY(0); }
-      to { opacity: 0; transform: translateY(-20px); }
-    }
->>>>>>> posts-claim
     .footer {
       background: linear-gradient(135deg, var(--dark-bg) 0%, #111827 100%);
       color: #fff;
@@ -257,10 +156,7 @@
       font-size: 0.9rem;
       flex-shrink: 0;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .footer:before {
       content: '';
       position: absolute;
@@ -270,10 +166,7 @@
       height: 3px;
       background: linear-gradient(90deg, var(--primary-color) 0%, #7c3aed 100%);
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .footer h5 {
       color: #fff;
       font-weight: 600;
@@ -281,10 +174,7 @@
       position: relative;
       font-size: 1.1rem;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .footer h5:after {
       content: '';
       position: absolute;
@@ -295,36 +185,24 @@
       background: var(--primary-color);
       border-radius: 2px;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .footer p {
       color: #d1d5db;
       line-height: 1.6;
       font-size: 0.85rem;
       margin-bottom: 0.5rem;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .footer ul {
       list-style: none;
       padding: 0;
       margin: 0;
     }
-<<<<<<< HEAD
     
     .footer ul li {
       margin-bottom: 0.5rem;
     }
     
-=======
-    .footer ul li {
-      margin-bottom: 0.5rem;
-    }
->>>>>>> posts-claim
     .footer a {
       color: #d1d5db;
       text-decoration: none;
@@ -332,18 +210,12 @@
       display: inline-block;
       font-size: 0.85rem;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .footer a:hover {
       color: #fff;
       transform: translateX(3px);
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .footer .social-links a {
       display: inline-flex;
       align-items: center;
@@ -355,35 +227,23 @@
       margin-right: 0.5rem;
       transition: var(--transition);
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .footer .social-links a:hover {
       background: var(--primary-color);
       transform: translateY(-2px);
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .footer hr {
       border-color: rgba(255, 255, 255, 0.1);
       margin: 1.5rem 0;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .copyright {
       color: #9ca3af;
       font-size: 0.8rem;
     }
-<<<<<<< HEAD
     
     /* Back to Top Button */
-=======
->>>>>>> posts-claim
     .back-to-top {
       position: fixed;
       right: 30px;
@@ -402,36 +262,24 @@
       visibility: hidden;
       box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .back-to-top.active {
       opacity: 1;
       visibility: visible;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .back-to-top:hover {
       background: var(--primary-hover);
       transform: translateY(-5px);
     }
-<<<<<<< HEAD
     
     /* User Dropdown */
-=======
->>>>>>> posts-claim
     .dropdown-user {
       display: flex;
       align-items: center;
       cursor: pointer;
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     .user-avatar {
       width: 36px;
       height: 36px;
@@ -440,73 +288,46 @@
       border: 2px solid rgba(255,255,255,0.2);
       transition: var(--transition);
     }
-<<<<<<< HEAD
     
     .dropdown-toggle:hover .user-avatar {
       border-color: var(--primary-color);
     }
 
     /* Responsive Adjustments */
-=======
-    .dropdown-toggle:hover .user-avatar {
-      border-color: var(--primary-color);
-    }
->>>>>>> posts-claim
     @media (max-width: 992px) {
       .navbar-collapse {
         padding: 1rem 0;
       }
-<<<<<<< HEAD
       
       .navbar-nav {
         margin-top: 1rem;
       }
       
-=======
-      .navbar-nav {
-        margin-top: 1rem;
-      }
->>>>>>> posts-claim
       .nav-item {
         margin-bottom: 0.5rem;
       }
     }
-<<<<<<< HEAD
     
-=======
->>>>>>> posts-claim
     @media (max-width: 768px) {
       .footer .col-md-6 {
         text-align: center !important;
         margin-bottom: 2rem;
       }
-<<<<<<< HEAD
       
-=======
->>>>>>> posts-claim
       .footer h5:after {
         left: 50%;
         transform: translateX(-50%);
       }
-<<<<<<< HEAD
-
-=======
->>>>>>> posts-claim
       .main-content {
         min-height: calc(100vh - 100px);
       }
     }
-<<<<<<< HEAD
-
-=======
->>>>>>> posts-claim
     @media (max-height: 600px) {
       .main-content {
         min-height: calc(100vh - 80px);
       }
     }
   </style>
-<<<<<<< HEAD
 
   {% block stylesheets %}{% endblock %}
 </head>
@@ -702,7 +523,6 @@
   </script>
 
   {% block javascripts %}{% endblock %}
-=======
  <style> /* Chatbot Modernisé */
         #chatbot-icon {
             position: fixed;
@@ -1187,6 +1007,5 @@
     }
 </script>
 {% block javascripts %}{% endblock %}
->>>>>>> posts-claim
 </body>
 </html>

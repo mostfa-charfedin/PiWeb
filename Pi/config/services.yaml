@@ -1,15 +1,11 @@
 # config/services.yaml
 parameters:
-<<<<<<< HEAD
-    env(GOOGLE_APPLICATION_CREDENTIALS): '%kernel.project_dir%/valiant-azimuth-402115-0dcd3dfce8ef.json'
-=======
     upload_directory: '%kernel.project_dir%/public/uploads/uploadposte'
     huggingface_api_key: '%env(HUGGINGFACE_API_KEY)%'
     categories: '%kernel.project_dir%/config/categories.yaml'
     GOOGLE_API_KEY: '%env(GOOGLE_API_KEY)%'
 
 
->>>>>>> posts-claim
 services:
     # default configuration for services in *this* file
     _defaults:

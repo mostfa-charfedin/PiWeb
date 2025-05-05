@@ -19,8 +19,4 @@
 /node_modules/
 /public/build/
 npm-debug.log
-<<<<<<< HEAD
 yarn-error.log
-=======
-yarn-error.log
->>>>>>> posts-claim

@@ -11,20 +11,12 @@
         "doctrine/dbal": "^3",
         "doctrine/doctrine-bundle": "*",
         "doctrine/doctrine-migrations-bundle": "^3.4",
-<<<<<<< HEAD
-        "doctrine/orm": "^2.20",
-        "dompdf/dompdf": "^3.1",
-        "endroid/qr-code-bundle": "^5.0",
-        "google/cloud-translate": "^2.0",
-        "knplabs/knp-paginator-bundle": "^6.7",
-        "knplabs/knp-snappy-bundle": "^1.10",
-        "knplabs/knp-time-bundle": "^2.4",
-=======
         "doctrine/orm": "*",
+        "endroid/qr-code": "*",
         "google/apiclient": "*",
         "guzzlehttp/guzzle": "*",
         "knplabs/knp-paginator-bundle": "^6.8",
->>>>>>> posts-claim
+        "knplabs/knp-snappy-bundle": "*",
         "phpdocumentor/reflection-docblock": "^5.6",
         "phpstan/phpdoc-parser": "^1.22",
         "symfony/asset": "^6.4",

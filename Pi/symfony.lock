@@ -47,10 +47,9 @@
             "./migrations/.gitignore"
         ]
     },
-<<<<<<< HEAD
     "endroid/qr-code-bundle": {
         "version": "5.0.2"
-=======
+    },
     "google/apiclient": {
         "version": "2.18",
         "recipe": {
@@ -62,7 +61,6 @@
         "files": [
             "./config/packages/google_apiclient.yaml"
         ]
->>>>>>> posts-claim
     },
     "knplabs/knp-paginator-bundle": {
         "version": "v6.7.0"
