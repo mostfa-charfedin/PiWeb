@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mise à jour du statut de votre réclamation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #777;
+        }
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 3px;
+            color: #fff;
+            font-weight: bold;
+        }
+        .badge-warning { background-color: #ffc107; }
+        .badge-success { background-color: #28a745; }
+        .badge-danger { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>Mise à jour du statut de votre réclamation</h2>
+    </div>
+    <div class="content">
+        <p>Cher(e) {{ complaint.user.email }},</p>
+        <p>Le statut de votre réclamation (ID: {{ complaint.id }}) a été mis à jour à :</p>
+        <p>
+            <span class="badge badge-{{ complaint.getStatusColor() }}">{{ statusText }}</span>
+        </p>
+        <h3>Détails de la réclamation</h3>
+        <p><strong>Sujet :</strong> {{ complaint.subject }}</p>
+        <p><strong>Contenu :</strong> {{ complaint.content }}</p>
+        <p><strong>Date de création :</strong> {{ complaint.createdAt|date('d/m/Y H:i') }}</p>
+        {% if complaint.response %}
+            <p><strong>Réponse de l'administrateur :</strong> {{ complaint.response }}</p>
+        {% endif %}
+        <p>Merci de votre patience. Pour toute question, contactez-nous à cette adresse.</p>
+    </div>
+    <div class="footer">
+        <p>&copy; {{ "now"|date("Y") }} Onboardify. Tous droits réservés.</p>
+    </div>
+</div>
+</body>
+</html>
