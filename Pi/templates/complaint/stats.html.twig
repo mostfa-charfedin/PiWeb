@@ -1,0 +1,105 @@
+{# templates/complaint/stats.html.twig #}
+
+{% extends 'sideBar.html.twig' %}
+
+{% block title %}Complaints Statistics{% endblock %}
+
+{% block content %}
+    <div class="container mt-4">
+        <h1 class="mb-4">Complaints Statistics</h1>
+
+        <div class="row">
+            <!-- Statistics Cards -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card text-white bg-success h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Resolved</h5>
+                        <h2 class="display-4">{{ stats.resolved_percent }}%</h2>
+                        <p class="card-text">{{ stats.resolved }} out of {{ stats.total }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card text-white bg-warning h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Pending</h5>
+                        <h2 class="display-4">{{ stats.pending_percent }}%</h2>
+                        <p class="card-text">{{ stats.pending }} out of {{ stats.total }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card text-white bg-danger h-100">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Rejected</h5>
+                        <h2 class="display-4">{{ stats.rejected_percent }}%</h2>
+                        <p class="card-text">{{ stats.rejected }} out of {{ stats.total }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="chart-container" style="position: relative; height:400px; width:100%">
+                    <canvas id="complaintChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('complaintChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Resolved', 'Pending', 'Rejected'],
+                    datasets: [{
+                        data: [
+                            {{ stats.resolved_percent }},
+                            {{ stats.pending_percent }},
+                            {{ stats.rejected_percent }}
+                        ],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.8)',
+                            'rgba(255, 193, 7, 0.8)',
+                            'rgba(220, 53, 69, 0.8)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.label}: ${context.raw}%`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        });
+    </script>
+{% endblock %}

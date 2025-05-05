@@ -1,0 +1,103 @@
+{% extends 'sideBar.html.twig' %}
+
+{% block title %}Update Complaint Status - #{{ complaint.id }}{% endblock %}
+
+{% block content %}
+    <div class="container-fluid">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    Update Complaint Status - #{{ complaint.id }}
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="complaint-details mb-4">
+                            <h5>Complaint Details</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered">
+                                    <tr>
+                                        <th>User</th>
+                                        <td>{{ complaint.user.email }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Subject</th>
+                                        <td>{{ complaint.subject }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Content</th>
+                                        <td>{{ complaint.content }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Created At</th>
+                                        <td>{{ complaint.createdAt|date('Y-m-d H:i') }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Current Status</th>
+                                        <td>
+                                            <span class="badge bg-{{ complaint.getStatusColor() }}">
+                                                {{ complaint.getStatusText() }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        {{ form_start(form) }}
+                        <div class="form-group">
+                            {{ form_label(form.status) }}
+                            {{ form_widget(form.status, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.status) }}
+                        </div>
+
+                        <div class="form-group">
+                            {{ form_label(form.response) }}
+                            {{ form_widget(form.response, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.response) }}
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('app_complaint_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to list
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Update Status
+                            </button>
+                        </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Status change visual feedback
+            const statusSelect = document.getElementById('{{ form.status.vars.id }}');
+            if (statusSelect) {
+                statusSelect.addEventListener('change', function() {
+                    const currentStatusBadge = document.querySelector('.complaint-details .badge');
+                    if (currentStatusBadge) {
+                        if (this.value === '') {
+                            currentStatusBadge.className = 'badge bg-warning';
+                            currentStatusBadge.textContent = 'Pending';
+                        } else if (this.value === '1') {
+                            currentStatusBadge.className = 'badge bg-success';
+                            currentStatusBadge.textContent = 'Resolved';
+                        } else {
+                            currentStatusBadge.className = 'badge bg-danger';
+                            currentStatusBadge.textContent = 'Rejected';
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}
