@@ -5,32 +5,43 @@ namespace App\Entity;
 use App\Repository\CommentRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CommentRepository::class)]
+/**
+ * @ORM\Entity(repositoryClass=CommentRepository::class)
+ */
 class Comment
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
     private ?int $id = null;
 
-
-    #[ORM\Column(type: "datetime")]
+    /**
+     * @ORM\Column(type="datetime")
+     */
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
     private ?string $contenu = null;
 
-    #[ORM\ManyToOne(inversedBy: 'comments')]
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="comments")
+     */
     private ?User $User = null;
 
-    // Relation ManyToOne avec Poste
-    #[ORM\ManyToOne(targetEntity: Poste::class, inversedBy: 'comments')]
+    /**
+     * @ORM\ManyToOne(targetEntity=Poste::class, inversedBy="comments")
+     */
     private $poste;
 
     public function getId(): ?int
     {
         return $this->id;
     }
+
     public function __construct()
     {
         $this->createdAt = new \DateTime(); 
@@ -46,6 +57,7 @@ class Comment
         $this->createdAt = $createdAt;
         return $this;
     }
+
     public function getContenu(): ?string
     {
         return $this->contenu;
@@ -54,7 +66,6 @@ class Comment
     public function setContenu(?string $contenu): static
     {
         $this->contenu = $contenu;
-
         return $this;
     }
 
@@ -66,19 +77,17 @@ class Comment
     public function setUser(?User $User): static
     {
         $this->User = $User;
-
         return $this;
     }
 
-    public function getPoste(): ?poste
+    public function getPoste(): ?Poste
     {
         return $this->poste;
     }
 
-    public function setPoste(?poste $poste): static
+    public function setPoste(?Poste $poste): static
     {
         $this->poste = $poste;
-
         return $this;
     }
 }

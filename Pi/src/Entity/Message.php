@@ -5,25 +5,37 @@ namespace App\Entity;
 use App\Repository\MessageRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: MessageRepository::class)]
+/**
+ * @ORM\Entity(repositoryClass=MessageRepository::class)
+ */
 class Message
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
     private ?int $id = null;
 
-    #[ORM\Column(type: "text")]
+    /**
+     * @ORM\Column(type="text")
+     */
     private ?string $content = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    /**
+     * @ORM\ManyToOne(targetEntity="User")
+     * @ORM\JoinColumn(nullable=false)
+     */
     private ?User $user = null;
 
-    #[ORM\Column(type: "datetime")]
+    /**
+     * @ORM\Column(type="datetime")
+     */
     private ?\DateTimeInterface $createdAt = null;
 
-    #[ORM\Column(nullable: true)]
+    /**
+     * @ORM\Column(type="boolean", nullable=true, options={"default"=false})
+     */
     private ?bool $signaled = false;
 
     public function __construct()
@@ -62,6 +74,7 @@ class Message
     {
         return $this->createdAt;
     }
+
     public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
         $this->createdAt = $createdAt;
@@ -76,7 +89,6 @@ class Message
     public function setSignaled(?bool $signaled): static
     {
         $this->signaled = $signaled;
-
         return $this;
     }
 }

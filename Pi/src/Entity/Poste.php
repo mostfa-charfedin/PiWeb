@@ -5,40 +5,59 @@ namespace App\Entity;
 use App\Repository\PosteRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PosteRepository::class)]
+/**
+ * @ORM\Entity(repositoryClass=PosteRepository::class)
+ */
 class Poste
 {
-    #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
     private ?string $title = null;
 
-    #[ORM\Column(type: Types::TEXT)]
+    /**
+     * @ORM\Column(type="text")
+     */
     private ?string $contenu = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
     private ?string $image = null;
 
-    #[ORM\Column(type: Types::BOOLEAN, nullable: true)]
+    /**
+     * @ORM\Column(type="boolean", nullable=true, options={"default"=false})
+     */
     private ?bool $signaled = false;
 
-    #[ORM\ManyToOne(inversedBy: 'postes')]
-    #[ORM\JoinColumn(nullable: false)]
+    /**
+     * @ORM\ManyToOne(targetEntity="User", inversedBy="postes")
+     * @ORM\JoinColumn(nullable=false)
+     */
     private ?User $user = null;
 
-    #[ORM\Column(type: Types::JSON)]
-    private array $categories = []; // Store categories as JSON array
+    /**
+     * @ORM\Column(type="json")
+     */
+    private array $categories = [];
 
-    #[ORM\OneToMany(mappedBy: 'poste', targetEntity: Comment::class, orphanRemoval: true)]
+    /**
+     * @ORM\OneToMany(targetEntity="Comment", mappedBy="poste", orphanRemoval=true)
+     */
     private Collection $comments;
 
-    #[ORM\OneToMany(mappedBy: 'poste', targetEntity: Like::class, orphanRemoval: true)]
+    /**
+     * @ORM\OneToMany(targetEntity="Like", mappedBy="poste", orphanRemoval=true)
+     */
     private Collection $likes;
 
     public function __construct()

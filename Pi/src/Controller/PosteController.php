@@ -224,6 +224,7 @@ final class PosteController extends AbstractController
         }
 
         return $this->render('poste/new.html.twig', [
+            'user' => $user,
             'poste' => $poste,
             'form' => $form->createView(),
         ]);
@@ -303,6 +304,7 @@ final class PosteController extends AbstractController
         }
 
         return $this->render('poste/edit.html.twig', [
+            'user' => $user,
             'poste' => $poste,
             'form' => $form->createView(),
         ]);

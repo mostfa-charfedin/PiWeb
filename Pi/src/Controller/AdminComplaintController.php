@@ -30,10 +30,19 @@ class AdminComplaintController extends AbstractController
     public function editStatus(
         Request $request,
         ?Complaint $complaint,
-        EntityManagerInterface $entityManager,
+        EntityManagerInterface $entityManager,SessionInterface $session, 
+         
         MailerInterface $mailer,
         LoggerInterface $logger
     ): Response {
+        if (!$session->get('id')) {
+            return $this->redirectToRoute('login');
+        }
+    
+        $userId = $session->get('id');
+        $user = $entityManager->getRepository(User::class)->find($userId);
+
+
         if (!$complaint) {
             $logger->error('Complaint not found for ID: '.$request->attributes->get('id'));
             throw new NotFoundHttpException('Réclamation non trouvée.');
@@ -80,7 +89,7 @@ class AdminComplaintController extends AbstractController
         }
 
         return $this->render('complaint/admin_edit_status.html.twig', [
-            'complaint' => $complaint,
+            'complaint' => $complaint,'user' => $user,
             'form' => $form->createView(),
         ]);
     }
@@ -89,6 +98,7 @@ class AdminComplaintController extends AbstractController
     public function stats(
         ComplaintRepository $complaintRepository,
         SessionInterface $session,
+  
         EntityManagerInterface $entityManager
     ): Response {
         $userId = $session->get('id');
