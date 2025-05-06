@@ -33,6 +33,20 @@ use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
 use GuzzleHttp\Client;
 
+use App\Form\ResetPasswordRequestFormType;
+use App\Form\ChangePasswordFormType;
+
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
+
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+
+use SymfonyCasts\Bundle\ResetPassword\Controller\ResetPasswordControllerTrait;
+use SymfonyCasts\Bundle\ResetPassword\Exception\ResetPasswordExceptionInterface;
+
 
 
 use Google\Cloud\AIPlatform\V1\Content;
@@ -47,7 +61,15 @@ use App\Service\GeminiService;
 use Google\Cloud\AIPlatform\V1\Client\PredictionServiceClient;
 class UserController extends AbstractController
 {
+    private UserPasswordHasherInterface $passwordHasher;
 
+    public function __construct(
+       
+        private EntityManagerInterface $entityManager,
+        UserPasswordHasherInterface $passwordHasher
+    ) {
+        $this->passwordHasher = $passwordHasher;
+    }
  
     #[Route('/profile', name: 'profile')]
     public function profile(Request $request, SessionInterface $session, 
@@ -283,7 +305,15 @@ class UserController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-           
+         
+
+            // Encode and set the new password
+            $encodedPassword = $this->passwordHasher->hashPassword(
+                $user,
+                $form->get('password')->getData()
+            );
+
+            $user->setPassword($encodedPassword);
             $entityManager->persist($user);
             $entityManager->flush();
 
